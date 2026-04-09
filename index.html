@@ -240,6 +240,13 @@
         메시지 복사
       </button>
     </div>
+    <button onclick="shareURL()" id="shareURLBtn"
+      class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+      </svg>
+      견적 URL 복사 (공유용)
+    </button>
     <p class="text-center text-xs text-slate-400">원본 양식 서식으로 생성됩니다</p>
   </div>
 </aside>
@@ -412,6 +419,8 @@ let selectedPrices = {}; // { name: customPrice }
   const today = new Date();
   document.getElementById('todayDate').textContent =
     `${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일 (${['일','월','화','수','목','금','토'][today.getDay()]}요일)`;
+
+  loadFromURL();
 })();
 
 // ============ 과정 변경 ============
@@ -662,6 +671,54 @@ function copyMessage() {
     btn.textContent = '복사 완료!';
     setTimeout(() => { btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> 메시지 복사`; }, 2000);
   });
+}
+
+// ============ URL 공유 ============
+function shareURL() {
+  const selected = getSelectedItems();
+  if (selected.length === 0) { alert('과목을 먼저 선택해주세요.'); return; }
+  const courseType = document.getElementById('courseType').value;
+  const discount = document.getElementById('discountSlider').value;
+  const r1 = document.getElementById('reason1').value;
+  const r2 = document.getElementById('reason2').value;
+  const r3 = document.getElementById('reason3').value;
+  const state = {
+    c: courseType,
+    d: discount,
+    s: Object.keys(selectedPrices),
+    p: Object.values(selectedPrices),
+    r: [r1, r2, r3]
+  };
+  const encoded = btoa(encodeURIComponent(JSON.stringify(state)));
+  const url = location.href.split('?')[0] + '?q=' + encoded;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('shareURLBtn');
+    btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> URL 복사됨!`;
+    setTimeout(() => { btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg> 견적 URL 복사 (공유용)`; }, 2500);
+  });
+}
+
+function loadFromURL() {
+  const params = new URLSearchParams(location.search);
+  const q = params.get('q');
+  if (!q) return;
+  try {
+    const state = JSON.parse(decodeURIComponent(atob(q)));
+    const sel = document.getElementById('courseType');
+    sel.value = state.c;
+    onCourseChange();
+    state.s.forEach((name, i) => {
+      selectedPrices[name] = state.p[i];
+      const cb = [...document.querySelectorAll('.subject-check')].find(c => c.dataset.name === name);
+      if (cb) cb.checked = true;
+    });
+    document.getElementById('discountSlider').value = state.d;
+    document.getElementById('discountLabel').textContent = state.d + '%';
+    if (state.r) {
+      ['reason1','reason2','reason3'].forEach((id, i) => { document.getElementById(id).value = state.r[i] || ''; });
+    }
+    render();
+  } catch(e) { console.warn('URL 파싱 실패', e); }
 }
 
 // ============ 커리큘럼 설계 ============
