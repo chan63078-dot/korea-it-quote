@@ -1025,7 +1025,9 @@ let selectedDeptIds = new Set(DEPT_MAP.map(d => d.id)); // 초기 전체 선택
   renderDeptChips();
   // 추천 커리큘럼 프리셋 렌더링
   renderCurrPresets();
-  // API 키 배너 초기화
+  // API 키 로드 (구버전 단일키 마이그레이션 포함) + 렌더링
+  getGeminiApiKey();
+  renderApiKeyList();
   updateApiKeyBanners();
 
   loadFromURL();
