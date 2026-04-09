@@ -112,6 +112,15 @@
     .curr-check:checked + .curr-label .chk2 { background: #1d4ed8; border-color: #1d4ed8; }
     .curr-check:checked + .curr-label .chk2::after { content: '✓'; color: white; font-size: 9px; font-weight: bold; }
 
+    /* 학과 칩 */
+    .dept-chip { transition: all .15s; }
+
+    /* AI 검색 칩 */
+    .ai-chip { transition: all .15s; }
+
+    /* 사이드바 탭 */
+    .sidebar-tab { transition: all .15s; }
+
     /* 인쇄 */
     #printView { display: none; }
     .print-table { width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'Malgun Gothic', sans-serif; }
@@ -141,53 +150,35 @@
   <!-- 헤더 -->
   <div class="bg-gradient-to-r from-blue-800 to-blue-600 text-white px-5 py-4 flex items-center justify-between">
     <div>
-      <div class="text-xs font-medium opacity-70 mb-1">코리아IT아카데미</div>
-      <div class="text-lg font-bold leading-tight">수강료 견적 시스템</div>
+      <div class="text-xs font-medium opacity-60 mb-0.5">🎯 코리아IT아카데미</div>
+      <div class="text-base font-bold leading-tight">교육과정 상담 시스템</div>
     </div>
     <button onclick="toggleDark()" id="darkBtn" title="다크모드" class="opacity-60 hover:opacity-100 text-lg">🌙</button>
   </div>
 
+  <!-- 사이드 내비 -->
+  <div class="border-b border-slate-100 px-3 py-2 flex flex-col gap-0.5">
+    <button onclick="setSidebarTab('quote')" id="tabQuote"
+      class="sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors bg-red-50 text-red-700">
+      <span class="w-2 h-2 rounded-full bg-red-500 flex-shrink-0"></span> 패키지 견적서
+    </button>
+    <button onclick="setSidebarTab('blog')" id="tabBlog"
+      class="sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-500 hover:bg-slate-50">
+      <span class="w-2 h-2 rounded-full bg-slate-300 flex-shrink-0"></span> 블로그 자동화
+    </button>
+  </div>
+
   <div class="flex-1 p-4 space-y-5">
 
-    <!-- 과정 선택 -->
-    <section>
-      <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">과정 유형 선택</label>
-      <select id="courseType" onchange="onCourseChange()"
-        class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-        <option value="">-- 과정을 선택하세요 --</option>
-      </select>
-    </section>
-
-    <!-- 과목 선택 -->
-    <section>
-      <div class="flex items-center justify-between mb-2">
-        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">과목 선택</label>
-        <div class="flex gap-1">
-          <button class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" onclick="selectAll(true)">전체선택</button>
-          <button class="btn-sm bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100" onclick="selectAll(false)">초기화</button>
-        </div>
-      </div>
-      <div class="relative mb-1">
-        <input type="text" id="subjectSearch" placeholder="과목 검색..." oninput="filterSubjects(this.value)"
-          class="w-full border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-50" />
-        <svg class="absolute left-2.5 top-2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-      </div>
-      <div id="subjectList" class="space-y-0.5 max-h-60 overflow-y-auto pr-1">
-        <div class="empty-state text-sm">
-          <svg class="w-8 h-8 mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-          과정을 먼저 선택하세요
-        </div>
-      </div>
-    </section>
+    <!-- 과정/과목 선택은 메인 영역(학과 선택 + 상세 과정 선택 섹션)으로 이동됨 -->
 
     <!-- 할인 설정 -->
     <section class="bg-slate-50 rounded-xl p-4 space-y-4">
       <label class="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wide section-toggle" onclick="toggleSection('discSection','discArrow')">
-        할인 설정
+        <span>💸 할인 설정</span>
         <span id="discArrow" class="text-slate-400 transition-transform">▾</span>
       </label>
+      <div class="text-xs text-slate-400 -mt-2">단계별 할인 명분 &amp; 할인율</div>
       <div id="discSection" class="section-body space-y-3" style="max-height:600px">
 
         <!-- 합계 표시 -->
@@ -239,19 +230,35 @@
       </div><!-- /discSection -->
     </section>
 
-    <!-- 고객 정보 -->
-    <section class="bg-amber-50 rounded-xl p-3 space-y-2">
-      <label class="flex items-center justify-between text-xs font-bold text-amber-700 uppercase tracking-wide section-toggle" onclick="toggleSection('custSection','custArrow')">
-        고객 정보
-        <span id="custArrow" class="text-amber-400 transition-transform">▾</span>
+    <!-- 상담생 정보 -->
+    <section>
+      <label class="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 section-toggle" onclick="toggleSection('custSection','custArrow')">
+        상담생 정보
+        <span id="custArrow" class="text-slate-400 transition-transform">▾</span>
       </label>
       <div id="custSection" class="section-body space-y-2" style="max-height:400px">
-        <input type="text" id="customerName" placeholder="고객 이름" oninput="render()"
-          class="w-full border border-amber-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white" />
-        <input type="text" id="customerPhone" placeholder="연락처" oninput="render()"
-          class="w-full border border-amber-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white" />
+        <div>
+          <label class="text-xs text-slate-400 mb-0.5 block">성함</label>
+          <input type="text" id="customerName" placeholder="홍길동" oninput="render()"
+            class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-0.5 block">연락처</label>
+          <input type="text" id="customerPhone" placeholder="010-0000-0000" oninput="render()"
+            class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-0.5 block">희망 분야</label>
+          <input type="text" id="customerWishField" placeholder="영상편집 / UI디자인 ..." oninput="render()"
+            class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-0.5 block">담당 상담사</label>
+          <input type="text" id="consultantName" placeholder="상담사" oninput="render()"
+            class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white" />
+        </div>
         <select id="visitRoute" oninput="render()"
-          class="w-full border border-amber-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white">
+          class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
           <option value="">방문경로 선택</option>
           <option>인터넷 검색</option>
           <option>SNS (인스타/유튜브)</option>
@@ -261,7 +268,7 @@
           <option>기타</option>
         </select>
         <select id="customerGoal" oninput="render()"
-          class="w-full border border-amber-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white">
+          class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
           <option value="">수강 목적 선택</option>
           <option>취업 준비</option>
           <option>자격증 취득</option>
@@ -273,16 +280,10 @@
       </div>
     </section>
 
-    <!-- 상담자 정보 -->
+    <!-- 상담자 연락처 (기존 유지) -->
     <section>
-      <label class="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 section-toggle" onclick="toggleSection('consultSection','consultArrow')">
-        상담자 정보
-        <span id="consultArrow" class="text-slate-400 transition-transform">▾</span>
-      </label>
       <div id="consultSection" class="section-body space-y-2" style="max-height:200px">
-        <input type="text" id="consultantName" value="서창규 부장" placeholder="상담자 이름" oninput="render()"
-          class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-        <input type="text" id="consultantPhone" value="010 - 5104 - 1704" placeholder="연락처" oninput="render()"
+        <input type="text" id="consultantPhone" placeholder="상담사 연락처" oninput="render()"
           class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
       </div>
     </section>
@@ -409,22 +410,121 @@
 <!-- ============ 메인 콘텐츠 ============ -->
 <main class="flex-1 overflow-y-auto p-6">
 
-  <!-- 상단 헤더 -->
-  <div class="mb-6 flex items-start justify-between">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-800">수강료 견적서</h1>
-      <p class="text-sm text-slate-500 mt-1" id="todayDate"></p>
-    </div>
-    <div class="flex flex-col items-end gap-1 no-print">
-      <div id="customerBadge" class="hidden bg-amber-100 border border-amber-300 rounded-xl px-4 py-2 text-right">
-      <div id="customerBadgeName" class="font-bold text-amber-800 text-sm"></div>
-      <div id="customerBadgeSub" class="text-xs text-amber-600 mt-0.5"></div>
+  <!-- 히어로 배너 -->
+  <div class="mb-5 rounded-2xl bg-gradient-to-r from-blue-800 to-blue-600 text-white px-6 py-5">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-xl">🎯</span>
+          <h1 class="text-xl font-bold">코리아IT아카데미·교육과정 상담 시스템</h1>
+        </div>
+        <p class="text-sm opacity-80">수강료 계산·커리큘럼 설계·상담일지 자동 생성</p>
+        <p class="text-xs opacity-60 mt-0.5" id="todayDate"></p>
       </div>
-      <div class="text-xs text-slate-300 text-right leading-relaxed hidden xl:block">
-        <span class="bg-slate-100 text-slate-500 rounded px-1">Alt+E</span> 엑셀 &nbsp;
-        <span class="bg-slate-100 text-slate-500 rounded px-1">Alt+P</span> 인쇄 &nbsp;
-        <span class="bg-slate-100 text-slate-500 rounded px-1">Alt+S</span> 저장 &nbsp;
-        <span class="bg-slate-100 text-slate-500 rounded px-1">Alt+C</span> 복사
+      <div id="customerBadge" class="hidden bg-white/20 border border-white/30 rounded-xl px-4 py-2 text-right">
+        <div id="customerBadgeName" class="font-bold text-white text-sm"></div>
+        <div id="customerBadgeSub" class="text-xs text-white/80 mt-0.5"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI 과정 설계 검색 -->
+  <div class="mb-5 rounded-2xl bg-slate-800 text-white p-5 no-print">
+    <div class="flex items-center gap-2 mb-1">
+      <span class="text-blue-400 text-lg">⊙</span>
+      <h2 class="font-bold text-base">AI 과정 설계 검색</h2>
+    </div>
+    <p class="text-xs text-slate-400 mb-3">희망 분야와 목표를 자유롭게 입력하면 최소·최대 커리큘럼을 자동으로 설계합니다.</p>
+    <div class="flex gap-2 flex-wrap mb-3" id="aiSearchChips">
+      <button onclick="aiSearchFill('정보보안 취업 과정 최소/최대 설계해줘')" class="ai-chip text-xs px-3 py-1.5 rounded-full border border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-500 transition-colors whitespace-nowrap">정보보안 취업 루트 짜줘</button>
+      <button onclick="aiSearchFill('AI 빅데이터 입문 과정 추천해줘')" class="ai-chip text-xs px-3 py-1.5 rounded-full border border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-500 transition-colors whitespace-nowrap">AI 빅데이터 입문 추천</button>
+      <button onclick="aiSearchFill('정보처리기사 단기 취득 루트')" class="ai-chip text-xs px-3 py-1.5 rounded-full border border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-500 transition-colors whitespace-nowrap">정처기 단기 취득 루트</button>
+      <button onclick="aiSearchFill('파이썬 기초부터 취업까지 풀 커리큘럼')" class="ai-chip text-xs px-3 py-1.5 rounded-full border border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-500 transition-colors whitespace-nowrap">파이썬 취업 풀 커리큘럼</button>
+      <button onclick="aiSearchFill('AI아카데미 크리에이터 입문')" class="ai-chip text-xs px-3 py-1.5 rounded-full border border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-500 transition-colors whitespace-nowrap">AI아카데미 크리에이터 입문</button>
+      <button onclick="aiSearchFill('n8n 자동화 수익화 과정 추천')" class="ai-chip text-xs px-3 py-1.5 rounded-full border border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-500 transition-colors whitespace-nowrap">n8n 자동화 수익화</button>
+    </div>
+    <textarea id="aiSearchInput" rows="2" placeholder="예: 마야 포트폴리오 과정 추천해줘 / 웹디자인 취업 루트"
+      class="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-blue-400 resize-none mb-2"></textarea>
+    <button onclick="runAiCurriculumSearch()"
+      class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+      <span class="text-blue-300">⊙</span> 커리큘럼 설계
+    </button>
+    <div id="aiSearchResult" class="hidden mt-3 bg-slate-700 rounded-xl p-4 text-sm text-slate-200"></div>
+  </div>
+
+  <!-- 학과 선택 + 합계 패널 2열 -->
+  <div class="mb-4 grid grid-cols-1 xl:grid-cols-3 gap-4">
+    <!-- 학과 선택 + 과정 선택 -->
+    <div class="xl:col-span-2 space-y-4">
+      <!-- 학과 선택 태그 칩 -->
+      <div class="bg-white rounded-2xl shadow-sm p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-1 h-5 bg-blue-600 rounded-full flex-shrink-0"></span>
+          <h3 class="font-bold text-slate-700">🎓 과정 유형 선택</h3>
+        </div>
+        <div id="deptChipsContainer" class="flex flex-wrap gap-2 mb-3 min-h-8">
+          <!-- 학과 칩들이 여기 렌더링됨 -->
+        </div>
+        <div class="flex gap-1">
+          <button onclick="toggleAllDepts(true)" class="btn-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-blue-50 hover:text-blue-700">전체</button>
+          <button onclick="toggleAllDepts(false)" class="btn-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-red-50 hover:text-red-600">초기화</button>
+        </div>
+      </div>
+      <!-- 상세 과정 선택 -->
+      <div class="bg-white rounded-2xl shadow-sm p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-1 h-5 bg-blue-500 rounded-full flex-shrink-0"></span>
+          <h3 class="font-bold text-slate-700">✅ 상세 과정 선택</h3>
+        </div>
+        <select id="courseType" onchange="onCourseChange()"
+          class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white mb-2">
+          <option value="">Choose options</option>
+        </select>
+        <div id="detailCourseArea" class="hidden">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-slate-400">과목 선택</span>
+            <div class="flex gap-1">
+              <button class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" onclick="selectAll(true)">전체선택</button>
+              <button class="btn-sm bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100" onclick="selectAll(false)">초기화</button>
+            </div>
+          </div>
+          <div class="relative mb-1">
+            <input type="text" id="subjectSearch" placeholder="과목 검색..." oninput="filterSubjects(this.value)"
+              class="w-full border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-50" />
+            <svg class="absolute left-2.5 top-2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          <div id="subjectList" class="space-y-0.5 max-h-52 overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 합계 패널 -->
+    <div class="xl:col-span-1">
+      <div class="bg-white rounded-2xl shadow-sm p-5 sticky top-4">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-1 h-5 bg-orange-500 rounded-full flex-shrink-0"></span>
+          <h3 class="font-bold text-slate-700">🔥 합계</h3>
+        </div>
+        <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-5 text-white text-center mb-3">
+          <div class="text-xs opacity-70 mb-1">정가 합계</div>
+          <div id="summaryTotal" class="text-4xl font-bold mb-2">0원</div>
+          <div id="summaryDiscount" class="text-xs opacity-80">복합 할인율 0.0% 직용 → 최종 0원</div>
+          <div id="summarySaving" class="text-xs opacity-70 mt-0.5">절약 0원</div>
+        </div>
+        <div class="flex justify-between text-sm mb-2">
+          <span class="text-slate-500">선택 과정 수</span>
+          <span id="summaryCount" class="font-bold text-slate-800">0개</span>
+        </div>
+        <div class="flex justify-between text-sm mb-2">
+          <span class="text-slate-500">적용 할인율</span>
+          <span id="summaryRate" class="font-bold text-blue-600">0%</span>
+        </div>
+        <div class="flex justify-between text-sm font-bold border-t border-slate-100 pt-2 mt-2">
+          <span class="text-slate-700">최종 납부금액</span>
+          <span id="summaryFinal" class="text-red-600 text-base">0원</span>
+        </div>
       </div>
     </div>
   </div>
@@ -514,7 +614,7 @@
   <!-- 과목별 상세 테이블 -->
   <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
     <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-      <h2 class="font-bold text-slate-700">과목별 수강료 상세 내역</h2>
+      <h2 class="font-bold text-slate-700">📋 선택 과정 수강료 내역</h2>
       <span id="selectedBadge" class="badge bg-slate-100 text-slate-600">선택 0개</span>
     </div>
 
@@ -564,6 +664,76 @@
     <p>1) 위 수강료는 학원 내 게시되어 있는 수강료 기준이며, 교육청에 신고된 금액입니다.</p>
     <p>2) 할인내역은 해당사항에 한해 적용되며, 증명서류 증빙이 필요합니다.</p>
     <p>3) 할인금액은 수강과목 무료지원으로 진행됩니다.</p>
+  </div>
+
+  <!-- 추천 커리큘럼 프리셋 -->
+  <div class="mt-6 no-print">
+    <div class="flex items-center gap-2 mb-4">
+      <span class="w-1 h-5 bg-orange-500 rounded-full flex-shrink-0"></span>
+      <h3 class="font-bold text-slate-700">🎯 추천 커리큘럼 프리셋</h3>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3" id="currPresetGrid">
+      <!-- 프리셋 버튼들이 JS로 렌더링됨 -->
+    </div>
+  </div>
+
+  <!-- 상담일지 저장 -->
+  <div class="mt-6 no-print">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="w-1 h-5 bg-blue-500 rounded-full flex-shrink-0"></span>
+      <h3 class="font-bold text-slate-700">📋 상담일지 저장</h3>
+    </div>
+    <div id="diaryEmptyNote" class="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 text-sm text-amber-700">
+      과정을 선택한 뒤 저장할 수 있습니다.
+    </div>
+    <div id="diarySaveArea" class="hidden">
+      <div class="bg-white rounded-2xl shadow-sm p-5">
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">상담일자</label>
+            <input type="text" id="diaryDate" class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">상담 결과</label>
+            <select id="diaryResult" class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
+              <option>긍정적 / 등록 예정</option>
+              <option>중립 / 추가 상담 필요</option>
+              <option>부정적 / 재접촉 예정</option>
+              <option>즉시 등록</option>
+              <option>미결</option>
+            </select>
+          </div>
+        </div>
+        <textarea id="diaryMemo" rows="2" placeholder="특이사항, 고객 요청, 다음 연락 예정 등..."
+          class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none mb-3"></textarea>
+        <div class="flex gap-2">
+          <button onclick="saveDiary()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-sm transition-colors">상담일지 저장</button>
+          <button onclick="viewDiaryList()" class="px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2.5 rounded-xl text-sm transition-colors">이력 보기</button>
+        </div>
+      </div>
+    </div>
+    <div id="diaryListArea" class="hidden mt-3 bg-white rounded-2xl shadow-sm divide-y divide-slate-100 max-h-64 overflow-y-auto"></div>
+  </div>
+
+  <!-- AI 멘토링 어시스턴트 -->
+  <div class="mt-6 no-print">
+    <div class="bg-slate-800 rounded-2xl p-5 text-white">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="text-xl">🧑‍💼</span>
+        <h3 class="font-bold text-base">AI 멘토링 어시스턴트</h3>
+      </div>
+      <p class="text-xs text-slate-400 mb-4">코리아IT아카데미 10년차 베테랑 커리어 멘토에게 무엇이든 물어보세요.</p>
+      <div class="flex gap-2 flex-wrap mb-3">
+        <button onclick="mentorFill('비전공자 IT 취업 준비 방법')" class="text-xs px-4 py-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 border border-slate-600 transition-colors">비전공자 취업 준비</button>
+        <button onclick="mentorFill('정보보안 vs AI 빅데이터 어떤 과정이 취업에 유리한가요')" class="text-xs px-4 py-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 border border-slate-600 transition-colors">보안 vs AI 빅데이터</button>
+        <button onclick="mentorFill('정보처리기사 취득 난이도와 준비 기간')" class="text-xs px-4 py-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 border border-slate-600 transition-colors">정처기 취득 난이도</button>
+        <button onclick="mentorFill('AI아카데미 과정 취업 성공률')" class="text-xs px-4 py-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 border border-slate-600 transition-colors">AI아카데미 취업 성공률</button>
+      </div>
+      <textarea id="mentorInput" rows="2" placeholder="예: 비전공자도 정보보안 취업이 가능한가요?"
+        class="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-blue-400 resize-none mb-2"></textarea>
+      <button onclick="askMentor()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-sm transition-colors">질문하기</button>
+      <div id="mentorAnswerArea" class="hidden mt-3 bg-slate-700 rounded-xl p-4 text-sm text-slate-200 leading-relaxed"></div>
+    </div>
   </div>
 
   <!-- 상담 이력 로그 -->
@@ -704,27 +874,76 @@
 // ============ 데이터 ============
 const COURSE_DATA = {"기초과정_자율1~2 버전": [{"name": "AI 파이썬 1", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "AI 파이썬 2", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "AI 파이썬 3", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 1", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 2", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 3", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "SQLD", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스마스터 2급", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "ChatGPT 활용 마스터 클래스", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "ADSP 1", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}], "기초과정_자율1버전": [{"name": "AI 파이썬 1", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "AI 파이썬 2", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "AI 파이썬 3", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 1", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 2", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 3", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "SQLD", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스마스터 2급", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "ChatGPT 활용 마스터 클래스", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "ADSP 1", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}], "정보보안정규": [{"name": "AI 파이썬 1", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "AI 파이썬 2", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "AI 파이썬 3", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "파이썬 1", "price": 500000, "day": "주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "파이썬 2", "price": 500000, "day": "주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "파이썬 3", "price": 500000, "day": "주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "C언어 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "C언어 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "자바 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "자바 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "SQLD", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "리눅스마스터 2급", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 1 (네트워크보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 2 (네트워크보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 3 (네트워크보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 4 (시스템보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 5 (시스템보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 6 (시스템보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 7 (웹보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 8 (웹보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 9 (웹보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}], "AI빅데이터": [{"name": "AI 파이썬 1", "price": 500000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI 파이썬 2", "price": 500000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI 파이썬 3", "price": 500000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "파이썬 1", "price": 500000, "day": "주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "파이썬 2", "price": 500000, "day": "주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "파이썬 3", "price": 500000, "day": "주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "ADSP 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "ADSP 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "SQLD", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI 프로젝트 1", "price": 500000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI 프로젝트 2", "price": 500000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI 프로젝트 3", "price": 500000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI 프로젝트 4", "price": 500000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}], "기타자격증": [{"name": "SQLD", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "자격증 과정"}, {"name": "ADSP 1", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "ADSP 2", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "리눅스마스터 2급", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "자격증 과정"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "빅데이터분석기사 필기 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "빅데이터분석기사 실기 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "정보처리기사 필기 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "정보처리기사 실기 1 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "정보처리기사 실기 2 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}], "정처기": [{"name": "AI 파이썬 1", "price": 500000, "day": "평일", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "AI 파이썬 2", "price": 500000, "day": "평일", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "AI 파이썬 3", "price": 500000, "day": "평일", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "파이썬 1", "price": 500000, "day": "주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "파이썬 2", "price": 500000, "day": "주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "파이썬 3", "price": 500000, "day": "주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "C언어 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "C언어 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "자바 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "자바 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "리눅스 1 (운영체제)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "리눅스 2 (운영체제)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "정보처리기사 필기 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "정보처리기사 실기 1 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "정보처리기사 실기 2 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}], "2+1 할인율": [{"name": "파이썬 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "DBMS", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "Notion & Git", "price": 300000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}], "기초과정_방학특강": [{"name": "파이썬 1 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 2 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 1 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 2 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 1 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 2 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "DBMS", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "Notion & Git", "price": 300000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}], "AI아카데미": [{"name": "AI 올인원: 기획·문서·자동화 끝판왕", "price": 500000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "칼퇴 부르는 데이터 비밀병기: 수집부터 자동화까지 풀코스", "price": 500000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "국가공인 AI자격증 AICE 어소시에이트 취득과정", "price": 1000000, "day": "주말", "course": "2mon", "category": "AI아카데미"}, {"name": "단 10일 만에 완성하는 AI영상 크리에이터 과정", "price": 400000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "마케팅 자동화의 모든 것: 생성형AI 실전 클래스", "price": 400000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "AI와 Blender로 완성하는 3D 브랜드 광고 콘텐츠 제작", "price": 400000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "아직도 감으로 주식해!? AI 데이터 활용으로 똑똑하게 투자하는법", "price": 500000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "월급은 내가 받을게, 일은 네가 해라: n8n활용 AI 업무 비서 만들기", "price": 500000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "n8n과 함께라면 업무 잔소리는 down, 연봉은 Up! 업무효율 극대화", "price": 500000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "바이브코딩: Cursor AI로 나 혼자 끝내는 웹사이트 구축", "price": 1000000, "day": "평일", "course": "2mon", "category": "AI아카데미"}, {"name": "AI Canvas로 완성하는 노코드 머신러닝: 앱 서비스 제작", "price": 500000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "구글애널리틱스(GA4) 자격증으로 레벨업 하는 마케팅 스킬", "price": 500000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "매출로 증명하는 전략 퍼포먼스 마케팅 실무 올인원", "price": 500000, "day": "평일", "course": "1mon", "category": "AI아카데미"}]};
 
+// ============ 학과(과정 유형) 분류 데이터 ============
+const DEPT_MAP = [
+  { id: 'basic', name: '기초과정', courseKeys: ['기초과정_자율1~2 버전','기초과정_자율1버전','기초과정_방학특강','2+1 할인율'] },
+  { id: 'security', name: '정보보안', courseKeys: ['정보보안정규'] },
+  { id: 'ai_big', name: 'AI/빅데이터', courseKeys: ['AI빅데이터'] },
+  { id: 'cert', name: '자격증', courseKeys: ['기타자격증','정처기'] },
+  { id: 'ai_acad', name: 'AI아카데미', courseKeys: ['AI아카데미'] },
+];
+
+// 커리큘럼 프리셋 (기존 IT 과정 기반)
+const CURR_PRESETS_DISPLAY = [
+  {
+    id: 'security_full', icon: '🔐', name: '보안 풀코스',
+    desc: '정보보안 취업과정', courseCount: '21개 과목', duration: '약 21개월',
+    courseType: '정보보안정규',
+  },
+  {
+    id: 'ai_big_full', icon: '🤖', name: 'AI 빅데이터',
+    desc: 'AI 인공지능 빅데이터 풀코스', courseCount: '14개 과목', duration: '약 14개월',
+    courseType: 'AI빅데이터',
+  },
+  {
+    id: 'jcheogi', icon: '📋', name: '정처기 취득',
+    desc: '정보처리기사 자격증', courseCount: '9개 과목', duration: '약 9개월',
+    courseType: '정처기',
+  },
+  {
+    id: 'basic', icon: '💻', name: '기초 프로그래밍',
+    desc: '기초과정 입문', courseCount: '6개 과목', duration: '약 6개월',
+    courseType: '기초과정_자율1~2 버전',
+  },
+  {
+    id: 'ai_acad', icon: '⊙', name: 'AI아카데미',
+    desc: 'AI 실무·자동화 과정', courseCount: '13개 과목', duration: '최신 트렌드',
+    courseType: 'AI아카데미',
+  },
+  {
+    id: 'cert', icon: '🏆', name: '자격증 집중',
+    desc: '핵심 자격증 취득', courseCount: '6개 과목', duration: '약 6개월',
+    courseType: '기타자격증',
+  },
+];
+
 // ============ 상태 ============
 let selectedPrices = {}; // { name: customPrice }
+let selectedDeptIds = new Set(DEPT_MAP.map(d => d.id)); // 초기 전체 선택
 
 // ============ 초기화 ============
 (function init() {
-  const sel = document.getElementById('courseType');
-  Object.keys(COURSE_DATA).forEach(k => {
-    const opt = document.createElement('option');
-    opt.value = k; opt.textContent = k;
-    sel.appendChild(opt);
-  });
+  // 과정 드롭다운은 filterCourseTypeByDept()가 관리하므로 초기에는 비워둠
+  // (renderDeptChips 호출 시 자동으로 채워짐)
 
   const today = new Date();
-  document.getElementById('todayDate').textContent =
+  const todayEl = document.getElementById('todayDate');
+  if (todayEl) todayEl.textContent =
     `${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일 (${['일','월','화','수','목','금','토'][today.getDay()]}요일)`;
+
+  // 학과 칩 + 과정 드롭다운 초기화
+  renderDeptChips();
+  // 추천 커리큘럼 프리셋 렌더링
+  renderCurrPresets();
 
   loadFromURL();
 
   // 시간표 서버 초기화
   const savedUrl = localStorage.getItem('timetableUrl');
-  if (savedUrl) document.getElementById('timetableUrl').value = savedUrl;
+  if (savedUrl) {
+    const urlEl = document.getElementById('timetableUrl');
+    if (urlEl) urlEl.value = savedUrl;
+  }
   // 현재 월을 기본값으로 설정
   const curMonth = new Date().getMonth() + 1;
   const monthSel = document.getElementById('timetableMonth');
@@ -733,25 +952,326 @@ let selectedPrices = {}; // { name: customPrice }
   }
 })();
 
+// ============ 사이드바 탭 ============
+function setSidebarTab(tab) {
+  // 탭 스타일 토글 (현재는 UI만)
+  document.getElementById('tabQuote').className = tab === 'quote'
+    ? 'sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors bg-red-50 text-red-700'
+    : 'sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-500 hover:bg-slate-50';
+  document.getElementById('tabBlog').className = tab === 'blog'
+    ? 'sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors bg-blue-50 text-blue-700'
+    : 'sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-500 hover:bg-slate-50';
+}
+
+// ============ 학과 칩 렌더링 ============
+function renderDeptChips() {
+  const container = document.getElementById('deptChipsContainer');
+  if (!container) return;
+  container.innerHTML = DEPT_MAP.map(d => {
+    const active = selectedDeptIds.has(d.id);
+    return `<button onclick="toggleDept('${d.id}')"
+      class="dept-chip flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${active
+        ? 'bg-blue-600 text-white border-blue-600'
+        : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'}"
+      id="deptChip_${d.id}">
+      ${d.name}
+      ${active ? '<span class="text-xs opacity-70 leading-none">&times;</span>' : ''}
+    </button>`;
+  }).join('');
+  // 과정 드롭다운 필터링
+  filterCourseTypeByDept();
+}
+
+function toggleDept(id) {
+  if (selectedDeptIds.has(id)) {
+    if (selectedDeptIds.size === 1) return; // 최소 1개 유지
+    selectedDeptIds.delete(id);
+  } else {
+    selectedDeptIds.add(id);
+  }
+  renderDeptChips();
+}
+
+function toggleAllDepts(all) {
+  if (all) {
+    DEPT_MAP.forEach(d => selectedDeptIds.add(d.id));
+  } else {
+    selectedDeptIds.clear();
+    selectedDeptIds.add(DEPT_MAP[0].id);
+  }
+  renderDeptChips();
+}
+
+function filterCourseTypeByDept() {
+  const sel = document.getElementById('courseType');
+  if (!sel) return;
+  const currentVal = sel.value;
+  // 선택된 학과에 해당하는 courseKey 목록
+  const allowedKeys = new Set();
+  DEPT_MAP.forEach(d => {
+    if (selectedDeptIds.has(d.id)) {
+      d.courseKeys.forEach(k => allowedKeys.add(k));
+    }
+  });
+  // 드롭다운 옵션 갱신
+  sel.innerHTML = '<option value="">Choose options</option>';
+  Object.keys(COURSE_DATA).forEach(k => {
+    if (allowedKeys.has(k)) {
+      const opt = document.createElement('option');
+      opt.value = k; opt.textContent = k;
+      if (k === currentVal) opt.selected = true;
+      sel.appendChild(opt);
+    }
+  });
+  if (!allowedKeys.has(currentVal)) {
+    selectedPrices = {};
+    const area = document.getElementById('detailCourseArea');
+    if (area) area.classList.add('hidden');
+    render();
+  }
+}
+
+// ============ 추천 커리큘럼 프리셋 렌더링 ============
+function renderCurrPresets() {
+  const grid = document.getElementById('currPresetGrid');
+  if (!grid) return;
+  grid.innerHTML = CURR_PRESETS_DISPLAY.map(p => `
+    <div class="bg-white rounded-2xl shadow-sm p-4 border border-slate-100 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
+      onclick="applyCurrPreset('${p.id}')">
+      <div class="text-2xl mb-2">${p.icon}</div>
+      <div class="text-xs text-slate-400 mb-0.5">${p.desc}</div>
+      <div class="text-xs text-slate-400 mb-2">${p.courseCount} | ${p.duration}</div>
+      <button class="w-full text-xs font-bold py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">${p.name}</button>
+    </div>
+  `).join('');
+}
+
+function applyCurrPreset(presetId) {
+  const preset = CURR_PRESETS_DISPLAY.find(p => p.id === presetId);
+  if (!preset || !COURSE_DATA[preset.courseType]) return;
+  // 과정 유형 선택
+  const sel = document.getElementById('courseType');
+  sel.value = preset.courseType;
+  onCourseChange();
+  // 전체 과목 선택
+  selectAll(true);
+  // 해당 학과 활성화
+  const deptEntry = DEPT_MAP.find(d => d.courseKeys.includes(preset.courseType));
+  if (deptEntry) {
+    selectedDeptIds.add(deptEntry.id);
+    renderDeptChips();
+  }
+  // 스크롤
+  document.getElementById('tableArea').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ============ AI 과정 설계 검색 ============
+function aiSearchFill(text) {
+  const input = document.getElementById('aiSearchInput');
+  if (input) { input.value = text; input.focus(); }
+}
+
+function runAiCurriculumSearch() {
+  const query = (document.getElementById('aiSearchInput').value || '').trim().toLowerCase();
+  const resultEl = document.getElementById('aiSearchResult');
+  if (!query) { alert('희망 분야나 목표를 입력해주세요.'); return; }
+
+  // 키워드 기반 자동 커리큘럼 제안
+  let matched = null;
+  if (query.includes('보안') || query.includes('security')) matched = CURR_PRESETS_DISPLAY.find(p => p.id === 'security_full');
+  else if (query.includes('ai') || query.includes('빅데이터') || query.includes('인공지능')) matched = CURR_PRESETS_DISPLAY.find(p => p.id === 'ai_big_full');
+  else if (query.includes('정처기') || query.includes('정보처리')) matched = CURR_PRESETS_DISPLAY.find(p => p.id === 'jcheogi');
+  else if (query.includes('파이썬') || query.includes('기초') || query.includes('프로그래밍')) matched = CURR_PRESETS_DISPLAY.find(p => p.id === 'basic');
+  else if (query.includes('자격증') || query.includes('sqld') || query.includes('adsp')) matched = CURR_PRESETS_DISPLAY.find(p => p.id === 'cert');
+  else if (query.includes('n8n') || query.includes('자동화') || query.includes('크리에이터') || query.includes('아카데미')) matched = CURR_PRESETS_DISPLAY.find(p => p.id === 'ai_acad');
+
+  resultEl.classList.remove('hidden');
+  if (matched) {
+    const courses = COURSE_DATA[matched.courseType] || [];
+    const total = courses.reduce((s, c) => s + c.price, 0);
+    resultEl.innerHTML = `
+      <div class="font-bold text-blue-300 mb-2">🎯 추천 커리큘럼: ${matched.name}</div>
+      <div class="text-slate-300 text-xs mb-2">${matched.desc} · ${matched.courseCount} · ${matched.duration}</div>
+      <div class="text-xs text-slate-400 mb-3">정가 합계: <span class="text-white font-bold">${fmt(total)}원</span></div>
+      <div class="flex flex-wrap gap-1 mb-3">
+        ${courses.slice(0, 8).map(c => `<span class="text-xs px-2 py-0.5 bg-slate-600 rounded-full">${c.name}</span>`).join('')}
+        ${courses.length > 8 ? `<span class="text-xs px-2 py-0.5 bg-slate-600 rounded-full">외 ${courses.length - 8}개</span>` : ''}
+      </div>
+      <button onclick="applyCurrPreset('${matched.id}')" class="w-full text-sm font-bold py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors">이 커리큘럼 적용하기</button>
+    `;
+  } else {
+    resultEl.innerHTML = `
+      <div class="text-slate-300 mb-2">입력하신 "<span class="text-white">${query}</span>" 관련 추천 과정입니다.</div>
+      <div class="flex flex-wrap gap-2">
+        ${CURR_PRESETS_DISPLAY.map(p => `
+          <button onclick="applyCurrPreset('${p.id}')" class="text-xs px-3 py-1.5 bg-slate-600 hover:bg-slate-500 rounded-lg text-slate-200 transition-colors">${p.icon} ${p.name}</button>
+        `).join('')}
+      </div>
+    `;
+  }
+}
+
+// ============ AI 멘토링 어시스턴트 ============
+const MENTOR_QA = {
+  '비전공자': `
+    <strong>비전공자도 IT 취업이 충분히 가능합니다!</strong><br><br>
+    코리아IT아카데미에서는 기초부터 체계적으로 배울 수 있어, 비전공자 수강생의 취업 성공 사례가 많습니다.<br><br>
+    추천 루트: <b>파이썬 기초 → AI 빅데이터</b> 또는 <b>기초 프로그래밍 → 정보보안 취업과정</b>
+  `,
+  '보안': `
+    <strong>정보보안 vs AI 빅데이터 비교</strong><br><br>
+    • <b>정보보안</b>: 안정적인 수요, 기업 보안팀·공공기관 취업. 난이도 높지만 연봉 우수.<br>
+    • <b>AI 빅데이터</b>: 빠르게 성장하는 분야, 데이터 분석·AI 기업 취업. 수요 폭발적 증가 중.<br><br>
+    취업 목표 업종에 따라 선택하시면 됩니다. 상담사와 상세 논의를 권장합니다.
+  `,
+  '정처기': `
+    <strong>정보처리기사 취득 안내</strong><br><br>
+    • 준비 기간: 필기 1~2개월, 실기 2~3개월 (평균 3~5개월)<br>
+    • 난이도: 중상급 (합격률 약 25~35%)<br>
+    • 코리아IT 코스 수강 시 합격률 대폭 향상!<br><br>
+    관련 과정: 기초 프로그래밍 → 정처기 과정 순서로 수강 권장
+  `,
+  'AI아카데미': `
+    <strong>AI아카데미 취업 성공률</strong><br><br>
+    AI아카데미 과정은 실무 중심 단기 과정으로, 수강 후 빠른 취업·부업 수익화가 가능합니다.<br><br>
+    인기 과정: AI 자동화(n8n), 바이브코딩, AI 영상 크리에이터<br>
+    수료 후 프리랜서·부업으로도 활발히 활동하는 사례 다수!
+  `,
+};
+
+function mentorFill(text) {
+  const input = document.getElementById('mentorInput');
+  if (input) { input.value = text; input.focus(); }
+}
+
+function askMentor() {
+  const query = (document.getElementById('mentorInput').value || '').trim();
+  const area = document.getElementById('mentorAnswerArea');
+  if (!query) { alert('질문을 입력해주세요.'); return; }
+
+  // 키워드 매칭
+  let answer = null;
+  if (query.includes('비전공자') || query.includes('전공')) answer = MENTOR_QA['비전공자'];
+  else if (query.includes('보안') || query.includes('빅데이터') || query.includes('ai')) answer = MENTOR_QA['보안'];
+  else if (query.includes('정처기') || query.includes('정보처리')) answer = MENTOR_QA['정처기'];
+  else if (query.includes('아카데미') || query.includes('n8n') || query.includes('자동화') || query.includes('취업 성공')) answer = MENTOR_QA['AI아카데미'];
+  else {
+    answer = `"<b>${query}</b>"에 대한 상세 답변은 상담사에게 직접 문의해주세요.<br><br>
+      빠른 답변을 원하시면 아래 버튼을 활용해 보세요.<br>
+      📞 상담 연락처: ${document.getElementById('consultantPhone')?.value || '학원 대표번호'}`;
+  }
+
+  area.classList.remove('hidden');
+  area.innerHTML = answer;
+}
+
+// ============ 상담일지 저장 ============
+function initDiaryDate() {
+  const el = document.getElementById('diaryDate');
+  if (el && !el.value) el.value = todayStr();
+}
+
+function saveDiary() {
+  const selected = getSelectedItems();
+  if (selected.length === 0) { alert('과정을 먼저 선택해주세요.'); return; }
+  const dd = getDiscountData();
+  const record = {
+    date: document.getElementById('diaryDate').value || todayStr(),
+    result: document.getElementById('diaryResult').value,
+    memo: document.getElementById('diaryMemo').value.trim(),
+    customer: document.getElementById('customerName').value.trim() || '미입력',
+    phone: document.getElementById('customerPhone').value.trim(),
+    wishField: document.getElementById('customerWishField')?.value.trim() || '',
+    consultant: document.getElementById('consultantName').value.trim(),
+    courseType: document.getElementById('courseType').value,
+    subjects: selected.map(c => c.name),
+    total: dd.total, final: dd.final,
+    savedAt: new Date().toLocaleString('ko-KR'),
+  };
+  const diaries = JSON.parse(localStorage.getItem('diaryLog') || '[]');
+  diaries.unshift(record);
+  if (diaries.length > 30) diaries.pop();
+  localStorage.setItem('diaryLog', JSON.stringify(diaries));
+  document.getElementById('diaryMemo').value = '';
+  alert('상담일지가 저장되었습니다.');
+  renderDiaryList();
+}
+
+function viewDiaryList() {
+  const area = document.getElementById('diaryListArea');
+  area.classList.toggle('hidden');
+  if (!area.classList.contains('hidden')) renderDiaryList();
+}
+
+function renderDiaryList() {
+  const diaries = JSON.parse(localStorage.getItem('diaryLog') || '[]');
+  const area = document.getElementById('diaryListArea');
+  if (!area) return;
+  if (diaries.length === 0) {
+    area.innerHTML = '<div class="text-sm text-slate-400 text-center py-6">저장된 상담일지가 없습니다.</div>';
+    return;
+  }
+  area.innerHTML = diaries.map((d, i) => `
+    <div class="px-5 py-3 hover:bg-slate-50 flex items-start gap-3">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 flex-wrap mb-0.5">
+          <span class="font-semibold text-slate-800 text-sm">${d.customer}</span>
+          ${d.phone ? `<span class="text-xs text-slate-400">${d.phone}</span>` : ''}
+          <span class="badge bg-blue-100 text-blue-700">${d.result}</span>
+        </div>
+        <div class="text-xs text-slate-500">${d.subjects.slice(0,3).join(', ')}${d.subjects.length > 3 ? ` 외 ${d.subjects.length-3}개` : ''}</div>
+        <div class="text-xs text-red-600 font-bold mt-0.5">${fmt(d.final)}원</div>
+        ${d.memo ? `<div class="text-xs text-slate-400 mt-0.5 truncate">📝 ${d.memo}</div>` : ''}
+      </div>
+      <div class="text-xs text-slate-400 text-right flex-shrink-0">${d.date}<br>${d.savedAt.split(' ')[1] || ''}</div>
+    </div>
+  `).join('');
+}
+
+// ============ 상담일지 섹션 표시 업데이트 ============
+function updateDiarySection(hasSelection) {
+  const emptyNote = document.getElementById('diaryEmptyNote');
+  const saveArea = document.getElementById('diarySaveArea');
+  if (!emptyNote || !saveArea) return;
+  if (hasSelection) {
+    emptyNote.classList.add('hidden');
+    saveArea.classList.remove('hidden');
+    initDiaryDate();
+  } else {
+    emptyNote.classList.remove('hidden');
+    saveArea.classList.add('hidden');
+  }
+}
+
 // ============ 과정 변경 ============
 function onCourseChange() {
   selectedPrices = {};
-  document.getElementById('subjectSearch').value = '';
+  const searchEl = document.getElementById('subjectSearch');
+  if (searchEl) searchEl.value = '';
   const type = document.getElementById('courseType').value;
   const list = document.getElementById('subjectList');
-  if (!type) { list.innerHTML = '<div class="empty-state text-sm text-slate-400">과정을 먼저 선택하세요</div>'; render(); return; }
+  const detailArea = document.getElementById('detailCourseArea');
 
+  if (!type) {
+    if (list) list.innerHTML = '<div class="empty-state text-sm text-slate-400">과정을 먼저 선택하세요</div>';
+    if (detailArea) detailArea.classList.add('hidden');
+    render(); return;
+  }
+
+  if (detailArea) detailArea.classList.remove('hidden');
   const courses = COURSE_DATA[type];
-  list.innerHTML = courses.map((c, i) => `
-    <div class="subject-item" data-name="${c.name.toLowerCase()}">
-      <input type="checkbox" class="subject-check" id="sub${i}" data-name="${c.name}" data-price="${c.price}" onchange="onSubjectChange('${c.name}', ${c.price})" />
-      <label for="sub${i}" class="subject-label">
-        <span class="chk"></span>
-        <span class="flex-1">${c.name}</span>
-        <span class="text-xs text-slate-400">${fmt(c.price)}</span>
-      </label>
-    </div>
-  `).join('');
+  if (list) {
+    list.innerHTML = courses.map((c, i) => `
+      <div class="subject-item" data-name="${c.name.toLowerCase()}">
+        <input type="checkbox" class="subject-check" id="sub${i}" data-name="${c.name}" data-price="${c.price}" onchange="onSubjectChange('${c.name}', ${c.price})" />
+        <label for="sub${i}" class="subject-label">
+          <span class="chk"></span>
+          <span class="flex-1">${c.name}</span>
+          <span class="text-xs text-slate-400">${fmt(c.price)}</span>
+        </label>
+      </div>
+    `).join('');
+  }
   render();
 }
 
@@ -820,7 +1340,7 @@ function render() {
 
   const selected = getSelectedItems();
 
-  // 카드 업데이트
+  // 기존 카드 업데이트
   document.getElementById('cardTotal').textContent = fmt(total) + '원';
   document.getElementById('cardCount').textContent = `과목 ${selected.length}개`;
   document.getElementById('cardDiscount').textContent = inputRateSum + '%';
@@ -830,9 +1350,23 @@ function render() {
   updateRiskBadge();
   checkDiscountLimit();
 
+  // 새 합계 패널 업데이트
+  const summaryTotal = document.getElementById('summaryTotal');
+  const summaryDiscount = document.getElementById('summaryDiscount');
+  const summarySaving = document.getElementById('summarySaving');
+  const summaryCount = document.getElementById('summaryCount');
+  const summaryRate = document.getElementById('summaryRate');
+  const summaryFinal = document.getElementById('summaryFinal');
+  if (summaryTotal) summaryTotal.textContent = fmt(total) + '원';
+  if (summaryDiscount) summaryDiscount.textContent = `복합 할인율 ${inputRateSum.toFixed(1)}% 적용 → 최종 ${fmt(final)}원`;
+  if (summarySaving) summarySaving.textContent = `절약 ${fmt(totalDiscount)}원`;
+  if (summaryCount) summaryCount.textContent = `${selected.length}개`;
+  if (summaryRate) summaryRate.textContent = `${inputRateSum}%`;
+  if (summaryFinal) summaryFinal.textContent = fmt(final) + '원';
+
   // 고객 배지 업데이트
   const custName = document.getElementById('customerName').value.trim();
-  const custGoal = document.getElementById('customerGoal').value;
+  const custGoal = document.getElementById('customerGoal')?.value || '';
   const badge = document.getElementById('customerBadge');
   if (custName) {
     badge.classList.remove('hidden');
@@ -851,6 +1385,9 @@ function render() {
     document.getElementById('cardDuration').textContent = '-';
     document.getElementById('cardDurationSub').textContent = '과목 선택 시 표시';
   }
+
+  // 상담일지 섹션 표시
+  updateDiarySection(selected.length > 0);
 
   // 테이블
   const tableArea = document.getElementById('tableArea');
