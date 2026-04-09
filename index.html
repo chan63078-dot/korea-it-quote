@@ -90,6 +90,15 @@
     body.dark .detail-table td { border-color: #334155; }
     body.dark .detail-table tr:hover td { background: #1e3a5f; }
 
+    /* 시간표 달력 */
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .cal-day { text-align: center; padding: 3px 2px; border-radius: 6px; font-size: 11px; min-height: 32px; }
+    .cal-day.today { background: #e0e7ff; font-weight: 700; }
+    .cal-day.has-class { cursor: pointer; background: #f0f9ff; }
+    .cal-day.has-class:hover { background: #dbeafe; }
+    .cal-dots { display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; margin-top: 2px; }
+    .cal-dot { width: 5px; height: 5px; border-radius: 50%; }
+
     /* 모달 */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 50; display: flex; align-items: center; justify-content: center; }
     .modal-box { background: white; border-radius: 16px; width: 700px; max-width: 95vw; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,.25); }
@@ -277,6 +286,41 @@
       </div>
     </section>
 
+    <!-- 시간표 서버 연동 -->
+    <section class="bg-emerald-50 rounded-xl p-3 space-y-2">
+      <label class="flex items-center justify-between text-xs font-bold text-emerald-700 uppercase tracking-wide section-toggle" onclick="toggleSection('timetableServerSection','timetableServerArrow')">
+        <span class="flex items-center gap-1.5">
+          <span id="serverStatusDot" class="w-2 h-2 rounded-full bg-slate-300 inline-block"></span>
+          시간표 서버 연동
+        </span>
+        <span id="timetableServerArrow" class="text-emerald-400 transition-transform">▾</span>
+      </label>
+      <div id="timetableServerSection" class="section-body space-y-2" style="max-height:300px">
+        <div class="flex gap-1.5">
+          <input type="text" id="timetableUrl" value="http://localhost:5000" placeholder="서버 주소"
+            class="flex-1 text-xs border border-emerald-200 rounded px-2 py-1.5 focus:outline-none focus:border-emerald-400 bg-white" />
+          <button onclick="testTimetableConnection()" class="btn-sm bg-emerald-600 text-white hover:bg-emerald-700 px-2 whitespace-nowrap">연결</button>
+        </div>
+        <div class="grid grid-cols-2 gap-1.5">
+          <div>
+            <label class="text-xs text-emerald-600 block mb-0.5">캠퍼스</label>
+            <select id="timetableCampus" class="w-full text-xs border border-emerald-200 rounded px-2 py-1.5 bg-white focus:outline-none focus:border-emerald-400">
+              <option>대구</option><option>강남</option><option>신촌</option>
+              <option>부산</option><option>인천</option><option>대전</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-emerald-600 block mb-0.5">조회 월</label>
+            <select id="timetableMonth" class="w-full text-xs border border-emerald-200 rounded px-2 py-1.5 bg-white focus:outline-none focus:border-emerald-400">
+              <option value="4">4월</option><option value="5">5월</option>
+              <option value="6">6월</option><option value="7">7월</option>
+              <option value="8">8월</option>
+            </select>
+          </div>
+        </div>
+        <p id="timetableStatusText" class="text-xs text-emerald-700 bg-emerald-100 rounded px-2 py-1">
+          서버 연결 시 실제 수업 날짜를 조회합니다
+        </p>
       </div>
     </section>
 
@@ -397,10 +441,13 @@
   <!-- 일정 달력 뷰 토글 -->
   <div id="scheduleSection" class="hidden mb-4 bg-white rounded-2xl shadow-sm p-5 no-print">
     <div class="flex items-center justify-between mb-3">
-      <h3 class="font-bold text-slate-700">과목 수강 일정</h3>
+      <div>
+        <h3 class="font-bold text-slate-700">강의 일정 조회</h3>
+        <p id="scheduleSourceLabel" class="text-xs text-slate-400 mt-0.5">기본 정보 기준</p>
+      </div>
       <button onclick="document.getElementById('scheduleSection').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-xl">&times;</button>
     </div>
-    <div class="grid grid-cols-2 gap-3" id="scheduleGrid"></div>
+    <div id="scheduleGrid" class="space-y-3"></div>
   </div>
 
   <!-- 상담 체크리스트 -->
@@ -618,6 +665,16 @@ let selectedPrices = {}; // { name: customPrice }
     `${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일 (${['일','월','화','수','목','금','토'][today.getDay()]}요일)`;
 
   loadFromURL();
+
+  // 시간표 서버 초기화
+  const savedUrl = localStorage.getItem('timetableUrl');
+  if (savedUrl) document.getElementById('timetableUrl').value = savedUrl;
+  // 현재 월을 기본값으로 설정
+  const curMonth = new Date().getMonth() + 1;
+  const monthSel = document.getElementById('timetableMonth');
+  if (monthSel) {
+    [...monthSel.options].forEach(o => { if (parseInt(o.value) === curMonth) o.selected = true; });
+  }
 })();
 
 // ============ 과정 변경 ============
@@ -1205,54 +1262,262 @@ function copyMessage() {
   });
 }
 
+// ============ 시간표 서버 연동 ============
+let timetableConnected = false;
+
+async function testTimetableConnection() {
+  const url = (document.getElementById('timetableUrl').value || '').trim();
+  const dot  = document.getElementById('serverStatusDot');
+  const txt  = document.getElementById('timetableStatusText');
+  dot.className  = 'w-2 h-2 rounded-full bg-yellow-400 inline-block';
+  txt.textContent = '연결 중...';
+  try {
+    const r = await fetch(`${url}/api/campuses`, { signal: AbortSignal.timeout(4000) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const campuses = await r.json();
+    timetableConnected = true;
+    dot.className  = 'w-2 h-2 rounded-full bg-green-500 inline-block';
+    txt.textContent = `연결됨 · 캠퍼스: ${campuses.join(', ')}`;
+    localStorage.setItem('timetableUrl', url);
+  } catch(e) {
+    timetableConnected = false;
+    dot.className  = 'w-2 h-2 rounded-full bg-red-500 inline-block';
+    txt.textContent = '연결 실패 — Flask 서버가 실행 중인지 확인하세요 (python app.py)';
+  }
+}
+
+// 요일 문자열 → JS getDay() 숫자 Set
+function parseYoilDays(yoil) {
+  const map = { '월': 1, '화': 2, '수': 3, '목': 4, '금': 5, '토': 6, '일': 0 };
+  const days = new Set();
+  if (!yoil) return days;
+  if (yoil.includes('~')) {
+    const order = [1, 2, 3, 4, 5, 6, 0];
+    const parts = yoil.split('~');
+    const s = map[parts[0].trim()], e = map[parts[1].trim()];
+    let on = false;
+    for (const d of order) {
+      if (d === s) on = true;
+      if (on) days.add(d);
+      if (d === e) break;
+    }
+  } else {
+    for (const ch of yoil) { if (map[ch] !== undefined) days.add(map[ch]); }
+  }
+  return days;
+}
+
+function getClassDates(startDate, endDate, yoil) {
+  const days = parseYoilDays(yoil);
+  if (!days.size || !startDate || !endDate) return [];
+  const dates = [];
+  const end = new Date(endDate + 'T00:00:00');
+  for (let d = new Date(startDate + 'T00:00:00'); d <= end; d.setDate(d.getDate() + 1)) {
+    if (days.has(d.getDay())) dates.push(d.toISOString().slice(0, 10));
+  }
+  return dates;
+}
+
+function renderMiniCalendar(month, year, dateColorMap) {
+  const korDays = ['일','월','화','수','목','금','토'];
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const firstDow   = new Date(year, month - 1, 1).getDay();
+  const todayStr   = new Date().toISOString().slice(0, 10);
+
+  let cells = '';
+  for (let i = 0; i < firstDow; i++) cells += `<div></div>`;
+  for (let day = 1; day <= daysInMonth; day++) {
+    const ds = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const colors = dateColorMap[ds] || [];
+    const dow    = new Date(year, month - 1, day).getDay();
+    const numCls = dow === 0 ? 'text-red-500' : dow === 6 ? 'text-blue-500' : 'text-slate-700';
+    const bgCls  = ds === todayStr ? 'today' : colors.length ? 'has-class' : '';
+    const dots   = colors.map(c => `<span class="cal-dot" style="background:var(--dot-${c},#6366f1)"></span>`).join('');
+    cells += `<div class="cal-day ${bgCls}">
+      <span class="${numCls} font-medium">${day}</span>
+      ${dots ? `<div class="cal-dots">${dots}</div>` : ''}
+    </div>`;
+  }
+
+  const headers = korDays.map((d,i) =>
+    `<div class="text-center text-xs font-semibold py-1 ${i===0?'text-red-400':i===6?'text-blue-400':'text-slate-400'}">${d}</div>`
+  ).join('');
+
+  return `<div class="mb-3">
+    <div class="text-center text-sm font-bold text-slate-700 mb-2">${year}년 ${month}월 강의 달력</div>
+    <div class="cal-grid">${headers}${cells}</div>
+  </div>`;
+}
+
 // ============ 수강 일정 뷰 ============
-function showSchedule() {
+const SCHED_COLORS = ['#3b82f6','#a855f7','#10b981','#f97316','#f43f5e','#6366f1'];
+const SCHED_NAMES  = ['blue','purple','emerald','orange','rose','indigo'];
+
+async function showSchedule() {
   const selected = getSelectedItems();
   if (selected.length === 0) { alert('과목을 먼저 선택해주세요.'); return; }
+  const section = document.getElementById('scheduleSection');
+  const grid    = document.getElementById('scheduleGrid');
+  section.classList.remove('hidden');
+  section.scrollIntoView({ behavior: 'smooth' });
 
+  if (timetableConnected) {
+    document.getElementById('scheduleSourceLabel').textContent = '시간표 서버 연동 기준';
+    grid.innerHTML = `<div class="text-center py-8 text-slate-400 text-sm animate-pulse">시간표 서버에서 일정 조회 중...</div>`;
+    await showScheduleFromAPI(selected);
+  } else {
+    document.getElementById('scheduleSourceLabel').textContent = '기본 정보 기준 (서버 미연결)';
+    showScheduleBasic(selected);
+  }
+}
+
+function showScheduleBasic(selected) {
   const weekdays = selected.filter(c => c.day && c.day.includes('평일'));
   const weekends = selected.filter(c => c.day && c.day.includes('주말') && !c.day.includes('평일'));
-  const both = selected.filter(c => c.day && c.day.includes('/'));
-
-  const dayColor = { '평일': 'blue', '주말': 'purple', '평일 / 주말': 'indigo' };
-  const cards = selected.map(c => {
-    const day = c.day || '';
-    let color = 'slate';
-    if (day.includes('/')) color = 'indigo';
-    else if (day.includes('평일')) color = 'blue';
-    else if (day.includes('주말')) color = 'purple';
-    return `<div class="rounded-xl border-l-4 border-${color}-400 bg-${color}-50 px-3 py-2">
-      <div class="font-semibold text-sm text-${color}-800 leading-tight">${c.name}</div>
-      <div class="flex items-center gap-2 mt-1">
-        <span class="text-xs px-2 py-0.5 rounded-full font-medium
-          ${color === 'blue' ? 'bg-blue-100 text-blue-700' : color === 'purple' ? 'bg-purple-100 text-purple-700' : 'bg-indigo-100 text-indigo-700'}">
-          ${day || '-'}
-        </span>
-        <span class="text-xs text-slate-400">${c.course === '2mon' ? '2개월' : '1개월'}</span>
+  const both     = selected.filter(c => c.day && c.day.includes('/'));
+  const cards = selected.map((c, i) => {
+    const color = SCHED_NAMES[i % SCHED_NAMES.length];
+    return `<div class="rounded-xl border-l-4 border-${color}-400 bg-${color}-50 px-4 py-3 flex items-center justify-between">
+      <div>
+        <div class="font-semibold text-sm text-${color}-800">${c.name}</div>
+        <div class="text-xs text-slate-500 mt-1">${c.day || '-'} · ${c.course === '2mon' ? '약 2개월' : '약 1개월'}</div>
       </div>
+      <span class="text-xs text-slate-400 bg-white px-2 py-1 rounded-lg border border-slate-100">
+        좌측 서버 연결 시<br>날짜 조회 가능
+      </span>
     </div>`;
   }).join('');
 
-  const summary = `
-    <div class="col-span-2 grid grid-cols-3 gap-2 mb-2">
-      <div class="rounded-xl bg-blue-50 px-3 py-2 text-center">
-        <div class="text-xs text-blue-500 font-semibold">평일 과목</div>
-        <div class="text-xl font-bold text-blue-700">${weekdays.length}개</div>
-      </div>
-      <div class="rounded-xl bg-purple-50 px-3 py-2 text-center">
-        <div class="text-xs text-purple-500 font-semibold">주말 과목</div>
-        <div class="text-xl font-bold text-purple-700">${weekends.length}개</div>
-      </div>
-      <div class="rounded-xl bg-indigo-50 px-3 py-2 text-center">
-        <div class="text-xs text-indigo-500 font-semibold">평일+주말</div>
-        <div class="text-xl font-bold text-indigo-700">${both.length}개</div>
-      </div>
+  const summary = `<div class="grid grid-cols-3 gap-2 mb-3">
+    <div class="rounded-xl bg-blue-50 px-3 py-2 text-center">
+      <div class="text-xs text-blue-500 font-semibold">평일</div>
+      <div class="text-xl font-bold text-blue-700">${weekdays.length}</div>
     </div>
-  `;
+    <div class="rounded-xl bg-purple-50 px-3 py-2 text-center">
+      <div class="text-xs text-purple-500 font-semibold">주말</div>
+      <div class="text-xl font-bold text-purple-700">${weekends.length}</div>
+    </div>
+    <div class="rounded-xl bg-indigo-50 px-3 py-2 text-center">
+      <div class="text-xs text-indigo-500 font-semibold">평일+주말</div>
+      <div class="text-xl font-bold text-indigo-700">${both.length}</div>
+    </div>
+  </div>`;
 
   document.getElementById('scheduleGrid').innerHTML = summary + cards;
-  document.getElementById('scheduleSection').classList.remove('hidden');
-  document.getElementById('scheduleSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function showScheduleFromAPI(selected) {
+  const baseUrl  = (document.getElementById('timetableUrl').value || '').trim();
+  const campus   = document.getElementById('timetableCampus').value;
+  const month    = parseInt(document.getElementById('timetableMonth').value);
+  const year     = new Date().getFullYear();
+  const grid     = document.getElementById('scheduleGrid');
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  // Inline CSS dot color variables
+  const dotStyleVars = SCHED_COLORS.map((c,i) => `--dot-${SCHED_NAMES[i]}:${c}`).join(';');
+  document.documentElement.style.cssText += ';' + dotStyleVars;
+
+  const dateColorMap = {}; // { 'YYYY-MM-DD': [colorName, ...] }
+  const allResults   = [];
+
+  for (let i = 0; i < selected.length; i++) {
+    const subj  = selected[i];
+    const color = SCHED_NAMES[i % SCHED_NAMES.length];
+    const hex   = SCHED_COLORS[i % SCHED_COLORS.length];
+
+    // 평일/주말 모두 조회
+    const [wdR, weR] = await Promise.all([
+      fetch(`${baseUrl}/api/courses?month=${month}&type=weekday&campus=${encodeURIComponent(campus)}&q=${encodeURIComponent(subj.name)}`).then(r=>r.json()).catch(()=>({courses:[]})),
+      fetch(`${baseUrl}/api/courses?month=${month}&type=weekend&campus=${encodeURIComponent(campus)}&q=${encodeURIComponent(subj.name)}`).then(r=>r.json()).catch(()=>({courses:[]})),
+    ]);
+
+    // 과목명 기준 필터링 (첫 단어 포함 여부)
+    const keyword = subj.name.split(' ')[0];
+    const matched = [...(wdR.courses||[]), ...(weR.courses||[])]
+      .filter(c => c['과정명'] && c['과정명'].includes(keyword));
+
+    const coursesWithDates = matched.map(c => {
+      const dates = getClassDates(c['개강일'], c['종강일'], c['요일']);
+      dates.forEach(d => {
+        if (!dateColorMap[d]) dateColorMap[d] = [];
+        if (!dateColorMap[d].includes(color)) dateColorMap[d].push(color);
+      });
+      return { ...c, dates };
+    });
+
+    allResults.push({ subj, color, hex, courses: coursesWithDates });
+  }
+
+  // 달력 렌더링
+  const calHtml = renderMiniCalendar(month, year, dateColorMap);
+
+  // 범례
+  const legend = `<div class="flex flex-wrap gap-3 mb-3 text-xs">
+    ${allResults.map(({subj,hex,color}) => `
+      <span class="flex items-center gap-1.5">
+        <span style="background:${hex}" class="w-2.5 h-2.5 rounded-full inline-block flex-shrink-0"></span>
+        <span class="text-slate-600">${subj.name}</span>
+      </span>`).join('')}
+  </div>`;
+
+  // 과목별 카드
+  const cards = allResults.map(({subj, color, courses}) => {
+    if (courses.length === 0) {
+      return `<div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+        <div class="font-semibold text-sm text-slate-600">${subj.name}</div>
+        <div class="text-xs text-slate-400 mt-1">해당 월(${month}월)에 등록된 강의 정보가 없습니다</div>
+      </div>`;
+    }
+
+    const courseRows = courses.map(c => {
+      const upcoming = c.dates.filter(d => d >= todayStr);
+      const next5    = upcoming.slice(0, 5);
+      const korDay   = ['일','월','화','수','목','금','토'];
+      const datePills = next5.map(d => {
+        const dt = new Date(d + 'T00:00:00');
+        return `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs border border-${color}-200 bg-${color}-50 text-${color}-700 font-medium">
+          ${dt.getMonth()+1}/${dt.getDate()}(${korDay[dt.getDay()]})
+        </span>`;
+      }).join('');
+      const moreCount = upcoming.length - 5;
+
+      return `<div class="mt-2 bg-white rounded-xl border border-slate-100 p-3">
+        <div class="flex items-start justify-between gap-2 flex-wrap">
+          <div class="min-w-0">
+            <div class="text-xs font-bold text-${color}-700 truncate">${c['과정명'] || ''}</div>
+            <div class="text-xs text-slate-500 mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5">
+              <span>📅 ${c['요일'] || '-'}</span>
+              <span>⏰ ${c['시작시간'] || '?'} ~ ${c['종료시간'] || '?'}</span>
+              ${c['강사'] ? `<span>👤 ${c['강사']}</span>` : ''}
+              ${c['room'] ? `<span>🚪 ${c['room']}</span>` : ''}
+            </div>
+            <div class="text-xs text-slate-400 mt-0.5">
+              ${c['개강일'] || '?'} ~ ${c['종강일'] || '?'} · 총 ${c.dates.length}회
+            </div>
+          </div>
+          <span class="text-xs px-2 py-0.5 rounded-full font-semibold flex-shrink-0 whitespace-nowrap
+            ${c['진행상태'] === '진행중' ? 'bg-green-100 text-green-700' :
+              c['진행상태'] === '예정' ? 'bg-blue-100 text-blue-700' :
+              c['진행상태'] === '오늘개강' ? 'bg-orange-100 text-orange-700' :
+              'bg-slate-100 text-slate-500'}">
+            ${c['진행상태'] || ''}
+          </span>
+        </div>
+        ${next5.length > 0 ? `<div class="mt-2 flex flex-wrap gap-1.5">
+          ${datePills}
+          ${moreCount > 0 ? `<span class="text-xs text-slate-400 self-center">+${moreCount}일 더</span>` : ''}
+        </div>` : '<div class="text-xs text-slate-400 mt-1">이후 수업 날짜 없음</div>'}
+      </div>`;
+    }).join('');
+
+    return `<div class="rounded-xl border-l-4 border-${color}-400 bg-${color}-50 px-4 py-3">
+      <div class="font-bold text-sm text-${color}-800 mb-1">${subj.name}</div>
+      ${courseRows}
+    </div>`;
+  }).join('');
+
+  grid.innerHTML = calHtml + legend + cards;
 }
 
 // ============ 견적 저장/불러오기 ============
