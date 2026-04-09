@@ -71,6 +71,25 @@
     .section-body { transition: max-height 0.2s ease, opacity 0.2s; overflow: hidden; }
     .section-body.collapsed { max-height: 0 !important; opacity: 0; }
 
+    /* 사이드바 리사이즈 핸들 */
+    #resizeHandle { width: 5px; cursor: col-resize; background: transparent; flex-shrink: 0; transition: background .15s; }
+    #resizeHandle:hover { background: #bfdbfe; }
+
+    /* 다크모드 */
+    body.dark { background: #0f172a; color: #e2e8f0; }
+    body.dark #sidebar { background: #1e293b; }
+    body.dark .bg-white { background: #1e293b !important; color: #e2e8f0; }
+    body.dark .bg-slate-50, body.dark .bg-slate-100 { background: #334155 !important; }
+    body.dark .bg-amber-50 { background: #451a03 !important; }
+    body.dark .text-slate-800, body.dark .text-slate-700 { color: #e2e8f0 !important; }
+    body.dark .text-slate-500, body.dark .text-slate-400 { color: #94a3b8 !important; }
+    body.dark .border-slate-200, body.dark .border-slate-100 { border-color: #334155 !important; }
+    body.dark input, body.dark select, body.dark textarea { background: #0f172a; color: #e2e8f0; border-color: #475569; }
+    body.dark .subject-label:hover { background: #1e3a5f; }
+    body.dark .subject-check:checked + .subject-label { background: #1e3a5f; border-color: #3b82f6; }
+    body.dark .detail-table td { border-color: #334155; }
+    body.dark .detail-table tr:hover td { background: #1e3a5f; }
+
     /* 모달 */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 50; display: flex; align-items: center; justify-content: center; }
     .modal-box { background: white; border-radius: 16px; width: 700px; max-width: 95vw; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,.25); }
@@ -108,12 +127,15 @@
 <body class="bg-slate-100 flex">
 
 <!-- ============ 사이드바 ============ -->
-<aside id="sidebar" class="w-80 bg-white shadow-xl flex-shrink-0 flex flex-col">
+<aside id="sidebar" class="w-80 bg-white shadow-xl flex-shrink-0 flex flex-col" style="min-width:240px;max-width:480px">
 
   <!-- 헤더 -->
-  <div class="bg-gradient-to-r from-blue-800 to-blue-600 text-white px-5 py-4">
-    <div class="text-xs font-medium opacity-70 mb-1">코리아IT아카데미</div>
-    <div class="text-lg font-bold leading-tight">수강료 견적 시스템</div>
+  <div class="bg-gradient-to-r from-blue-800 to-blue-600 text-white px-5 py-4 flex items-center justify-between">
+    <div>
+      <div class="text-xs font-medium opacity-70 mb-1">코리아IT아카데미</div>
+      <div class="text-lg font-bold leading-tight">수강료 견적 시스템</div>
+    </div>
+    <button onclick="toggleDark()" id="darkBtn" title="다크모드" class="opacity-60 hover:opacity-100 text-lg">🌙</button>
   </div>
 
   <div class="flex-1 p-4 space-y-5">
@@ -315,6 +337,9 @@
   </div>
 </aside>
 
+<!-- 사이드바 리사이즈 핸들 -->
+<div id="resizeHandle" class="no-print"></div>
+
 <!-- ============ 메인 콘텐츠 ============ -->
 <main class="flex-1 overflow-y-auto p-6">
 
@@ -324,9 +349,17 @@
       <h1 class="text-2xl font-bold text-slate-800">수강료 견적서</h1>
       <p class="text-sm text-slate-500 mt-1" id="todayDate"></p>
     </div>
-    <div id="customerBadge" class="hidden bg-amber-100 border border-amber-300 rounded-xl px-4 py-2 text-right no-print">
+    <div class="flex flex-col items-end gap-1 no-print">
+      <div id="customerBadge" class="hidden bg-amber-100 border border-amber-300 rounded-xl px-4 py-2 text-right">
       <div id="customerBadgeName" class="font-bold text-amber-800 text-sm"></div>
       <div id="customerBadgeSub" class="text-xs text-amber-600 mt-0.5"></div>
+      </div>
+      <div class="text-xs text-slate-300 text-right leading-relaxed hidden xl:block">
+        <span class="bg-slate-100 text-slate-500 rounded px-1">Alt+E</span> 엑셀 &nbsp;
+        <span class="bg-slate-100 text-slate-500 rounded px-1">Alt+P</span> 인쇄 &nbsp;
+        <span class="bg-slate-100 text-slate-500 rounded px-1">Alt+S</span> 저장 &nbsp;
+        <span class="bg-slate-100 text-slate-500 rounded px-1">Alt+C</span> 복사
+      </div>
     </div>
   </div>
 
@@ -779,6 +812,45 @@ function todayStr() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
+
+// ============ 다크모드 ============
+function toggleDark() {
+  const isDark = document.body.classList.toggle('dark');
+  localStorage.setItem('darkMode', isDark ? '1' : '');
+  document.getElementById('darkBtn').textContent = isDark ? '☀️' : '🌙';
+}
+if (localStorage.getItem('darkMode')) {
+  document.body.classList.add('dark');
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('darkBtn');
+    if (btn) btn.textContent = '☀️';
+  });
+}
+
+// ============ 사이드바 리사이즈 ============
+(function() {
+  const handle = document.getElementById('resizeHandle');
+  const sidebar = document.getElementById('sidebar');
+  let dragging = false;
+  handle.addEventListener('mousedown', e => { dragging = true; e.preventDefault(); });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const w = Math.min(Math.max(e.clientX, 240), 480);
+    sidebar.style.width = w + 'px';
+  });
+  document.addEventListener('mouseup', () => { dragging = false; });
+})();
+
+// ============ 키보드 단축키 ============
+document.addEventListener('keydown', e => {
+  if (e.altKey) {
+    if (e.key === 'e') { e.preventDefault(); downloadExcel(); }
+    if (e.key === 'p') { e.preventDefault(); printQuote(); }
+    if (e.key === 's') { e.preventDefault(); openSaveModal(); }
+    if (e.key === 'c') { e.preventDefault(); copyMessage(); }
+    if (e.key === 'l') { e.preventDefault(); toggleLogSection(); }
+  }
+});
 
 // ============ 상담 이력 로그 ============
 function toggleLogSection() {
