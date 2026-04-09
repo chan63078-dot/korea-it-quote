@@ -119,7 +119,14 @@
           <button class="btn-sm bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100" onclick="selectAll(false)">초기화</button>
         </div>
       </div>
-      <div id="subjectList" class="space-y-0.5 max-h-72 overflow-y-auto pr-1">
+      <div class="relative mb-1">
+        <input type="text" id="subjectSearch" placeholder="과목 검색..." oninput="filterSubjects(this.value)"
+          class="w-full border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-slate-50" />
+        <svg class="absolute left-2.5 top-2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
+      <div id="subjectList" class="space-y-0.5 max-h-60 overflow-y-auto pr-1">
         <div class="empty-state text-sm">
           <svg class="w-8 h-8 mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
           과정을 먼저 선택하세요
@@ -159,6 +166,35 @@
       </div>
     </section>
 
+    <!-- 고객 정보 -->
+    <section class="bg-amber-50 rounded-xl p-3 space-y-2">
+      <label class="block text-xs font-bold text-amber-700 uppercase tracking-wide">고객 정보</label>
+      <input type="text" id="customerName" placeholder="고객 이름" oninput="render()"
+        class="w-full border border-amber-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white" />
+      <input type="text" id="customerPhone" placeholder="연락처" oninput="render()"
+        class="w-full border border-amber-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white" />
+      <select id="visitRoute" oninput="render()"
+        class="w-full border border-amber-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white">
+        <option value="">방문경로 선택</option>
+        <option>인터넷 검색</option>
+        <option>SNS (인스타/유튜브)</option>
+        <option>지인 소개</option>
+        <option>현수막/전단지</option>
+        <option>재등록</option>
+        <option>기타</option>
+      </select>
+      <select id="customerGoal" oninput="render()"
+        class="w-full border border-amber-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white">
+        <option value="">수강 목적 선택</option>
+        <option>취업 준비</option>
+        <option>자격증 취득</option>
+        <option>업무 역량 향상</option>
+        <option>취미/자기계발</option>
+        <option>이직 준비</option>
+        <option>기타</option>
+      </select>
+    </section>
+
     <!-- 상담자 정보 -->
     <section>
       <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">상담자 정보</label>
@@ -168,6 +204,13 @@
         <input type="text" id="consultantPhone" value="010 - 5104 - 1704" placeholder="연락처" oninput="render()"
           class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
       </div>
+    </section>
+
+    <!-- 상담 메모 -->
+    <section>
+      <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">상담 메모</label>
+      <textarea id="consultMemo" placeholder="특이사항, 고객 요청, 다음 연락 예정 등..." rows="3" oninput="render()"
+        class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"></textarea>
     </section>
 
   </div>
@@ -202,7 +245,7 @@
   </div>
 
   <!-- 요약 카드 -->
-  <div class="grid grid-cols-3 gap-4 mb-6">
+  <div class="grid grid-cols-4 gap-4 mb-6">
     <div class="stat-card bg-white rounded-2xl shadow-sm p-5 border-t-4 border-slate-200">
       <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">정가 합계</div>
       <div id="cardTotal" class="text-2xl font-bold text-slate-800">0원</div>
@@ -217,6 +260,11 @@
       <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">최종 납부금액</div>
       <div id="cardFinal" class="text-2xl font-bold text-red-600">0원</div>
       <div class="text-xs text-slate-400 mt-1">VAT 포함 (카드/현금)</div>
+    </div>
+    <div class="stat-card bg-white rounded-2xl shadow-sm p-5 border-t-4 border-emerald-400">
+      <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">예상 수강기간</div>
+      <div id="cardDuration" class="text-2xl font-bold text-emerald-600">-</div>
+      <div id="cardDurationSub" class="text-xs text-slate-400 mt-1">과목 선택 시 표시</div>
     </div>
   </div>
 
@@ -344,13 +392,14 @@ let selectedPrices = {}; // { name: customPrice }
 // ============ 과정 변경 ============
 function onCourseChange() {
   selectedPrices = {};
+  document.getElementById('subjectSearch').value = '';
   const type = document.getElementById('courseType').value;
   const list = document.getElementById('subjectList');
   if (!type) { list.innerHTML = '<div class="empty-state text-sm text-slate-400">과정을 먼저 선택하세요</div>'; render(); return; }
 
   const courses = COURSE_DATA[type];
   list.innerHTML = courses.map((c, i) => `
-    <div>
+    <div class="subject-item" data-name="${c.name.toLowerCase()}">
       <input type="checkbox" class="subject-check" id="sub${i}" data-name="${c.name}" data-price="${c.price}" onchange="onSubjectChange('${c.name}', ${c.price})" />
       <label for="sub${i}" class="subject-label">
         <span class="chk"></span>
@@ -360,6 +409,14 @@ function onCourseChange() {
     </div>
   `).join('');
   render();
+}
+
+// ============ 과목 검색 필터 ============
+function filterSubjects(q) {
+  const kw = q.toLowerCase();
+  document.querySelectorAll('.subject-item').forEach(el => {
+    el.style.display = el.dataset.name.includes(kw) ? '' : 'none';
+  });
 }
 
 function onSubjectChange(name, basePrice) {
@@ -413,6 +470,16 @@ function render() {
   document.getElementById('cardDiscountAmt').textContent = '할인금액 ' + fmt(discountAmt) + '원';
   document.getElementById('cardFinal').textContent = fmt(final) + '원';
   document.getElementById('selectedBadge').textContent = `선택 ${selected.length}개`;
+
+  // 예상 수강기간
+  if (selected.length > 0) {
+    const totalMon = selected.reduce((s, c) => s + (c.course === '2mon' ? 2 : 1), 0);
+    document.getElementById('cardDuration').textContent = `약 ${totalMon}개월`;
+    document.getElementById('cardDurationSub').textContent = `과목 ${selected.length}개 기준`;
+  } else {
+    document.getElementById('cardDuration').textContent = '-';
+    document.getElementById('cardDurationSub').textContent = '과목 선택 시 표시';
+  }
 
   // 테이블
   const tableArea = document.getElementById('tableArea');
