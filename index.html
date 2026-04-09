@@ -1311,17 +1311,18 @@ function getClassDates(startDate, endDate, yoil) {
   const days = parseYoilDays(yoil);
   if (!days.size || !startDate || !endDate) return [];
   const dates = [];
-  const end = new Date(endDate + 'T00:00:00');
-  for (let d = new Date(startDate + 'T00:00:00'); d <= end; d.setDate(d.getDate() + 1)) {
-    if (days.has(d.getDay())) dates.push(d.toISOString().slice(0, 10));
+  // YYYY-MM-DD → UTC midnight (시간대 버그 방지)
+  const end = new Date(endDate);
+  for (let d = new Date(startDate); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+    if (days.has(d.getUTCDay())) dates.push(d.toISOString().slice(0, 10));
   }
   return dates;
 }
 
 function renderMiniCalendar(month, year, dateColorMap) {
   const korDays = ['일','월','화','수','목','금','토'];
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const firstDow   = new Date(year, month - 1, 1).getDay();
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const firstDow   = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
   const todayStr   = new Date().toISOString().slice(0, 10);
 
   let cells = '';
@@ -1329,7 +1330,7 @@ function renderMiniCalendar(month, year, dateColorMap) {
   for (let day = 1; day <= daysInMonth; day++) {
     const ds = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
     const colors = dateColorMap[ds] || [];
-    const dow    = new Date(year, month - 1, day).getDay();
+    const dow    = new Date(ds).getUTCDay(); // UTC 기준 (시간대 버그 방지)
     const numCls = dow === 0 ? 'text-red-500' : dow === 6 ? 'text-blue-500' : 'text-slate-700';
     const bgCls  = ds === todayStr ? 'today' : colors.length ? 'has-class' : '';
     const dots   = colors.map(c => `<span class="cal-dot" style="background:var(--dot-${c},#6366f1)"></span>`).join('');
@@ -1406,6 +1407,34 @@ function showScheduleBasic(selected) {
   document.getElementById('scheduleGrid').innerHTML = summary + cards;
 }
 
+// 견적 과목명 → 시간표 검색어 변환
+function toSearchKeyword(name) {
+  const rules = [
+    [/^AI\s*파이썬/, '파이썬'],
+    [/^C언어/, 'C언어'],
+    [/^자바/, '자바'],
+    [/^DBMS/, 'DBMS'],
+    [/^리눅스마스터/, '리눅스마스터'],
+    [/^리눅스/, '리눅스'],
+    [/^네트워크/, '네트워크'],
+    [/^정보보안\s*\d*\s*\(네트워크보안\)/, '네트워크보안'],
+    [/^정보보안\s*\d*\s*\(시스템보안\)/, '시스템보안'],
+    [/^정보보안\s*\d*\s*\(웹보안\)/, '웹보안'],
+    [/^SQLD/, 'SQLD'],
+    [/^ADSP/, 'ADsP'],
+    [/^정보처리기사 필기/, '정보처리기사필기'],
+    [/^정보처리기사 실기 1/, '정보처리기사실기1'],
+    [/^정보처리기사 실기 2/, '정보처리기사실기2'],
+    [/^빅데이터분석기사 필기/, '빅데이터분석기사필기'],
+    [/^빅데이터분석기사 실기/, '빅데이터분석기사실기'],
+    [/^ChatGPT/, 'ChatGPT'],
+    [/^Claude/, 'Claude'],
+  ];
+  for (const [pat, kw] of rules) { if (pat.test(name)) return kw; }
+  // 기본: 괄호·숫자 제거 후 첫 단어
+  return name.replace(/\s*\([^)]*\)/g, '').replace(/\s+\d+$/, '').trim().split(' ')[0];
+}
+
 async function showScheduleFromAPI(selected) {
   const baseUrl  = (document.getElementById('timetableUrl').value || '').trim();
   const campus   = document.getElementById('timetableCampus').value;
@@ -1426,16 +1455,23 @@ async function showScheduleFromAPI(selected) {
     const color = SCHED_NAMES[i % SCHED_NAMES.length];
     const hex   = SCHED_COLORS[i % SCHED_COLORS.length];
 
-    // 평일/주말 모두 조회
-    const [wdR, weR] = await Promise.all([
-      fetch(`${baseUrl}/api/courses?month=${month}&type=weekday&campus=${encodeURIComponent(campus)}&q=${encodeURIComponent(subj.name)}`).then(r=>r.json()).catch(()=>({courses:[]})),
-      fetch(`${baseUrl}/api/courses?month=${month}&type=weekend&campus=${encodeURIComponent(campus)}&q=${encodeURIComponent(subj.name)}`).then(r=>r.json()).catch(()=>({courses:[]})),
-    ]);
+    const keyword = toSearchKeyword(subj.name);
 
-    // 과목명 기준 필터링 (첫 단어 포함 여부)
-    const keyword = subj.name.split(' ')[0];
-    const matched = [...(wdR.courses||[]), ...(weR.courses||[])]
-      .filter(c => c['과정명'] && c['과정명'].includes(keyword));
+    // 선택 월부터 8월까지 평일·주말 전부 조회
+    const months = Array.from({length: 9 - month}, (_, k) => month + k);
+    const fetches = months.flatMap(m => ['weekday','weekend'].map(t =>
+      fetch(`${baseUrl}/api/courses?month=${m}&type=${t}&campus=${encodeURIComponent(campus)}&q=${encodeURIComponent(keyword)}`)
+        .then(r=>r.json()).catch(()=>({courses:[]}))
+    ));
+    const allResponses = await Promise.all(fetches);
+
+    // 중복 제거 (과정명+개강일 기준)
+    const seen = new Set();
+    const matched = allResponses.flatMap(r => r.courses||[]).filter(c => {
+      const key = (c['과정명']||'') + (c['개강일']||'');
+      if (seen.has(key)) return false;
+      seen.add(key); return true;
+    });
 
     const coursesWithDates = matched.map(c => {
       const dates = getClassDates(c['개강일'], c['종강일'], c['요일']);
@@ -1449,8 +1485,10 @@ async function showScheduleFromAPI(selected) {
     allResults.push({ subj, color, hex, courses: coursesWithDates });
   }
 
-  // 달력 렌더링
-  const calHtml = renderMiniCalendar(month, year, dateColorMap);
+  // 실제 날짜가 있는 월들만 달력 렌더링
+  const usedMonths = [...new Set(Object.keys(dateColorMap).map(d => parseInt(d.slice(5,7))))].sort((a,b)=>a-b);
+  const calMonths  = usedMonths.length ? usedMonths : [month];
+  const calHtml = calMonths.map(m => renderMiniCalendar(m, year, dateColorMap)).join('');
 
   // 범례
   const legend = `<div class="flex flex-wrap gap-3 mb-3 text-xs">
@@ -1464,9 +1502,11 @@ async function showScheduleFromAPI(selected) {
   // 과목별 카드
   const cards = allResults.map(({subj, color, courses}) => {
     if (courses.length === 0) {
+      const kw = toSearchKeyword(subj.name);
       return `<div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
         <div class="font-semibold text-sm text-slate-600">${subj.name}</div>
-        <div class="text-xs text-slate-400 mt-1">해당 월(${month}월)에 등록된 강의 정보가 없습니다</div>
+        <div class="text-xs text-slate-400 mt-1">검색어 "<b>${kw}</b>" — ${month}~${Math.min(month+1,8)}월 시간표에 등록된 강의 없음</div>
+        <div class="text-xs text-slate-300 mt-0.5">시간표 파일 미등록이거나 해당 월에 미개설</div>
       </div>`;
     }
 
@@ -1475,9 +1515,9 @@ async function showScheduleFromAPI(selected) {
       const next5    = upcoming.slice(0, 5);
       const korDay   = ['일','월','화','수','목','금','토'];
       const datePills = next5.map(d => {
-        const dt = new Date(d + 'T00:00:00');
+        const dt = new Date(d); // YYYY-MM-DD → UTC midnight
         return `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs border border-${color}-200 bg-${color}-50 text-${color}-700 font-medium">
-          ${dt.getMonth()+1}/${dt.getDate()}(${korDay[dt.getDay()]})
+          ${dt.getUTCMonth()+1}/${dt.getUTCDate()}(${korDay[dt.getUTCDay()]})
         </span>`;
       }).join('');
       const moreCount = upcoming.length - 5;
