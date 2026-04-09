@@ -304,6 +304,13 @@
       </svg>
       견적 URL 복사 (공유용)
     </button>
+    <button onclick="toggleLogSection()"
+      class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      상담 이력 보기
+    </button>
     <p class="text-center text-xs text-slate-400">원본 양식 서식으로 생성됩니다</p>
   </div>
 </aside>
@@ -452,6 +459,19 @@
     <p>1) 위 수강료는 학원 내 게시되어 있는 수강료 기준이며, 교육청에 신고된 금액입니다.</p>
     <p>2) 할인내역은 해당사항에 한해 적용되며, 증명서류 증빙이 필요합니다.</p>
     <p>3) 할인금액은 수강과목 무료지원으로 진행됩니다.</p>
+  </div>
+
+  <!-- 상담 이력 로그 -->
+  <div id="logSection" class="hidden mt-4 bg-white rounded-2xl shadow-sm no-print">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+      <h3 class="font-bold text-slate-700">상담 이력 로그</h3>
+      <div class="flex gap-2">
+        <button onclick="logCurrentQuote()" class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100">현재 견적 기록</button>
+        <button onclick="clearLog()" class="btn-sm bg-red-50 text-red-500 border border-red-200 hover:bg-red-100">전체 삭제</button>
+        <button onclick="document.getElementById('logSection').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-xl leading-none ml-1">&times;</button>
+      </div>
+    </div>
+    <div id="logList" class="divide-y divide-slate-100 max-h-80 overflow-y-auto"></div>
   </div>
 
   <!-- 인쇄 전용 뷰 (화면에는 숨김) -->
@@ -758,6 +778,97 @@ function fmt(n) {
 function todayStr() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ============ 상담 이력 로그 ============
+function toggleLogSection() {
+  const sec = document.getElementById('logSection');
+  sec.classList.toggle('hidden');
+  if (!sec.classList.contains('hidden')) {
+    renderLog();
+    sec.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function logCurrentQuote() {
+  const selected = getSelectedItems();
+  if (selected.length === 0) { alert('과목을 선택해주세요.'); return; }
+  const discountRate = parseInt(document.getElementById('discountSlider').value) / 100;
+  const total = selected.reduce((s, c) => s + c.price, 0);
+  const discountAmt = Math.floor(total * discountRate / 1000) * 1000;
+  const logs = JSON.parse(localStorage.getItem('consultLog') || '[]');
+  logs.unshift({
+    time: new Date().toLocaleString('ko-KR'),
+    customer: document.getElementById('customerName').value.trim() || '미입력',
+    customerPhone: document.getElementById('customerPhone').value.trim(),
+    goal: document.getElementById('customerGoal').value,
+    courseType: document.getElementById('courseType').value,
+    subjects: selected.map(c => c.name),
+    total, discountAmt,
+    final: total - discountAmt,
+    discount: Math.round(discountRate * 100),
+    consultant: document.getElementById('consultantName').value.trim(),
+    memo: document.getElementById('consultMemo').value.trim(),
+  });
+  if (logs.length > 50) logs.pop();
+  localStorage.setItem('consultLog', JSON.stringify(logs));
+  renderLog();
+}
+
+function renderLog() {
+  const logs = JSON.parse(localStorage.getItem('consultLog') || '[]');
+  const list = document.getElementById('logList');
+  if (logs.length === 0) {
+    list.innerHTML = '<div class="text-sm text-slate-400 text-center py-6">기록된 이력이 없습니다</div>';
+    return;
+  }
+  list.innerHTML = logs.map((l, i) => `
+    <div class="px-6 py-3 hover:bg-slate-50 flex items-start gap-3">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="font-semibold text-slate-800 text-sm">${l.customer}</span>
+          ${l.customerPhone ? `<span class="text-xs text-slate-400">${l.customerPhone}</span>` : ''}
+          ${l.goal ? `<span class="badge bg-amber-100 text-amber-700">${l.goal}</span>` : ''}
+          <span class="badge bg-blue-100 text-blue-700">${l.courseType}</span>
+        </div>
+        <div class="text-xs text-slate-500 mt-0.5">${l.subjects.slice(0,4).join(', ')}${l.subjects.length > 4 ? ` 외 ${l.subjects.length-4}개` : ''}</div>
+        <div class="flex items-center gap-3 mt-1">
+          <span class="text-xs font-bold text-red-600">${fmt(l.final)}원</span>
+          ${l.discount > 0 ? `<span class="text-xs text-blue-500">${l.discount}% 할인</span>` : ''}
+          ${l.memo ? `<span class="text-xs text-slate-400 truncate max-w-32">📝 ${l.memo}</span>` : ''}
+        </div>
+      </div>
+      <div class="text-right flex-shrink-0">
+        <div class="text-xs text-slate-400">${l.time}</div>
+        <button onclick="restoreLog(${i})" class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 mt-1">복원</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function restoreLog(i) {
+  const logs = JSON.parse(localStorage.getItem('consultLog') || '[]');
+  const l = logs[i];
+  if (!l) return;
+  document.getElementById('courseType').value = l.courseType;
+  onCourseChange();
+  l.subjects.forEach(name => {
+    const cb = [...document.querySelectorAll('.subject-check')].find(c => c.dataset.name === name);
+    if (cb) { cb.checked = true; selectedPrices[name] = parseInt(cb.dataset.price); }
+  });
+  document.getElementById('discountSlider').value = l.discount;
+  document.getElementById('discountLabel').textContent = l.discount + '%';
+  document.getElementById('customerName').value = l.customer === '미입력' ? '' : l.customer;
+  document.getElementById('consultMemo').value = l.memo || '';
+  render();
+  document.getElementById('logSection').classList.add('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function clearLog() {
+  if (!confirm('상담 이력을 모두 삭제할까요?')) return;
+  localStorage.removeItem('consultLog');
+  renderLog();
 }
 
 // ============ 상담 체크리스트 ============
