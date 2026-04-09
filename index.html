@@ -767,7 +767,7 @@
       <span class="text-xl">🔥</span>
       <h1 class="text-xl font-bold">블로그 자동화 · SEO 원고 생성</h1>
     </div>
-    <p class="text-sm opacity-80">Gemini 1.5 Flash 기반 · 네이버/구글 SEO 최적화 · 코리아IT아카데미 대전지점</p>
+    <p class="text-sm opacity-80">Gemini 2.0 Flash 기반 · 네이버/구글 SEO 최적화 · 코리아IT아카데미 대구지점</p>
   </div>
 
   <!-- Gemini API 키 설정 -->
@@ -1232,7 +1232,7 @@ async function callGeminiAPI(userPrompt, systemInstruction) {
   const apiKey = getGeminiApiKey();
   if (!apiKey) throw new Error('Gemini API 키가 필요합니다. 블로그 자동화 탭에서 키를 먼저 저장해주세요.');
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
   const body = {
     contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
     ...(systemInstruction ? { system_instruction: { parts: [{ text: systemInstruction }] } } : {}),
@@ -1253,15 +1253,15 @@ async function callGeminiAPI(userPrompt, systemInstruction) {
 }
 
 // ============ 블로그 자동화 ============
-const DEFAULT_SYSTEM_PROMPT = `당신은 코리아IT아카데미 대전지점의 전문 SEO 블로그 작가입니다.
+const DEFAULT_SYSTEM_PROMPT = `당신은 코리아IT아카데미 대구지점의 전문 SEO 블로그 작가입니다.
 - 결과물은 바로 복사-붙여넣기 가능한 마크다운으로만 출력
-- 홍보 대상: 코리아IT아카데미 대전지점
+- 홍보 대상: 코리아IT아카데미 대구지점
 - 문단 규칙: 한 문단 1-3문장, 220자 이내 준수
 - 본문에 마크다운 표 최소 1개 포함
 
 # Task
 - 구성: 제목(H1), 도입, 목차, 본문(H2/H3/H4), 표, Q&A(5개), 마무리, CTA(1개)
-- CTA는 마지막 줄에 "코리아IT아카데미 대전지점" 문의 유도로 고정
+- CTA는 마지막 줄에 "코리아IT아카데미 대구지점" 문의 유도로 고정
 - 본문 소제목은 반드시 H2부터 시작한다. 본문에서 H1은 절대 사용하지 않는다.
 - SEO를 위해 키워드를 제목과 소제목에 자연스럽게 배치한다.
 
@@ -1404,11 +1404,11 @@ async function askMentor() {
   }
 
   // Gemini API 호출
-  const mentorSystem = `당신은 코리아IT아카데미 대전지점의 10년차 커리어 멘토입니다.
+  const mentorSystem = `당신은 코리아IT아카데미 대구지점의 10년차 커리어 멘토입니다.
 IT 교육과 취업에 대한 전문 지식을 갖고 있으며, 친절하고 실용적인 답변을 제공합니다.
-- 코리아IT아카데미 대전지점의 과정: 정보보안, AI/빅데이터, 정보처리기사, 기초 프로그래밍, AI아카데미
+- 코리아IT아카데미 대구지점의 과정: 정보보안, AI/빅데이터, 정보처리기사, 기초 프로그래밍, AI아카데미
 - 답변은 한국어로, 200자 이내로 간결하게
-- 마지막에 항상 "더 자세한 상담은 코리아IT아카데미 대전지점에 문의해주세요!" 추가`;
+- 마지막에 항상 "더 자세한 상담은 코리아IT아카데미 대구지점에 문의해주세요!" 추가`;
 
   area.classList.remove('hidden');
   area.innerHTML = '<span class="animate-pulse">🤔 멘토가 답변 중입니다...</span>';
