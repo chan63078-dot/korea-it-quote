@@ -739,32 +739,36 @@ function getDiscountData() {
     text: document.getElementById('reason'+i).value.trim(),
     rate: parseFloat(document.getElementById('rate'+i).value) || 0
   }));
+  // 복리 할인: 각 할인을 이전 할인 후 금액에 적용
   let running = total;
   const reasons = rows.filter(r => r.text || r.rate > 0).map(r => {
-    const amt = Math.floor(total * r.rate / 100 / 1000) * 1000;
+    const amt = Math.floor(running * r.rate / 100 / 1000) * 1000;
     running -= amt;
     return { ...r, amt, running };
   });
   const totalDiscount = total - running;
-  const totalRate = rows.reduce((s, r) => s + r.rate, 0);
-  return { reasons, totalDiscount, totalRate, final: running, total };
+  // 실효 할인율 (합산이 아닌 실제 절감 비율)
+  const effectiveRate = total > 0 ? Math.round((totalDiscount / total) * 1000) / 10 : 0;
+  const inputRateSum = rows.reduce((s, r) => s + r.rate, 0);
+  return { reasons, totalDiscount, effectiveRate, inputRateSum, final: running, total };
 }
 
 // ============ 렌더 ============
 function render() {
   const type = document.getElementById('courseType').value;
   const dd = getDiscountData();
-  const { total, totalDiscount, totalRate, final } = dd;
+  const { total, totalDiscount, effectiveRate, inputRateSum, final } = dd;
 
-  // 총 할인율 레이블
-  document.getElementById('totalRateLabel').textContent = totalRate + '%';
+  // 총 할인율 레이블 (실효율 표시)
+  document.getElementById('totalRateLabel').textContent =
+    inputRateSum > 0 ? `실효 ${effectiveRate}%` : '0%';
 
   const selected = getSelectedItems();
 
   // 카드 업데이트
   document.getElementById('cardTotal').textContent = fmt(total) + '원';
   document.getElementById('cardCount').textContent = `과목 ${selected.length}개`;
-  document.getElementById('cardDiscount').textContent = totalRate + '%';
+  document.getElementById('cardDiscount').textContent = effectiveRate > 0 ? `실효 ${effectiveRate}%` : '0%';
   document.getElementById('cardDiscountAmt').textContent = '할인금액 ' + fmt(totalDiscount) + '원';
   document.getElementById('cardFinal').textContent = fmt(final) + '원';
   document.getElementById('selectedBadge').textContent = `선택 ${selected.length}개`;
@@ -802,7 +806,7 @@ function render() {
   document.getElementById('installmentSection').classList.remove('hidden');
 
   const rows = selected.map((c, i) => {
-    const discounted = totalRate > 0 ? Math.floor(c.price * (1 - totalRate / 100) / 1000) * 1000 : c.price;
+    const discounted = effectiveRate > 0 ? Math.floor(c.price * (1 - effectiveRate / 100) / 1000) * 1000 : c.price;
     return `<tr>
       <td class="text-center text-slate-500">${i + 1}</td>
       <td>${c.category || ''}</td>
@@ -843,19 +847,25 @@ function render() {
     </table>`;
 
   // 할인 상세
-  if (totalRate > 0 || dd.reasons.length > 0) {
+  if (inputRateSum > 0 || dd.reasons.length > 0) {
     document.getElementById('discountSummary').classList.remove('hidden');
     const details = document.getElementById('discountDetails');
     if (dd.reasons.length > 0) {
-      details.innerHTML = dd.reasons.map(r => `
-        <div class="flex justify-between text-slate-600">
-          <span>· ${r.text || '(명분 미입력)'} (${r.rate}%)</span>
-          <span class="text-blue-600">-${fmt(r.amt)}원</span>
-        </div>`).join('');
+      // 복리 할인: 각 단계 "기준금액 → 할인 → 적용후" 표시
+      details.innerHTML = dd.reasons.map((r, i) => {
+        const base = i === 0 ? total : dd.reasons[i-1].running;
+        return `<div class="flex justify-between items-center text-sm py-1 border-b border-slate-50 last:border-0">
+          <div class="text-slate-600">
+            <span class="font-medium">${r.text || '(명분 미입력)'}</span>
+            <span class="text-xs text-slate-400 ml-1">${fmt(base)}원 × ${r.rate}%</span>
+          </div>
+          <span class="text-blue-600 font-medium">-${fmt(r.amt)}원 → <b>${fmt(r.running)}원</b></span>
+        </div>`;
+      }).join('');
     } else {
       details.innerHTML = `<div class="text-slate-500 text-xs">할인 명분을 입력하세요</div>`;
     }
-    document.getElementById('totalDiscountDisplay').textContent = '-' + fmt(totalDiscount) + '원';
+    document.getElementById('totalDiscountDisplay').textContent = '-' + fmt(totalDiscount) + `원 (실효 ${effectiveRate}%)`;
     document.getElementById('finalDisplay').textContent = fmt(final) + '원';
   } else {
     document.getElementById('discountSummary').classList.add('hidden');
@@ -948,7 +958,7 @@ function logCurrentQuote() {
     subjects: selected.map(c => c.name),
     total: dd.total, discountAmt: dd.totalDiscount,
     final: dd.final,
-    discount: dd.totalRate,
+    discount: dd.effectiveRate,
     reasons: [1,2,3].map(i => document.getElementById('reason'+i).value),
     rates: [1,2,3].map(i => parseFloat(document.getElementById('rate'+i).value)||0),
     consultant: document.getElementById('consultantName').value.trim(),
@@ -1124,9 +1134,14 @@ function printQuote() {
     </tr>`;
   }).join('');
 
-  const discRows = dd.reasons.map(r => `<tr>
-    <td>${r.text || '(명분 미입력)'} (${r.rate}%)</td><td class="right">${fmt(r.amt)}</td><td class="right">${fmt(r.running)}</td>
-  </tr>`).join('');
+  const discRows = dd.reasons.map((r, i) => {
+    const base = i === 0 ? total : dd.reasons[i-1].running;
+    return `<tr>
+      <td>${r.text || '(명분 미입력)'} (${fmt(base)}원 × ${r.rate}%)</td>
+      <td class="right">-${fmt(r.amt)}</td>
+      <td class="right">${fmt(r.running)}</td>
+    </tr>`;
+  }).join('');
 
   document.getElementById('printView').innerHTML = `
     <div style="max-width:700px; margin:0 auto; font-family:'Malgun Gothic',sans-serif;">
@@ -1234,7 +1249,7 @@ function copyMessage() {
   const selected = getSelectedItems();
   if (selected.length === 0) { alert('과목을 먼저 선택해주세요.'); return; }
   const dd = getDiscountData();
-  const { total, totalDiscount, totalRate, final } = dd;
+  const { total, totalDiscount, effectiveRate, final } = dd;
   const customerName = document.getElementById('customerName').value.trim();
   const consultant = document.getElementById('consultantName').value.trim();
   const phone = document.getElementById('consultantPhone').value.trim();
@@ -1248,7 +1263,7 @@ function copyMessage() {
     ...selected.map((c, i) => `${i + 1}. ${c.name} — ${fmt(c.price)}원`),
     ``,
     `📌 정가 합계: ${fmt(total)}원`,
-    totalRate > 0 ? `🎁 할인 적용: -${fmt(totalDiscount)}원 (${totalRate}%)` : null,
+    effectiveRate > 0 ? `🎁 할인 적용: -${fmt(totalDiscount)}원 (실효 ${effectiveRate}%)` : null,
     `✅ 최종 납부금액: ${fmt(final)}원`,
     ``,
     `문의사항은 언제든지 연락주세요!`,
@@ -1485,79 +1500,52 @@ async function showScheduleFromAPI(selected) {
     allResults.push({ subj, color, hex, courses: coursesWithDates });
   }
 
-  // 실제 날짜가 있는 월들만 달력 렌더링
-  const usedMonths = [...new Set(Object.keys(dateColorMap).map(d => parseInt(d.slice(5,7))))].sort((a,b)=>a-b);
-  const calMonths  = usedMonths.length ? usedMonths : [month];
-  const calHtml = calMonths.map(m => renderMiniCalendar(m, year, dateColorMap)).join('');
+  const korDay = ['일','월','화','수','목','금','토'];
+  function fmtDate(ds) {
+    const dt = new Date(ds);
+    return `${dt.getUTCMonth()+1}월 ${dt.getUTCDate()}일(${korDay[dt.getUTCDay()]})`;
+  }
 
-  // 범례
-  const legend = `<div class="flex flex-wrap gap-3 mb-3 text-xs">
-    ${allResults.map(({subj,hex,color}) => `
-      <span class="flex items-center gap-1.5">
-        <span style="background:${hex}" class="w-2.5 h-2.5 rounded-full inline-block flex-shrink-0"></span>
-        <span class="text-slate-600">${subj.name}</span>
-      </span>`).join('')}
-  </div>`;
-
-  // 과목별 카드
+  // 과목별 텍스트 목록 카드
   const cards = allResults.map(({subj, color, courses}) => {
     if (courses.length === 0) {
       const kw = toSearchKeyword(subj.name);
       return `<div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
         <div class="font-semibold text-sm text-slate-600">${subj.name}</div>
-        <div class="text-xs text-slate-400 mt-1">검색어 "<b>${kw}</b>" — ${month}~${Math.min(month+1,8)}월 시간표에 등록된 강의 없음</div>
-        <div class="text-xs text-slate-300 mt-0.5">시간표 파일 미등록이거나 해당 월에 미개설</div>
+        <div class="text-xs text-slate-400 mt-1">검색어 "<b>${kw}</b>" — 등록된 강의 없음 (시간표 미등록 또는 미개설)</div>
       </div>`;
     }
 
     const courseRows = courses.map(c => {
       const upcoming = c.dates.filter(d => d >= todayStr);
-      const next5    = upcoming.slice(0, 5);
-      const korDay   = ['일','월','화','수','목','금','토'];
-      const datePills = next5.map(d => {
-        const dt = new Date(d); // YYYY-MM-DD → UTC midnight
-        return `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs border border-${color}-200 bg-${color}-50 text-${color}-700 font-medium">
-          ${dt.getUTCMonth()+1}/${dt.getUTCDate()}(${korDay[dt.getUTCDay()]})
-        </span>`;
-      }).join('');
-      const moreCount = upcoming.length - 5;
+      const dateText = upcoming.length > 0
+        ? upcoming.map(d => `${fmtDate(d)} ${campus}`).join('\n')
+        : '이후 수업 날짜 없음';
+
+      const stateBadge = c['진행상태'] ? `<span class="text-xs px-2 py-0.5 rounded-full font-semibold ml-2
+        ${c['진행상태']==='진행중'?'bg-green-100 text-green-700':
+          c['진행상태']==='예정'?'bg-blue-100 text-blue-700':
+          c['진행상태']==='오늘개강'?'bg-orange-100 text-orange-700':
+          'bg-slate-100 text-slate-500'}">${c['진행상태']}</span>` : '';
 
       return `<div class="mt-2 bg-white rounded-xl border border-slate-100 p-3">
-        <div class="flex items-start justify-between gap-2 flex-wrap">
-          <div class="min-w-0">
-            <div class="text-xs font-bold text-${color}-700 truncate">${c['과정명'] || ''}</div>
-            <div class="text-xs text-slate-500 mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5">
-              <span>📅 ${c['요일'] || '-'}</span>
-              <span>⏰ ${c['시작시간'] || '?'} ~ ${c['종료시간'] || '?'}</span>
-              ${c['강사'] ? `<span>👤 ${c['강사']}</span>` : ''}
-              ${c['room'] ? `<span>🚪 ${c['room']}</span>` : ''}
-            </div>
-            <div class="text-xs text-slate-400 mt-0.5">
-              ${c['개강일'] || '?'} ~ ${c['종강일'] || '?'} · 총 ${c.dates.length}회
-            </div>
-          </div>
-          <span class="text-xs px-2 py-0.5 rounded-full font-semibold flex-shrink-0 whitespace-nowrap
-            ${c['진행상태'] === '진행중' ? 'bg-green-100 text-green-700' :
-              c['진행상태'] === '예정' ? 'bg-blue-100 text-blue-700' :
-              c['진행상태'] === '오늘개강' ? 'bg-orange-100 text-orange-700' :
-              'bg-slate-100 text-slate-500'}">
-            ${c['진행상태'] || ''}
-          </span>
+        <div class="flex items-center flex-wrap gap-1 mb-2">
+          <span class="text-xs font-bold text-${color}-700">${c['과정명'] || ''}</span>
+          ${stateBadge}
+          <span class="text-xs text-slate-400 ml-auto">${c['요일'] || ''} ${c['시작시간']||''}~${c['종료시간']||''} ${c['강사']?'· '+c['강사']:''}</span>
         </div>
-        ${next5.length > 0 ? `<div class="mt-2 flex flex-wrap gap-1.5">
-          ${datePills}
-          ${moreCount > 0 ? `<span class="text-xs text-slate-400 self-center">+${moreCount}일 더</span>` : ''}
-        </div>` : '<div class="text-xs text-slate-400 mt-1">이후 수업 날짜 없음</div>'}
+        <div class="text-xs text-slate-600 leading-6 whitespace-pre-line font-mono">${dateText}</div>
+        ${upcoming.length > 0 ? `<div class="text-xs text-slate-400 mt-1 text-right">총 ${upcoming.length}회 (${fmtDate(upcoming[0])} ~ ${fmtDate(upcoming[upcoming.length-1])})</div>` : ''}
       </div>`;
     }).join('');
 
     return `<div class="rounded-xl border-l-4 border-${color}-400 bg-${color}-50 px-4 py-3">
-      <div class="font-bold text-sm text-${color}-800 mb-1">${subj.name}</div>
+      <div class="font-bold text-sm text-${color}-800">${subj.name}</div>
       ${courseRows}
     </div>`;
   }).join('');
 
-  grid.innerHTML = calHtml + legend + cards;
+  grid.innerHTML = cards || `<div class="text-sm text-slate-400 text-center py-6">조회된 일정이 없습니다</div>`;
 }
 
 // ============ 견적 저장/불러오기 ============
