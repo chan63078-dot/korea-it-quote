@@ -164,7 +164,7 @@
     </button>
     <button onclick="setSidebarTab('blog')" id="tabBlog"
       class="sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-500 hover:bg-slate-50">
-      <span class="w-2 h-2 rounded-full bg-slate-300 flex-shrink-0"></span> 블로그 자동화
+      <span class="w-2 h-2 rounded-full bg-slate-300 flex-shrink-0"></span> 🔥 블로그 자동화
     </button>
   </div>
 
@@ -409,6 +409,9 @@
 
 <!-- ============ 메인 콘텐츠 ============ -->
 <main class="flex-1 overflow-y-auto p-6">
+
+<!-- ===== 견적 페이지 ===== -->
+<div id="quotePage">
 
   <!-- 히어로 배너 -->
   <div class="mb-5 rounded-2xl bg-gradient-to-r from-blue-800 to-blue-600 text-white px-6 py-5">
@@ -731,7 +734,8 @@
       </div>
       <textarea id="mentorInput" rows="2" placeholder="예: 비전공자도 정보보안 취업이 가능한가요?"
         class="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-blue-400 resize-none mb-2"></textarea>
-      <button onclick="askMentor()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-sm transition-colors">질문하기</button>
+      <button onclick="askMentor()" id="mentorAskBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">질문하기</button>
+      <div id="mentorApiKeyNote" class="hidden mt-2 text-xs text-yellow-300 text-center">⚠️ AI 답변을 받으려면 블로그 자동화 탭에서 Gemini API 키를 저장하세요</div>
       <div id="mentorAnswerArea" class="hidden mt-3 bg-slate-700 rounded-xl p-4 text-sm text-slate-200 leading-relaxed"></div>
     </div>
   </div>
@@ -751,6 +755,82 @@
 
   <!-- 인쇄 전용 뷰 (화면에는 숨김) -->
   <div id="printView"></div>
+
+</div><!-- /quotePage -->
+
+<!-- ===== 블로그 자동화 페이지 ===== -->
+<div id="blogPage" class="hidden">
+
+  <!-- 그린 히어로 배너 -->
+  <div class="mb-5 rounded-2xl bg-gradient-to-r from-green-800 to-green-600 text-white px-6 py-5">
+    <div class="flex items-center gap-2 mb-1">
+      <span class="text-xl">🔥</span>
+      <h1 class="text-xl font-bold">블로그 자동화 · SEO 원고 생성</h1>
+    </div>
+    <p class="text-sm opacity-80">Gemini 1.5 Flash 기반 · 네이버/구글 SEO 최적화 · 코리아IT아카데미 대전지점</p>
+  </div>
+
+  <!-- Gemini API 키 설정 -->
+  <div id="blogApiKeyBanner" class="mb-4 bg-yellow-50 border border-yellow-200 rounded-xl px-5 py-3 flex items-center gap-3">
+    <span class="text-yellow-600 text-lg flex-shrink-0">🔑</span>
+    <div class="flex-1">
+      <div class="text-sm font-semibold text-yellow-800 mb-1">Gemini API 키가 필요합니다</div>
+      <div class="flex gap-2">
+        <input type="password" id="geminiApiKeyInput" placeholder="AIza..."
+          class="flex-1 border border-yellow-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white" />
+        <button onclick="saveGeminiApiKey()" class="px-4 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-sm font-bold whitespace-nowrap">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 시스템 프롬프트 설정 (고급) -->
+  <div class="mb-4 bg-white rounded-2xl shadow-sm overflow-hidden">
+    <div class="flex items-center gap-2 px-5 py-4 cursor-pointer select-none hover:bg-slate-50 border-b border-slate-100"
+      onclick="toggleSection('sysPromptBody','sysPromptArrow')">
+      <span class="text-slate-400 transition-transform" id="sysPromptArrow">▾</span>
+      <span class="text-blue-400">⚙</span>
+      <span class="font-semibold text-slate-700 text-sm">시스템 프롬프트 설정 (고급)</span>
+    </div>
+    <div id="sysPromptBody" class="section-body collapsed" style="max-height:600px">
+      <div class="px-5 pt-3 pb-2">
+        <p class="text-xs text-slate-500 mb-3">아래 내용을 직접 수정하면 생성 스타일과 지침을 변경할 수 있습니다.</p>
+        <textarea id="systemPromptText" rows="14"
+          class="w-full border border-slate-200 rounded-xl px-4 py-3 text-xs font-mono text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-400 resize-y bg-slate-50"></textarea>
+        <button onclick="resetSystemPrompt()" class="mt-2 px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm hover:bg-slate-50 transition-colors">기본값으로 초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 메인 키워드 입력 -->
+  <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
+    <h3 class="font-bold text-slate-700 mb-3">메인 키워드 입력</h3>
+    <input type="text" id="blogKeyword" placeholder="예: 코리아IT아카데미 대전 파이썬 과정"
+      class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 mb-3"
+      onkeydown="if(event.key==='Enter') generateBlogPost()" />
+    <button onclick="generateBlogPost()" id="blogGenBtn"
+      class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+      <span id="blogGenIcon">🔥</span>
+      <span id="blogGenText">원고 생성</span>
+    </button>
+  </div>
+
+  <!-- 생성 결과 -->
+  <div id="blogResultArea" class="hidden">
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+        <h3 class="font-bold text-slate-700">생성된 원고</h3>
+        <div class="flex gap-2">
+          <button onclick="copyBlogContent()" id="copyBlogBtn"
+            class="btn-sm bg-green-50 text-green-700 border border-green-200 hover:bg-green-100">복사</button>
+          <button onclick="downloadBlogMd()"
+            class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100">MD 다운로드</button>
+        </div>
+      </div>
+      <div id="blogRawContent" class="px-5 py-4 text-sm text-slate-700 font-mono whitespace-pre-wrap leading-relaxed bg-slate-50 max-h-[60vh] overflow-y-auto"></div>
+    </div>
+  </div>
+
+</div><!-- /blogPage -->
 
 </main>
 
@@ -935,6 +1015,8 @@ let selectedDeptIds = new Set(DEPT_MAP.map(d => d.id)); // 초기 전체 선택
   renderDeptChips();
   // 추천 커리큘럼 프리셋 렌더링
   renderCurrPresets();
+  // API 키 배너 초기화
+  updateApiKeyBanners();
 
   loadFromURL();
 
@@ -954,13 +1036,26 @@ let selectedDeptIds = new Set(DEPT_MAP.map(d => d.id)); // 초기 전체 선택
 
 // ============ 사이드바 탭 ============
 function setSidebarTab(tab) {
-  // 탭 스타일 토글 (현재는 UI만)
-  document.getElementById('tabQuote').className = tab === 'quote'
-    ? 'sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors bg-red-50 text-red-700'
-    : 'sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-500 hover:bg-slate-50';
-  document.getElementById('tabBlog').className = tab === 'blog'
-    ? 'sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors bg-blue-50 text-blue-700'
-    : 'sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-500 hover:bg-slate-50';
+  const tabs = { quote: 'tabQuote', blog: 'tabBlog', dashboard: 'tabDashboard' };
+  const pages = { quote: 'quotePage', blog: 'blogPage' };
+  const activeClass = 'sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors bg-red-50 text-red-700';
+  const inactiveClass = 'sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-500 hover:bg-slate-50';
+
+  Object.entries(tabs).forEach(([t, id]) => {
+    const el = document.getElementById(id);
+    if (el) el.className = t === tab ? activeClass : inactiveClass;
+  });
+
+  // 페이지 전환
+  const quoteP = document.getElementById('quotePage');
+  const blogP = document.getElementById('blogPage');
+  if (quoteP) quoteP.classList.toggle('hidden', tab !== 'quote');
+  if (blogP) blogP.classList.toggle('hidden', tab !== 'blog');
+
+  // 블로그 탭 진입 시 초기화
+  if (tab === 'blog') {
+    initBlogPage();
+  }
 }
 
 // ============ 학과 칩 렌더링 ============
@@ -1111,6 +1206,149 @@ function runAiCurriculumSearch() {
   }
 }
 
+// ============ Gemini API 공통 ============
+function getGeminiApiKey() {
+  return localStorage.getItem('geminiApiKey') || '';
+}
+
+function saveGeminiApiKey() {
+  const key = document.getElementById('geminiApiKeyInput').value.trim();
+  if (!key) { alert('API 키를 입력해주세요.'); return; }
+  localStorage.setItem('geminiApiKey', key);
+  updateApiKeyBanners();
+  alert('API 키가 저장되었습니다.');
+}
+
+function updateApiKeyBanners() {
+  const hasKey = !!getGeminiApiKey();
+  const blogBanner = document.getElementById('blogApiKeyBanner');
+  if (blogBanner) blogBanner.classList.toggle('hidden', hasKey);
+  // 멘토링 섹션 키 알림
+  const mentorKeyNote = document.getElementById('mentorApiKeyNote');
+  if (mentorKeyNote) mentorKeyNote.classList.toggle('hidden', hasKey);
+}
+
+async function callGeminiAPI(userPrompt, systemInstruction) {
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) throw new Error('Gemini API 키가 필요합니다. 블로그 자동화 탭에서 키를 먼저 저장해주세요.');
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const body = {
+    contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+    ...(systemInstruction ? { system_instruction: { parts: [{ text: systemInstruction }] } } : {}),
+    generationConfig: { temperature: 0.8, maxOutputTokens: 8192 }
+  };
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '응답이 없습니다.';
+}
+
+// ============ 블로그 자동화 ============
+const DEFAULT_SYSTEM_PROMPT = `당신은 코리아IT아카데미 대전지점의 전문 SEO 블로그 작가입니다.
+- 결과물은 바로 복사-붙여넣기 가능한 마크다운으로만 출력
+- 홍보 대상: 코리아IT아카데미 대전지점
+- 문단 규칙: 한 문단 1-3문장, 220자 이내 준수
+- 본문에 마크다운 표 최소 1개 포함
+
+# Task
+- 구성: 제목(H1), 도입, 목차, 본문(H2/H3/H4), 표, Q&A(5개), 마무리, CTA(1개)
+- CTA는 마지막 줄에 "코리아IT아카데미 대전지점" 문의 유도로 고정
+- 본문 소제목은 반드시 H2부터 시작한다. 본문에서 H1은 절대 사용하지 않는다.
+- SEO를 위해 키워드를 제목과 소제목에 자연스럽게 배치한다.
+
+# Image Keyword
+원고 작성이 끝나면 반드시 본문 맨 마지막 줄에 아래 형식으로 Pexels 이미지 검색 키워드 1개를 추가한다.
+다른 내용과 반드시 한 줄 띄우고 출력한다:
+[IMAGE_KEYWORD]: (글 전체 주제와 가장 잘 어울리는 영어 이미지 검색 단어 또는 짧은 구문 1개)
+예시: [IMAGE_KEYWORD]: coding bootcamp students learning`;
+
+function initBlogPage() {
+  // 시스템 프롬프트 초기화
+  const sysEl = document.getElementById('systemPromptText');
+  if (sysEl && !sysEl.value) {
+    sysEl.value = localStorage.getItem('blogSystemPrompt') || DEFAULT_SYSTEM_PROMPT;
+  }
+  // API 키 배너 업데이트
+  updateApiKeyBanners();
+  // API 키 입력칸에 저장된 키 표시 (마스킹)
+  const keyInput = document.getElementById('geminiApiKeyInput');
+  const savedKey = getGeminiApiKey();
+  if (keyInput && savedKey) keyInput.value = savedKey;
+}
+
+function resetSystemPrompt() {
+  if (!confirm('시스템 프롬프트를 기본값으로 초기화할까요?')) return;
+  document.getElementById('systemPromptText').value = DEFAULT_SYSTEM_PROMPT;
+  localStorage.removeItem('blogSystemPrompt');
+}
+
+async function generateBlogPost() {
+  const keyword = document.getElementById('blogKeyword').value.trim();
+  if (!keyword) { alert('메인 키워드를 입력해주세요.'); return; }
+
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) {
+    alert('Gemini API 키를 먼저 입력해주세요.');
+    document.getElementById('geminiApiKeyInput').focus();
+    return;
+  }
+
+  // 시스템 프롬프트 저장
+  const sysPrompt = document.getElementById('systemPromptText').value || DEFAULT_SYSTEM_PROMPT;
+  localStorage.setItem('blogSystemPrompt', sysPrompt);
+
+  // 로딩 상태
+  const btn = document.getElementById('blogGenBtn');
+  const btnText = document.getElementById('blogGenText');
+  const btnIcon = document.getElementById('blogGenIcon');
+  btn.disabled = true;
+  btnText.textContent = '생성 중...';
+  btnIcon.textContent = '⏳';
+
+  try {
+    const result = await callGeminiAPI(
+      `다음 키워드로 블로그 원고를 작성해주세요: "${keyword}"`,
+      sysPrompt
+    );
+
+    document.getElementById('blogRawContent').textContent = result;
+    document.getElementById('blogResultArea').classList.remove('hidden');
+    document.getElementById('blogResultArea').scrollIntoView({ behavior: 'smooth' });
+  } catch (err) {
+    alert('오류: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btnText.textContent = '원고 생성';
+    btnIcon.textContent = '🔥';
+  }
+}
+
+function copyBlogContent() {
+  const text = document.getElementById('blogRawContent').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBlogBtn');
+    btn.textContent = '복사됨!';
+    setTimeout(() => { btn.textContent = '복사'; }, 2000);
+  });
+}
+
+function downloadBlogMd() {
+  const text = document.getElementById('blogRawContent').textContent;
+  const keyword = document.getElementById('blogKeyword').value.replace(/\s+/g, '_') || 'blog';
+  const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `${keyword}_원고.md`; a.click(); URL.revokeObjectURL(a.href);
+}
+
 // ============ AI 멘토링 어시스턴트 ============
 const MENTOR_QA = {
   '비전공자': `
@@ -1144,25 +1382,49 @@ function mentorFill(text) {
   if (input) { input.value = text; input.focus(); }
 }
 
-function askMentor() {
+async function askMentor() {
   const query = (document.getElementById('mentorInput').value || '').trim();
   const area = document.getElementById('mentorAnswerArea');
   if (!query) { alert('질문을 입력해주세요.'); return; }
 
-  // 키워드 매칭
-  let answer = null;
-  if (query.includes('비전공자') || query.includes('전공')) answer = MENTOR_QA['비전공자'];
-  else if (query.includes('보안') || query.includes('빅데이터') || query.includes('ai')) answer = MENTOR_QA['보안'];
-  else if (query.includes('정처기') || query.includes('정보처리')) answer = MENTOR_QA['정처기'];
-  else if (query.includes('아카데미') || query.includes('n8n') || query.includes('자동화') || query.includes('취업 성공')) answer = MENTOR_QA['AI아카데미'];
-  else {
-    answer = `"<b>${query}</b>"에 대한 상세 답변은 상담사에게 직접 문의해주세요.<br><br>
-      빠른 답변을 원하시면 아래 버튼을 활용해 보세요.<br>
-      📞 상담 연락처: ${document.getElementById('consultantPhone')?.value || '학원 대표번호'}`;
+  const apiKey = getGeminiApiKey();
+
+  // API 키가 없으면 키워드 매칭 폴백
+  if (!apiKey) {
+    area.classList.remove('hidden');
+    let answer = null;
+    const q = query.toLowerCase();
+    if (q.includes('비전공자') || q.includes('전공')) answer = MENTOR_QA['비전공자'];
+    else if (q.includes('보안') || q.includes('빅데이터')) answer = MENTOR_QA['보안'];
+    else if (q.includes('정처기') || q.includes('정보처리')) answer = MENTOR_QA['정처기'];
+    else if (q.includes('아카데미') || q.includes('n8n') || q.includes('자동화')) answer = MENTOR_QA['AI아카데미'];
+    else answer = `💡 AI 멘토 답변을 받으려면 <b>블로그 자동화 탭</b>에서 Gemini API 키를 먼저 저장해주세요.<br><br>또는 "${query}"에 대해 상담사에게 직접 문의하세요.`;
+    area.innerHTML = answer;
+    return;
   }
 
+  // Gemini API 호출
+  const mentorSystem = `당신은 코리아IT아카데미 대전지점의 10년차 커리어 멘토입니다.
+IT 교육과 취업에 대한 전문 지식을 갖고 있으며, 친절하고 실용적인 답변을 제공합니다.
+- 코리아IT아카데미 대전지점의 과정: 정보보안, AI/빅데이터, 정보처리기사, 기초 프로그래밍, AI아카데미
+- 답변은 한국어로, 200자 이내로 간결하게
+- 마지막에 항상 "더 자세한 상담은 코리아IT아카데미 대전지점에 문의해주세요!" 추가`;
+
   area.classList.remove('hidden');
-  area.innerHTML = answer;
+  area.innerHTML = '<span class="animate-pulse">🤔 멘토가 답변 중입니다...</span>';
+
+  const mentorAskBtn = document.getElementById('mentorAskBtn');
+  if (mentorAskBtn) mentorAskBtn.disabled = true;
+
+  try {
+    const answer = await callGeminiAPI(query, mentorSystem);
+    // 줄바꿈 처리
+    area.innerHTML = answer.replace(/\n/g, '<br>');
+  } catch (err) {
+    area.innerHTML = `<span class="text-red-400">오류: ${err.message}</span>`;
+  } finally {
+    if (mentorAskBtn) mentorAskBtn.disabled = false;
+  }
 }
 
 // ============ 상담일지 저장 ============
