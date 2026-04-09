@@ -812,6 +812,7 @@
       <span id="blogGenIcon">🔥</span>
       <span id="blogGenText">원고 생성</span>
     </button>
+    <div id="blogErrorBox" class="hidden mt-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 whitespace-pre-line"></div>
   </div>
 
   <!-- 생성 결과 -->
@@ -1246,7 +1247,18 @@ async function callGeminiAPI(userPrompt, systemInstruction) {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error?.message || `HTTP ${res.status}`);
+    const raw = err?.error?.message || '';
+    let msg;
+    if (raw.includes('quota') || raw.includes('RESOURCE_EXHAUSTED') || res.status === 429) {
+      msg = 'API 무료 할당량이 초과되었습니다.\n\n해결 방법:\n① 잠시 후(1분~1시간) 다시 시도\n② Google AI Studio에서 유료 플랜으로 업그레이드\n③ aistudio.google.com → 프로젝트 → 결제 활성화';
+    } else if (raw.includes('API_KEY_INVALID') || raw.includes('invalid') || res.status === 400) {
+      msg = 'API 키가 올바르지 않습니다. API 키를 다시 확인해주세요.';
+    } else if (raw.includes('not found') || res.status === 404) {
+      msg = '모델을 찾을 수 없습니다. 잠시 후 다시 시도해주세요.';
+    } else {
+      msg = raw || `서버 오류 (HTTP ${res.status})`;
+    }
+    throw new Error(msg);
   }
   const data = await res.json();
   return data.candidates?.[0]?.content?.parts?.[0]?.text || '응답이 없습니다.';
@@ -1320,11 +1332,18 @@ async function generateBlogPost() {
       sysPrompt
     );
 
+    document.getElementById('blogErrorBox').classList.add('hidden');
     document.getElementById('blogRawContent').textContent = result;
     document.getElementById('blogResultArea').classList.remove('hidden');
     document.getElementById('blogResultArea').scrollIntoView({ behavior: 'smooth' });
   } catch (err) {
-    alert('오류: ' + err.message);
+    const errBox = document.getElementById('blogErrorBox');
+    if (errBox) {
+      errBox.textContent = err.message;
+      errBox.classList.remove('hidden');
+    } else {
+      alert(err.message);
+    }
   } finally {
     btn.disabled = false;
     btnText.textContent = '원고 생성';
