@@ -767,7 +767,7 @@
       <span class="text-xl">🔥</span>
       <h1 class="text-xl font-bold">블로그 자동화 · SEO 원고 생성</h1>
     </div>
-    <p class="text-sm opacity-80">Gemini 1.5 Flash 기반 · 네이버/구글 SEO 최적화 · 코리아IT아카데미 대구지점</p>
+    <p class="text-sm opacity-80">Gemini 2.0 Flash 기반 · 네이버/구글 SEO 최적화 · 코리아IT아카데미 대구지점</p>
   </div>
 
   <!-- Gemini API 키 관리 -->
@@ -1355,7 +1355,7 @@ function updateApiKeyBanners() {
 }
 
 async function _fetchGemini(apiKey, userPrompt, systemInstruction) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
   const fullPrompt = systemInstruction ? `${systemInstruction}\n\n---\n\n${userPrompt}` : userPrompt;
   const body = {
     contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
