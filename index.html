@@ -198,6 +198,7 @@
             <button onclick="clearReasons()" class="btn-sm bg-white text-red-500 border border-red-200 hover:bg-red-50">초기화</button>
           </div>
         </div>
+        <div id="discountWarning" class="hidden text-xs font-semibold px-2 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200"></div>
 
         <!-- 퀵 버튼 -->
         <div class="flex flex-wrap gap-1">
@@ -347,7 +348,7 @@
       </svg>
       견적서 엑셀 다운로드
     </button>
-    <div class="grid grid-cols-2 gap-2">
+    <div class="grid grid-cols-3 gap-2">
       <button onclick="printQuote()"
         class="bg-slate-600 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-1 text-sm">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -355,12 +356,19 @@
         </svg>
         인쇄
       </button>
-      <button onclick="copyMessage()" id="copyMsgBtn"
+      <button onclick="printQuote()"
+        class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-1 text-sm" title="브라우저 인쇄 → PDF로 저장 선택">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+        PDF
+      </button>
+      <button onclick="openMsgModal()" id="copyMsgBtn"
         class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-1 text-sm">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
         </svg>
-        메시지 복사
+        메시지 템플릿
       </button>
     </div>
     <button onclick="openSaveModal()"
@@ -383,6 +391,13 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
       상담 이력 보기
+    </button>
+    <button onclick="openCompareModal()"
+      class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+      </svg>
+      A / B 견적 비교
     </button>
     <p class="text-center text-xs text-slate-400">원본 양식 서식으로 생성됩니다</p>
   </div>
@@ -467,6 +482,9 @@
       </div>
     </div>
   </div>
+
+  <!-- 위험도 배지 -->
+  <div id="riskBadge" class="hidden border rounded-xl px-3 py-2 text-xs font-semibold mb-3 no-print"></div>
 
   <!-- 커리큘럼 설계 / 일정 뷰 / 체크리스트 버튼 -->
   <div class="mb-4 no-print grid grid-cols-3 gap-2">
@@ -593,6 +611,44 @@
     </div>
     <div class="px-6 py-3 border-t border-slate-100 bg-slate-50 rounded-b-2xl text-xs text-slate-400 text-center">
       최대 10개까지 저장됩니다 · 브라우저 로컬 저장
+    </div>
+  </div>
+</div>
+
+<!-- ============ 메시지 템플릿 모달 ============ -->
+<div id="msgModal" class="modal-overlay hidden" onclick="if(event.target===this)document.getElementById('msgModal').classList.add('hidden')">
+  <div class="modal-box" style="width:560px">
+    <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
+      <div class="text-lg font-bold">메시지 템플릿</div>
+      <button onclick="document.getElementById('msgModal').classList.add('hidden')" class="text-white opacity-70 hover:opacity-100 text-2xl">&times;</button>
+    </div>
+    <div class="p-5 space-y-3">
+      <div id="msgTemplateList" class="flex gap-2 flex-wrap"></div>
+      <textarea id="msgTemplateBody" rows="12" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono resize-none focus:outline-none focus:ring-2 focus:ring-purple-300"></textarea>
+      <button id="msgCopyBtn" onclick="copyMsgTemplate()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl text-sm">클립보드 복사</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ A/B 견적 비교 모달 ============ -->
+<div id="compareModal" class="modal-overlay hidden" onclick="if(event.target===this)closeCompareModal()">
+  <div class="modal-box" style="width:820px">
+    <div class="bg-gradient-to-r from-sky-600 to-blue-600 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
+      <div>
+        <div class="text-xs opacity-70 mb-0.5">견적 비교</div>
+        <div class="text-lg font-bold">A / B 견적 비교</div>
+      </div>
+      <button onclick="closeCompareModal()" class="text-white opacity-70 hover:opacity-100 text-2xl leading-none">&times;</button>
+    </div>
+    <div class="px-6 pt-4 pb-2 border-b border-slate-100 flex gap-2 flex-wrap">
+      <button onclick="saveCompareSlot('A')" class="btn-sm bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 text-sm px-3 py-1.5">현재 견적 → 안 A 저장</button>
+      <button onclick="saveCompareSlot('B')" class="btn-sm bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 text-sm px-3 py-1.5">현재 견적 → 안 B 저장</button>
+      <button onclick="clearCompare()" class="btn-sm bg-red-50 text-red-500 border border-red-200 hover:bg-red-100 text-sm px-3 py-1.5 ml-auto">초기화</button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-6">
+      <div class="grid grid-cols-2 gap-4" id="compareGrid">
+        <div class="text-sm text-slate-400 text-center col-span-2 py-8">안 A, 안 B를 각각 저장하면 비교 내용이 표시됩니다</div>
+      </div>
     </div>
   </div>
 </div>
@@ -771,6 +827,8 @@ function render() {
   document.getElementById('cardDiscountAmt').textContent = '할인금액 ' + fmt(totalDiscount) + '원';
   document.getElementById('cardFinal').textContent = fmt(final) + '원';
   document.getElementById('selectedBadge').textContent = `선택 ${selected.length}개`;
+  updateRiskBadge();
+  checkDiscountLimit();
 
   // 고객 배지 업데이트
   const custName = document.getElementById('customerName').value.trim();
@@ -1900,6 +1958,206 @@ function downloadExcel() {
   }
 
   XLSX.writeFile(wb, `코리아IT아카데미_수강료견적_${todayStr()}.xlsx`, { bookType: 'xlsx', cellStyles: true });
+}
+
+// ============ 기능1: A/B 견적 비교 ============
+function captureCurrentQuote(label) {
+  const selected = getSelectedItems();
+  const dd = getDiscountData();
+  return {
+    label,
+    courseType: document.getElementById('courseType').value,
+    customerName: document.getElementById('customerName').value.trim(),
+    subjects: selected.map(c => ({ name: c.name, price: c.price, category: c.category })),
+    reasons: [1,2,3].map(i => ({
+      text: document.getElementById('reason'+i).value.trim(),
+      rate: parseFloat(document.getElementById('rate'+i).value)||0
+    })).filter(r => r.text || r.rate),
+    total: dd.total,
+    totalDiscount: dd.totalDiscount,
+    final: dd.final,
+    inputRateSum: dd.inputRateSum,
+    savedAt: new Date().toLocaleString('ko-KR')
+  };
+}
+function saveCompareSlot(slot) {
+  const selected = getSelectedItems();
+  if (!selected.length) { alert('과목을 먼저 선택해주세요.'); return; }
+  const data = JSON.parse(localStorage.getItem('compareSlots') || '{}');
+  data[slot] = captureCurrentQuote('안 ' + slot);
+  localStorage.setItem('compareSlots', JSON.stringify(data));
+  renderCompare();
+}
+function clearCompare() {
+  localStorage.removeItem('compareSlots');
+  renderCompare();
+}
+function openCompareModal() {
+  renderCompare();
+  document.getElementById('compareModal').classList.remove('hidden');
+}
+function closeCompareModal() { document.getElementById('compareModal').classList.add('hidden'); }
+function renderCompare() {
+  const data = JSON.parse(localStorage.getItem('compareSlots') || '{}');
+  const grid = document.getElementById('compareGrid');
+  if (!data.A && !data.B) {
+    grid.innerHTML = '<div class="text-sm text-slate-400 text-center col-span-2 py-8">안 A, 안 B를 각각 저장하면 비교 내용이 표시됩니다</div>';
+    return;
+  }
+  const slotColors = { A: 'sky', B: 'indigo' };
+  const cols = ['A','B'].map(key => {
+    const s = data[key];
+    if (!s) return `<div class="rounded-2xl border-2 border-dashed border-slate-200 flex items-center justify-center h-40 text-slate-300 text-sm">안 ${key} 미저장</div>`;
+    const rows = s.subjects.map(c => `<div class="flex justify-between text-xs py-1 border-b border-slate-50">
+      <span class="text-slate-600 truncate mr-2">${c.name}</span>
+      <span class="text-slate-500 flex-shrink-0">${fmt(c.price)}원</span>
+    </div>`).join('');
+    const discRows = s.reasons.map((r,i) => {
+      const base = i===0 ? s.total : s.reasons.slice(0,i).reduce((acc,rr,idx)=>{
+        let run=s.total; s.reasons.slice(0,idx+1).forEach(x=>{ run-=Math.floor(run*x.rate/100/1000)*1000; }); return run;
+      }, s.total);
+      return `<div class="text-xs text-blue-600">· ${r.text||''} ${r.rate}%</div>`;
+    }).join('');
+    const color = slotColors[key];
+    return `<div class="rounded-2xl border-2 border-${color}-200 bg-${color}-50 p-4">
+      <div class="flex items-center justify-between mb-2">
+        <span class="font-bold text-${color}-700 text-base">안 ${key}</span>
+        <span class="text-xs text-slate-400">${s.savedAt}</span>
+      </div>
+      ${s.customerName ? `<div class="text-xs text-slate-500 mb-2">👤 ${s.customerName}</div>` : ''}
+      <div class="bg-white rounded-xl p-3 mb-3">${rows}</div>
+      <div class="space-y-0.5 mb-3">${discRows || '<div class="text-xs text-slate-400">할인 없음</div>'}</div>
+      <div class="border-t border-${color}-200 pt-3 space-y-1">
+        <div class="flex justify-between text-sm"><span class="text-slate-500">원수강료</span><span>${fmt(s.total)}원</span></div>
+        <div class="flex justify-between text-sm"><span class="text-blue-500">할인</span><span class="text-blue-600">-${fmt(s.totalDiscount)}원 (${s.inputRateSum}%)</span></div>
+        <div class="flex justify-between font-bold text-base"><span class="text-slate-700">최종</span><span class="text-red-600">${fmt(s.final)}원</span></div>
+      </div>
+    </div>`;
+  });
+  // 차액 비교
+  let diff = '';
+  if (data.A && data.B) {
+    const d = data.A.final - data.B.final;
+    diff = `<div class="col-span-2 bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+      <div class="text-xs text-amber-600 font-semibold mb-1">안 A vs 안 B 차액</div>
+      <div class="text-2xl font-bold ${d>0?'text-red-600':d<0?'text-green-600':'text-slate-600'}">
+        ${d===0?'동일':((d>0?'A가 ':'B가 ') + fmt(Math.abs(d)) + '원 더 비쌉니다')}
+      </div>
+    </div>`;
+  }
+  grid.innerHTML = cols.join('') + diff;
+}
+
+// ============ 기능2: 카카오/문자 템플릿 ============
+function openMsgModal() {
+  const selected = getSelectedItems();
+  if (!selected.length) { alert('과목을 먼저 선택해주세요.'); return; }
+  const dd = getDiscountData();
+  const { total, totalDiscount, inputRateSum, final } = dd;
+  const name = document.getElementById('customerName').value.trim();
+  const cons = document.getElementById('consultantName').value.trim();
+  const phone = document.getElementById('consultantPhone').value.trim();
+  const ctype = document.getElementById('courseType').value;
+  const listBasic = selected.map((c,i)=>`${i+1}. ${c.name} — ${fmt(c.price)}원`).join('\n');
+  const listSimple = selected.map(c=>c.name).join(', ');
+
+  const templates = [
+    {
+      name: '카카오톡 (친근)',
+      body: `안녕하세요${name?` ${name}님`:''}! 코리아IT아카데미입니다 😊\n\n`+
+        `문의 주신 ${ctype} 수강료 안내 드립니다!\n\n`+
+        `📚 수강 과목\n${listBasic}\n\n`+
+        `💰 원수강료: ${fmt(total)}원\n`+
+        (inputRateSum>0?`🎁 할인 적용: -${fmt(totalDiscount)}원 (${inputRateSum}%)\n`:'')+
+        `✅ 최종 납부금액: ${fmt(final)}원\n\n`+
+        `궁금한 점 있으시면 편하게 연락 주세요! 🙏\n📞 ${cons} ${phone}`
+    },
+    {
+      name: '문자 (간결)',
+      body: `[코리아IT아카데미]\n`+
+        (name?`${name}님 `:'')+`견적 안내\n`+
+        `과목: ${listSimple}\n`+
+        `원가: ${fmt(total)}원\n`+
+        (inputRateSum>0?`할인: -${fmt(totalDiscount)}원\n`:'')+
+        `최종: ${fmt(final)}원\n`+
+        `문의: ${cons} ${phone}`
+    },
+    {
+      name: '공식 이메일',
+      body: `안녕하세요${name?`, ${name}님`:''}.\n코리아IT아카데미 ${cons}입니다.\n\n`+
+        `문의하신 ${ctype} 수강료를 안내드립니다.\n\n`+
+        `【수강 과목】\n${listBasic}\n\n`+
+        `【수강료 내역】\n원수강료: ${fmt(total)}원\n`+
+        (inputRateSum>0?`할인금액: -${fmt(totalDiscount)}원 (${inputRateSum}% 적용)\n`:'')+
+        `최종 납부금액: ${fmt(final)}원\n\n`+
+        `추가 문의는 아래 연락처로 주시기 바랍니다.\n📞 ${cons} / ${phone}\n\n감사합니다.`
+    }
+  ];
+
+  let sel = 0;
+  function render() {
+    document.getElementById('msgTemplateList').innerHTML = templates.map((t,i)=>
+      `<button onclick="selectMsgTemplate(${i})" class="text-left px-3 py-2 rounded-lg text-sm border transition-all ${i===sel?'bg-blue-50 border-blue-300 font-semibold text-blue-700':'border-slate-200 text-slate-600 hover:bg-slate-50'}">${t.name}</button>`
+    ).join('');
+    document.getElementById('msgTemplateBody').value = templates[sel].body;
+  }
+  window.selectMsgTemplate = i => { sel=i; render(); };
+  window._msgTemplates = templates;
+  window._getMsgSel = () => sel;
+  render();
+  document.getElementById('msgModal').classList.remove('hidden');
+}
+function copyMsgTemplate() {
+  const txt = document.getElementById('msgTemplateBody').value;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btn = document.getElementById('msgCopyBtn');
+    btn.textContent='복사됨!'; setTimeout(()=>btn.textContent='클립보드 복사',2000);
+  });
+}
+
+// ============ 기능3: 수강 중단 위험도 ============
+function calcRisk() {
+  const selected = getSelectedItems();
+  if (!selected.length) return null;
+  const dd = getDiscountData();
+  let score = 0;
+  if (dd.total > 5000000) score += 3;
+  else if (dd.total > 3000000) score += 2;
+  else if (dd.total > 1500000) score += 1;
+  if (selected.length > 10) score += 3;
+  else if (selected.length > 6) score += 2;
+  else if (selected.length > 3) score += 1;
+  const months = selected.reduce((s,c)=>s+(c.course==='2mon'?2:1),0);
+  if (months > 10) score += 2;
+  else if (months > 6) score += 1;
+  if (dd.final > 4000000) score += 1;
+  if (score >= 6) return { level:'high', label:'⚠️ 이탈 위험 높음', cls:'bg-red-50 text-red-700 border-red-200', tip:'수강료가 높고 기간이 깁니다. 분할납부 안내를 권장합니다.' };
+  if (score >= 3) return { level:'mid', label:'🔶 중간 위험', cls:'bg-amber-50 text-amber-700 border-amber-200', tip:'적절한 목표 설정과 중간 점검을 권장합니다.' };
+  return { level:'low', label:'✅ 이탈 위험 낮음', cls:'bg-green-50 text-green-700 border-green-200', tip:'합리적인 수강 계획입니다.' };
+}
+function updateRiskBadge() {
+  const el = document.getElementById('riskBadge');
+  if (!el) return;
+  const risk = calcRisk();
+  if (!risk) { el.classList.add('hidden'); return; }
+  el.classList.remove('hidden');
+  el.className = `border rounded-xl px-3 py-2 text-xs font-semibold ${risk.cls}`;
+  el.innerHTML = `${risk.label} <span class="font-normal opacity-70 ml-1">${risk.tip}</span>`;
+}
+
+// ============ 기능4: PDF 저장 ============
+function savePDF() {
+  window.print();
+}
+
+// ============ 기능5: 할인 한도 경고 ============
+function checkDiscountLimit() {
+  const el = document.getElementById('discountWarning');
+  if (!el) return;
+  const sum = [1,2,3].reduce((s,i)=>s+(parseFloat(document.getElementById('rate'+i).value)||0),0);
+  if (sum > 50) { el.textContent = `⚠️ 할인율 ${sum}% — 팀장 승인이 필요합니다`; el.classList.remove('hidden'); }
+  else if (sum > 35) { el.textContent = `🔶 할인율 ${sum}% — 내부 기준을 초과합니다`; el.classList.remove('hidden'); }
+  else { el.classList.add('hidden'); }
 }
 </script>
 </body>
