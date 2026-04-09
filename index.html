@@ -224,13 +224,22 @@
       </svg>
       견적서 엑셀 다운로드
     </button>
-    <button onclick="printQuote()"
-      class="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-      </svg>
-      견적서 인쇄
-    </button>
+    <div class="grid grid-cols-2 gap-2">
+      <button onclick="printQuote()"
+        class="bg-slate-600 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-1 text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+        </svg>
+        인쇄
+      </button>
+      <button onclick="copyMessage()" id="copyMsgBtn"
+        class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-1 text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+        메시지 복사
+      </button>
+    </div>
     <p class="text-center text-xs text-slate-400">원본 양식 서식으로 생성됩니다</p>
   </div>
 </aside>
@@ -308,6 +317,22 @@
     <div class="flex justify-between font-bold text-base mt-1">
       <span class="text-slate-800">최종 납부금액</span>
       <span id="finalDisplay" class="text-red-600"></span>
+    </div>
+  </div>
+
+  <!-- 분할납부 시뮬레이터 -->
+  <div id="installmentSection" class="hidden mt-4 bg-white rounded-2xl shadow-sm p-5 no-print">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="font-bold text-slate-700">분할납부 시뮬레이터</h3>
+      <div class="flex gap-2" id="installmentBtns">
+        <button onclick="calcInstallment(2)" class="inst-btn btn-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300">2개월</button>
+        <button onclick="calcInstallment(3)" class="inst-btn btn-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300">3개월</button>
+        <button onclick="calcInstallment(6)" class="inst-btn btn-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300">6개월</button>
+        <button onclick="calcInstallment(12)" class="inst-btn btn-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300">12개월</button>
+      </div>
+    </div>
+    <div id="installmentResult" class="grid grid-cols-4 gap-3 text-center">
+      <div class="text-xs text-slate-400">버튼을 눌러 계산하세요</div>
     </div>
   </div>
 
@@ -486,8 +511,10 @@ function render() {
   if (selected.length === 0) {
     tableArea.innerHTML = `<div class="empty-state"><p class="text-sm">과목을 선택하면 상세 내역이 표시됩니다</p></div>`;
     document.getElementById('discountSummary').classList.add('hidden');
+    document.getElementById('installmentSection').classList.add('hidden');
     return;
   }
+  document.getElementById('installmentSection').classList.remove('hidden');
 
   const rows = selected.map((c, i) => {
     const discounted = Math.floor(c.price * (1 - discountRate) / 1000) * 1000;
@@ -577,6 +604,65 @@ function todayStr() {
 
 // ============ 인쇄 ============
 function printQuote() { window.print(); }
+
+// ============ 분할납부 시뮬레이터 ============
+function calcInstallment(months) {
+  const selected = getSelectedItems();
+  const discountRate = parseInt(document.getElementById('discountSlider').value) / 100;
+  const total = selected.reduce((s, c) => s + c.price, 0);
+  const discountAmt = Math.floor(total * discountRate / 1000) * 1000;
+  const final = total - discountAmt;
+  const perMonth = Math.ceil(final / months / 1000) * 1000;
+
+  document.querySelectorAll('.inst-btn').forEach(b => b.classList.remove('bg-blue-600','text-white','border-blue-600'));
+  event.target.classList.add('bg-blue-600','text-white','border-blue-600');
+
+  const cols = [2, 3, 6, 12];
+  document.getElementById('installmentResult').innerHTML = cols.map(m => {
+    const pm = Math.ceil(final / m / 1000) * 1000;
+    const active = m === months;
+    return `<div class="rounded-xl p-3 ${active ? 'bg-blue-600 text-white' : 'bg-slate-50 text-slate-700'} transition-all">
+      <div class="text-xs font-semibold mb-1 ${active ? 'opacity-80' : 'text-slate-400'}">${m}개월</div>
+      <div class="text-lg font-bold">${fmt(pm)}<span class="text-xs font-normal">원</span></div>
+      <div class="text-xs mt-0.5 ${active ? 'opacity-70' : 'text-slate-400'}">/ 월</div>
+    </div>`;
+  }).join('');
+}
+
+// ============ 메시지 복사 ============
+function copyMessage() {
+  const selected = getSelectedItems();
+  if (selected.length === 0) { alert('과목을 먼저 선택해주세요.'); return; }
+  const discountRate = parseInt(document.getElementById('discountSlider').value) / 100;
+  const total = selected.reduce((s, c) => s + c.price, 0);
+  const discountAmt = Math.floor(total * discountRate / 1000) * 1000;
+  const final = total - discountAmt;
+  const customerName = document.getElementById('customerName').value.trim();
+  const consultant = document.getElementById('consultantName').value.trim();
+  const phone = document.getElementById('consultantPhone').value.trim();
+  const courseType = document.getElementById('courseType').value;
+
+  const lines = [
+    `안녕하세요${customerName ? ', ' + customerName + '님' : ''}! 코리아IT아카데미입니다 😊`,
+    ``,
+    `📋 수강료 견적 안내 (${courseType})`,
+    ``,
+    ...selected.map((c, i) => `${i + 1}. ${c.name} — ${fmt(c.price)}원`),
+    ``,
+    `📌 정가 합계: ${fmt(total)}원`,
+    discountRate > 0 ? `🎁 할인 적용: -${fmt(discountAmt)}원 (${Math.round(discountRate*100)}%)` : null,
+    `✅ 최종 납부금액: ${fmt(final)}원`,
+    ``,
+    `문의사항은 언제든지 연락주세요!`,
+    `📞 ${consultant} ${phone}`,
+  ].filter(l => l !== null).join('\n');
+
+  navigator.clipboard.writeText(lines).then(() => {
+    const btn = document.getElementById('copyMsgBtn');
+    btn.textContent = '복사 완료!';
+    setTimeout(() => { btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> 메시지 복사`; }, 2000);
+  });
+}
 
 // ============ 커리큘럼 설계 ============
 const DEFAULT_PRESETS = [
