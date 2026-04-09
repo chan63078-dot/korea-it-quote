@@ -760,15 +760,14 @@ function render() {
   const { total, totalDiscount, effectiveRate, inputRateSum, final } = dd;
 
   // 총 할인율 레이블 (실효율 표시)
-  document.getElementById('totalRateLabel').textContent =
-    inputRateSum > 0 ? `실효 ${effectiveRate}%` : '0%';
+  document.getElementById('totalRateLabel').textContent = inputRateSum + '%';
 
   const selected = getSelectedItems();
 
   // 카드 업데이트
   document.getElementById('cardTotal').textContent = fmt(total) + '원';
   document.getElementById('cardCount').textContent = `과목 ${selected.length}개`;
-  document.getElementById('cardDiscount').textContent = effectiveRate > 0 ? `실효 ${effectiveRate}%` : '0%';
+  document.getElementById('cardDiscount').textContent = inputRateSum + '%';
   document.getElementById('cardDiscountAmt').textContent = '할인금액 ' + fmt(totalDiscount) + '원';
   document.getElementById('cardFinal').textContent = fmt(final) + '원';
   document.getElementById('selectedBadge').textContent = `선택 ${selected.length}개`;
@@ -865,7 +864,7 @@ function render() {
     } else {
       details.innerHTML = `<div class="text-slate-500 text-xs">할인 명분을 입력하세요</div>`;
     }
-    document.getElementById('totalDiscountDisplay').textContent = '-' + fmt(totalDiscount) + `원 (실효 ${effectiveRate}%)`;
+    document.getElementById('totalDiscountDisplay').textContent = '-' + fmt(totalDiscount) + `원 (${inputRateSum}% 복리적용)`;
     document.getElementById('finalDisplay').textContent = fmt(final) + '원';
   } else {
     document.getElementById('discountSummary').classList.add('hidden');
@@ -1249,7 +1248,7 @@ function copyMessage() {
   const selected = getSelectedItems();
   if (selected.length === 0) { alert('과목을 먼저 선택해주세요.'); return; }
   const dd = getDiscountData();
-  const { total, totalDiscount, effectiveRate, final } = dd;
+  const { total, totalDiscount, effectiveRate, inputRateSum, final } = dd;
   const customerName = document.getElementById('customerName').value.trim();
   const consultant = document.getElementById('consultantName').value.trim();
   const phone = document.getElementById('consultantPhone').value.trim();
@@ -1263,7 +1262,7 @@ function copyMessage() {
     ...selected.map((c, i) => `${i + 1}. ${c.name} — ${fmt(c.price)}원`),
     ``,
     `📌 정가 합계: ${fmt(total)}원`,
-    effectiveRate > 0 ? `🎁 할인 적용: -${fmt(totalDiscount)}원 (실효 ${effectiveRate}%)` : null,
+    effectiveRate > 0 ? `🎁 할인 적용: -${fmt(totalDiscount)}원 (${inputRateSum}%)` : null,
     `✅ 최종 납부금액: ${fmt(final)}원`,
     ``,
     `문의사항은 언제든지 연락주세요!`,
@@ -1517,25 +1516,16 @@ async function showScheduleFromAPI(selected) {
     }
 
     const courseRows = courses.map(c => {
-      const upcoming = c.dates.filter(d => d >= todayStr);
-      const dateText = upcoming.length > 0
-        ? upcoming.map(d => `${fmtDate(d)} ${campus}`).join('\n')
-        : '이후 수업 날짜 없음';
-
-      const stateBadge = c['진행상태'] ? `<span class="text-xs px-2 py-0.5 rounded-full font-semibold ml-2
-        ${c['진행상태']==='진행중'?'bg-green-100 text-green-700':
-          c['진행상태']==='예정'?'bg-blue-100 text-blue-700':
-          c['진행상태']==='오늘개강'?'bg-orange-100 text-orange-700':
-          'bg-slate-100 text-slate-500'}">${c['진행상태']}</span>` : '';
-
-      return `<div class="mt-2 bg-white rounded-xl border border-slate-100 p-3">
-        <div class="flex items-center flex-wrap gap-1 mb-2">
-          <span class="text-xs font-bold text-${color}-700">${c['과정명'] || ''}</span>
-          ${stateBadge}
-          <span class="text-xs text-slate-400 ml-auto">${c['요일'] || ''} ${c['시작시간']||''}~${c['종료시간']||''} ${c['강사']?'· '+c['강사']:''}</span>
-        </div>
-        <div class="text-xs text-slate-600 leading-6 whitespace-pre-line font-mono">${dateText}</div>
-        ${upcoming.length > 0 ? `<div class="text-xs text-slate-400 mt-1 text-right">총 ${upcoming.length}회 (${fmtDate(upcoming[0])} ~ ${fmtDate(upcoming[upcoming.length-1])})</div>` : ''}
+      const startDs = c['개강일'];
+      const startLabel = startDs ? fmtDate(startDs) : '개강일 미정';
+      const stateCls = c['진행상태']==='진행중' ? 'bg-green-100 text-green-700' :
+                       c['진행상태']==='예정'   ? 'bg-blue-100 text-blue-700'   :
+                       c['진행상태']==='오늘개강'? 'bg-orange-100 text-orange-700':
+                                                  'bg-slate-100 text-slate-500';
+      return `<div class="mt-1.5 bg-white rounded-lg border border-slate-100 px-3 py-2 flex items-center gap-3 flex-wrap">
+        <span class="font-semibold text-sm text-${color}-700">${startLabel} ${campus}</span>
+        <span class="text-xs text-slate-400">${c['과정명']||''} · ${c['요일']||''} ${c['시작시간']||''}~${c['종료시간']||''}</span>
+        ${c['진행상태'] ? `<span class="text-xs px-2 py-0.5 rounded-full font-semibold ${stateCls} ml-auto">${c['진행상태']}</span>` : ''}
       </div>`;
     }).join('');
 
