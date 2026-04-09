@@ -1144,18 +1144,18 @@ function renderCurrPresets() {
 function applyCurrPreset(presetId) {
   const preset = CURR_PRESETS_DISPLAY.find(p => p.id === presetId);
   if (!preset || !COURSE_DATA[preset.courseType]) return;
-  // 과정 유형 선택
-  const sel = document.getElementById('courseType');
-  sel.value = preset.courseType;
-  onCourseChange();
-  // 전체 과목 선택
-  selectAll(true);
-  // 해당 학과 활성화
+  // 1. 해당 학과 먼저 활성화 → 드롭다운 옵션 재구성
   const deptEntry = DEPT_MAP.find(d => d.courseKeys.includes(preset.courseType));
   if (deptEntry) {
     selectedDeptIds.add(deptEntry.id);
-    renderDeptChips();
+    renderDeptChips(); // filterCourseTypeByDept() 내부 호출로 옵션 재구성
   }
+  // 2. 드롭다운에 옵션이 생긴 후 값 설정
+  const sel = document.getElementById('courseType');
+  sel.value = preset.courseType;
+  onCourseChange();
+  // 3. 전체 과목 선택
+  selectAll(true);
   // 스크롤
   document.getElementById('tableArea').scrollIntoView({ behavior: 'smooth' });
 }
