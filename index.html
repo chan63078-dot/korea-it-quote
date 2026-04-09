@@ -179,46 +179,53 @@
         할인 설정
         <span id="discArrow" class="text-slate-400 transition-transform">▾</span>
       </label>
-      <div id="discSection" class="section-body space-y-4" style="max-height:600px">
+      <div id="discSection" class="section-body space-y-3" style="max-height:600px">
 
-      <div>
-        <div class="flex justify-between items-center mb-1">
-          <span class="text-sm text-slate-600">통합 할인율</span>
-          <span id="discountLabel" class="text-lg font-bold text-blue-700">0%</span>
+        <!-- 합계 표시 -->
+        <div class="flex items-center justify-between bg-blue-50 rounded-lg px-3 py-2">
+          <span class="text-xs font-semibold text-slate-500">총 할인율</span>
+          <div class="flex items-center gap-2">
+            <span id="totalRateLabel" class="text-xl font-bold text-blue-700">0%</span>
+            <button onclick="clearReasons()" class="btn-sm bg-white text-red-500 border border-red-200 hover:bg-red-50">초기화</button>
+          </div>
         </div>
-        <input type="range" id="discountSlider" min="0" max="100" step="5" value="0" oninput="onDiscountChange()" />
-        <div class="flex justify-between text-xs text-slate-400 mt-1">
-          <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
-        </div>
-      </div>
 
-      <div class="space-y-2">
-        <div class="flex items-center justify-between">
-          <div class="text-xs font-semibold text-slate-500">할인 명분 (최대 3개)</div>
-          <button onclick="clearReasons()" class="btn-sm bg-slate-50 text-slate-500 border border-slate-200 hover:bg-red-50 hover:text-red-500">초기화</button>
-        </div>
         <!-- 퀵 버튼 -->
         <div class="flex flex-wrap gap-1">
-          <button class="reason-quick btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" onclick="addReason('학사 지원 할인')">학사지원</button>
-          <button class="reason-quick btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" onclick="addReason('당일등록 추가할인')">당일등록</button>
-          <button class="reason-quick btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" onclick="addReason('친구 추천 할인')">친구추천</button>
-          <button class="reason-quick btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" onclick="addReason('리뷰 후기 작성 할인')">리뷰</button>
-          <button class="reason-quick btn-sm bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100" onclick="addReason('팀장 직권 할인')">직권</button>
-          <button class="reason-quick btn-sm bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100" onclick="addReason('재수강 할인')">재수강</button>
-          <button class="reason-quick btn-sm bg-green-50 text-green-700 border border-green-200 hover:bg-green-100" onclick="addReason('원서 접수 할인')">원서접수</button>
+          <button class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" onclick="addReason('학사 지원 할인', 25)">학사지원 25%</button>
+          <button class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" onclick="addReason('당일등록 추가할인', 10)">당일등록 10%</button>
+          <button class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" onclick="addReason('친구 추천 할인', 5)">친구추천 5%</button>
+          <button class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" onclick="addReason('리뷰 후기 작성 할인', 0)">리뷰</button>
+          <button class="btn-sm bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100" onclick="addReason('팀장 직권 할인', 0)">직권</button>
+          <button class="btn-sm bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100" onclick="addReason('재수강 할인', 0)">재수강</button>
+          <button class="btn-sm bg-green-50 text-green-700 border border-green-200 hover:bg-green-100" onclick="addReason('원서 접수 할인', 5)">원서접수 5%</button>
         </div>
-        <div class="reason-card bg-white rounded-lg p-2.5">
+
+        <!-- 할인 행 1 -->
+        <div class="reason-card bg-white rounded-lg px-3 py-2 flex items-center gap-2">
           <input type="text" id="reason1" placeholder="할인 명분 1" oninput="render()"
-            class="w-full text-sm border-none outline-none placeholder-slate-300" />
+            class="flex-1 text-sm border-none outline-none placeholder-slate-300 min-w-0" />
+          <input type="number" id="rate1" min="0" max="100" step="1" value="0" oninput="render()"
+            class="w-14 text-right text-sm font-bold text-blue-700 border border-slate-200 rounded px-1 py-0.5 focus:outline-none focus:border-blue-400" />
+          <span class="text-xs text-slate-400 flex-shrink-0">%</span>
         </div>
-        <div class="reason-card bg-white rounded-lg p-2.5">
+        <!-- 할인 행 2 -->
+        <div class="reason-card bg-white rounded-lg px-3 py-2 flex items-center gap-2">
           <input type="text" id="reason2" placeholder="할인 명분 2" oninput="render()"
-            class="w-full text-sm border-none outline-none placeholder-slate-300" />
+            class="flex-1 text-sm border-none outline-none placeholder-slate-300 min-w-0" />
+          <input type="number" id="rate2" min="0" max="100" step="1" value="0" oninput="render()"
+            class="w-14 text-right text-sm font-bold text-blue-700 border border-slate-200 rounded px-1 py-0.5 focus:outline-none focus:border-blue-400" />
+          <span class="text-xs text-slate-400 flex-shrink-0">%</span>
         </div>
-        <div class="reason-card bg-white rounded-lg p-2.5">
+        <!-- 할인 행 3 -->
+        <div class="reason-card bg-white rounded-lg px-3 py-2 flex items-center gap-2">
           <input type="text" id="reason3" placeholder="할인 명분 3" oninput="render()"
-            class="w-full text-sm border-none outline-none placeholder-slate-300" />
+            class="flex-1 text-sm border-none outline-none placeholder-slate-300 min-w-0" />
+          <input type="number" id="rate3" min="0" max="100" step="1" value="0" oninput="render()"
+            class="w-14 text-right text-sm font-bold text-blue-700 border border-slate-200 rounded px-1 py-0.5 focus:outline-none focus:border-blue-400" />
+          <span class="text-xs text-slate-400 flex-shrink-0">%</span>
         </div>
+
       </div><!-- /discSection -->
     </section>
 
@@ -667,31 +674,41 @@ function selectAll(checked) {
   render();
 }
 
-// ============ 할인 변경 ============
-function onDiscountChange() {
-  const v = document.getElementById('discountSlider').value;
-  document.getElementById('discountLabel').textContent = v + '%';
-  render();
+// ============ 할인 데이터 헬퍼 ============
+function getDiscountData() {
+  const selected = getSelectedItems();
+  const total = selected.reduce((s, c) => s + c.price, 0);
+  const rows = [1,2,3].map(i => ({
+    text: document.getElementById('reason'+i).value.trim(),
+    rate: parseFloat(document.getElementById('rate'+i).value) || 0
+  }));
+  let running = total;
+  const reasons = rows.filter(r => r.text || r.rate > 0).map(r => {
+    const amt = Math.floor(total * r.rate / 100 / 1000) * 1000;
+    running -= amt;
+    return { ...r, amt, running };
+  });
+  const totalDiscount = total - running;
+  const totalRate = rows.reduce((s, r) => s + r.rate, 0);
+  return { reasons, totalDiscount, totalRate, final: running, total };
 }
 
 // ============ 렌더 ============
 function render() {
   const type = document.getElementById('courseType').value;
-  const discountRate = parseInt(document.getElementById('discountSlider').value) / 100;
-  const reason1 = document.getElementById('reason1').value.trim();
-  const reason2 = document.getElementById('reason2').value.trim();
-  const reason3 = document.getElementById('reason3').value.trim();
+  const dd = getDiscountData();
+  const { total, totalDiscount, totalRate, final } = dd;
+
+  // 총 할인율 레이블
+  document.getElementById('totalRateLabel').textContent = totalRate + '%';
 
   const selected = getSelectedItems();
-  const total = selected.reduce((s, c) => s + c.price, 0);
-  const discountAmt = Math.floor(total * discountRate / 1000) * 1000;
-  const final = total - discountAmt;
 
   // 카드 업데이트
   document.getElementById('cardTotal').textContent = fmt(total) + '원';
   document.getElementById('cardCount').textContent = `과목 ${selected.length}개`;
-  document.getElementById('cardDiscount').textContent = (discountRate * 100) + '%';
-  document.getElementById('cardDiscountAmt').textContent = '할인금액 ' + fmt(discountAmt) + '원';
+  document.getElementById('cardDiscount').textContent = totalRate + '%';
+  document.getElementById('cardDiscountAmt').textContent = '할인금액 ' + fmt(totalDiscount) + '원';
   document.getElementById('cardFinal').textContent = fmt(final) + '원';
   document.getElementById('selectedBadge').textContent = `선택 ${selected.length}개`;
 
@@ -728,7 +745,7 @@ function render() {
   document.getElementById('installmentSection').classList.remove('hidden');
 
   const rows = selected.map((c, i) => {
-    const discounted = Math.floor(c.price * (1 - discountRate) / 1000) * 1000;
+    const discounted = totalRate > 0 ? Math.floor(c.price * (1 - totalRate / 100) / 1000) * 1000 : c.price;
     return `<tr>
       <td class="text-center text-slate-500">${i + 1}</td>
       <td>${c.category || ''}</td>
@@ -769,21 +786,19 @@ function render() {
     </table>`;
 
   // 할인 상세
-  const reasons = [reason1, reason2, reason3].filter(Boolean);
-  if (discountRate > 0 || reasons.length > 0) {
+  if (totalRate > 0 || dd.reasons.length > 0) {
     document.getElementById('discountSummary').classList.remove('hidden');
     const details = document.getElementById('discountDetails');
-    if (reasons.length > 0) {
-      const perReason = reasons.length > 0 ? Math.round(discountAmt / reasons.length / 1000) * 1000 : 0;
-      details.innerHTML = reasons.map(r => `
+    if (dd.reasons.length > 0) {
+      details.innerHTML = dd.reasons.map(r => `
         <div class="flex justify-between text-slate-600">
-          <span>· ${r}</span>
-          <span class="text-blue-600">-${fmt(perReason)}원</span>
+          <span>· ${r.text || '(명분 미입력)'} (${r.rate}%)</span>
+          <span class="text-blue-600">-${fmt(r.amt)}원</span>
         </div>`).join('');
     } else {
       details.innerHTML = `<div class="text-slate-500 text-xs">할인 명분을 입력하세요</div>`;
     }
-    document.getElementById('totalDiscountDisplay').textContent = '-' + fmt(discountAmt) + '원';
+    document.getElementById('totalDiscountDisplay').textContent = '-' + fmt(totalDiscount) + '원';
     document.getElementById('finalDisplay').textContent = fmt(final) + '원';
   } else {
     document.getElementById('discountSummary').classList.add('hidden');
@@ -865,9 +880,7 @@ function toggleLogSection() {
 function logCurrentQuote() {
   const selected = getSelectedItems();
   if (selected.length === 0) { alert('과목을 선택해주세요.'); return; }
-  const discountRate = parseInt(document.getElementById('discountSlider').value) / 100;
-  const total = selected.reduce((s, c) => s + c.price, 0);
-  const discountAmt = Math.floor(total * discountRate / 1000) * 1000;
+  const dd = getDiscountData();
   const logs = JSON.parse(localStorage.getItem('consultLog') || '[]');
   logs.unshift({
     time: new Date().toLocaleString('ko-KR'),
@@ -876,9 +889,11 @@ function logCurrentQuote() {
     goal: document.getElementById('customerGoal').value,
     courseType: document.getElementById('courseType').value,
     subjects: selected.map(c => c.name),
-    total, discountAmt,
-    final: total - discountAmt,
-    discount: Math.round(discountRate * 100),
+    total: dd.total, discountAmt: dd.totalDiscount,
+    final: dd.final,
+    discount: dd.totalRate,
+    reasons: [1,2,3].map(i => document.getElementById('reason'+i).value),
+    rates: [1,2,3].map(i => parseFloat(document.getElementById('rate'+i).value)||0),
     consultant: document.getElementById('consultantName').value.trim(),
     memo: document.getElementById('consultMemo').value.trim(),
   });
@@ -928,8 +943,8 @@ function restoreLog(i) {
     const cb = [...document.querySelectorAll('.subject-check')].find(c => c.dataset.name === name);
     if (cb) { cb.checked = true; selectedPrices[name] = parseInt(cb.dataset.price); }
   });
-  document.getElementById('discountSlider').value = l.discount;
-  document.getElementById('discountLabel').textContent = l.discount + '%';
+  if (l.reasons) [1,2,3].forEach((_, j) => { document.getElementById('reason'+(j+1)).value = l.reasons[j] || ''; });
+  if (l.rates) [1,2,3].forEach((_, j) => { document.getElementById('rate'+(j+1)).value = l.rates[j] || 0; });
   document.getElementById('customerName').value = l.customer === '미입력' ? '' : l.customer;
   document.getElementById('consultMemo').value = l.memo || '';
   render();
@@ -1010,16 +1025,22 @@ function toggleSection(bodyId, arrowId) {
 }
 
 // ============ 할인 명분 퀵버튼 ============
-function addReason(text) {
-  const ids = ['reason1','reason2','reason3'];
-  for (const id of ids) {
-    const el = document.getElementById(id);
-    if (!el.value.trim()) { el.value = text; render(); return; }
+function addReason(text, rate) {
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById('reason'+i);
+    if (!el.value.trim()) {
+      el.value = text;
+      if (rate !== undefined) document.getElementById('rate'+i).value = rate;
+      render(); return;
+    }
   }
   alert('할인 명분은 최대 3개까지 입력 가능합니다.');
 }
 function clearReasons() {
-  ['reason1','reason2','reason3'].forEach(id => document.getElementById(id).value = '');
+  [1,2,3].forEach(i => {
+    document.getElementById('reason'+i).value = '';
+    document.getElementById('rate'+i).value = 0;
+  });
   render();
 }
 
@@ -1029,17 +1050,10 @@ function printQuote() {
   if (selected.length === 0) { alert('과목을 선택해주세요.'); return; }
 
   const courseType = document.getElementById('courseType').value;
-  const discountRate = parseInt(document.getElementById('discountSlider').value) / 100;
-  const reason1 = document.getElementById('reason1').value.trim();
-  const reason2 = document.getElementById('reason2').value.trim();
-  const reason3 = document.getElementById('reason3').value.trim();
+  const dd = getDiscountData();
+  const { total, totalDiscount, final } = dd;
   const consultant = document.getElementById('consultantName').value.trim();
   const phone = document.getElementById('consultantPhone').value.trim();
-  const total = selected.reduce((s, c) => s + c.price, 0);
-  const discountAmt = Math.floor(total * discountRate / 1000) * 1000;
-  const final = total - discountAmt;
-  const reasons = [reason1, reason2, reason3].filter(Boolean);
-  const perR = reasons.length > 0 ? Math.round(discountAmt / reasons.length / 1000) * 1000 : 0;
 
   const subjectRows = selected.map((c, i) => {
     const prev = i > 0 ? selected[i-1].category : null;
@@ -1053,13 +1067,9 @@ function printQuote() {
     </tr>`;
   }).join('');
 
-  const discRows = [
-    [reason1, perR, total - perR],
-    [reason2, reasons.length > 1 ? perR : 0, total - perR * Math.min(2, reasons.length)],
-    [reason3, reasons.length > 2 ? perR : 0, final],
-  ].map(([r, amt, run]) => r ? `<tr>
-    <td>${r}</td><td class="right">${fmt(amt)}</td><td class="right">${fmt(run)}</td>
-  </tr>` : '').join('');
+  const discRows = dd.reasons.map(r => `<tr>
+    <td>${r.text || '(명분 미입력)'} (${r.rate}%)</td><td class="right">${fmt(r.amt)}</td><td class="right">${fmt(r.running)}</td>
+  </tr>`).join('');
 
   document.getElementById('printView').innerHTML = `
     <div style="max-width:700px; margin:0 auto; font-family:'Malgun Gothic',sans-serif;">
@@ -1114,7 +1124,7 @@ function printQuote() {
           ${discRows}
           <tr style="font-weight:bold; background:#fef3c7;">
             <td>총 할인금액 (수강지원)</td>
-            <td class="right">${fmt(discountAmt)}</td>
+            <td class="right">${fmt(totalDiscount)}</td>
             <td></td>
           </tr>
           <tr style="font-weight:bold; background:#fef3c7;">
@@ -1144,11 +1154,7 @@ function printQuote() {
 
 // ============ 분할납부 시뮬레이터 ============
 function calcInstallment(months) {
-  const selected = getSelectedItems();
-  const discountRate = parseInt(document.getElementById('discountSlider').value) / 100;
-  const total = selected.reduce((s, c) => s + c.price, 0);
-  const discountAmt = Math.floor(total * discountRate / 1000) * 1000;
-  const final = total - discountAmt;
+  const { final } = getDiscountData();
   const perMonth = Math.ceil(final / months / 1000) * 1000;
 
   document.querySelectorAll('.inst-btn').forEach(b => b.classList.remove('bg-blue-600','text-white','border-blue-600'));
@@ -1170,10 +1176,8 @@ function calcInstallment(months) {
 function copyMessage() {
   const selected = getSelectedItems();
   if (selected.length === 0) { alert('과목을 먼저 선택해주세요.'); return; }
-  const discountRate = parseInt(document.getElementById('discountSlider').value) / 100;
-  const total = selected.reduce((s, c) => s + c.price, 0);
-  const discountAmt = Math.floor(total * discountRate / 1000) * 1000;
-  const final = total - discountAmt;
+  const dd = getDiscountData();
+  const { total, totalDiscount, totalRate, final } = dd;
   const customerName = document.getElementById('customerName').value.trim();
   const consultant = document.getElementById('consultantName').value.trim();
   const phone = document.getElementById('consultantPhone').value.trim();
@@ -1187,7 +1191,7 @@ function copyMessage() {
     ...selected.map((c, i) => `${i + 1}. ${c.name} — ${fmt(c.price)}원`),
     ``,
     `📌 정가 합계: ${fmt(total)}원`,
-    discountRate > 0 ? `🎁 할인 적용: -${fmt(discountAmt)}원 (${Math.round(discountRate*100)}%)` : null,
+    totalRate > 0 ? `🎁 할인 적용: -${fmt(totalDiscount)}원 (${totalRate}%)` : null,
     `✅ 최종 납부금액: ${fmt(final)}원`,
     ``,
     `문의사항은 언제든지 연락주세요!`,
@@ -1271,15 +1275,14 @@ function saveQuote() {
   const slots = getSlots();
   if (slots.length >= 10) { alert('최대 10개까지 저장됩니다. 기존 항목을 삭제해주세요.'); return; }
   const courseType = document.getElementById('courseType').value;
-  const discount = document.getElementById('discountSlider').value;
-  const total = selected.reduce((s, c) => s + c.price, 0);
-  const discountAmt = Math.floor(total * parseInt(discount) / 100 / 1000) * 1000;
+  const dd = getDiscountData();
   slots.push({
-    name, courseType, discount,
+    name, courseType,
     subjects: Object.keys(selectedPrices),
     prices: Object.values(selectedPrices),
-    reasons: ['reason1','reason2','reason3'].map(id => document.getElementById(id).value),
-    finalPrice: total - discountAmt,
+    reasons: [1,2,3].map(i => document.getElementById('reason'+i).value),
+    rates: [1,2,3].map(i => parseFloat(document.getElementById('rate'+i).value)||0),
+    finalPrice: dd.final,
     savedAt: new Date().toLocaleDateString('ko-KR')
   });
   setSlots(slots);
@@ -1318,9 +1321,8 @@ function loadQuote(i) {
     const cb = [...document.querySelectorAll('.subject-check')].find(c => c.dataset.name === name);
     if (cb) cb.checked = true;
   });
-  document.getElementById('discountSlider').value = s.discount;
-  document.getElementById('discountLabel').textContent = s.discount + '%';
-  if (s.reasons) ['reason1','reason2','reason3'].forEach((id, j) => { document.getElementById(id).value = s.reasons[j] || ''; });
+  if (s.reasons) [1,2,3].forEach((_, j) => { document.getElementById('reason'+(j+1)).value = s.reasons[j] || ''; });
+  if (s.rates) [1,2,3].forEach((_, j) => { document.getElementById('rate'+(j+1)).value = s.rates[j] || 0; });
   render();
   closeSaveModal();
 }
@@ -1337,16 +1339,12 @@ function shareURL() {
   const selected = getSelectedItems();
   if (selected.length === 0) { alert('과목을 먼저 선택해주세요.'); return; }
   const courseType = document.getElementById('courseType').value;
-  const discount = document.getElementById('discountSlider').value;
-  const r1 = document.getElementById('reason1').value;
-  const r2 = document.getElementById('reason2').value;
-  const r3 = document.getElementById('reason3').value;
   const state = {
     c: courseType,
-    d: discount,
     s: Object.keys(selectedPrices),
     p: Object.values(selectedPrices),
-    r: [r1, r2, r3]
+    r: [1,2,3].map(i => document.getElementById('reason'+i).value),
+    rt: [1,2,3].map(i => parseFloat(document.getElementById('rate'+i).value)||0)
   };
   const encoded = btoa(encodeURIComponent(JSON.stringify(state)));
   const url = location.href.split('?')[0] + '?q=' + encoded;
@@ -1371,11 +1369,8 @@ function loadFromURL() {
       const cb = [...document.querySelectorAll('.subject-check')].find(c => c.dataset.name === name);
       if (cb) cb.checked = true;
     });
-    document.getElementById('discountSlider').value = state.d;
-    document.getElementById('discountLabel').textContent = state.d + '%';
-    if (state.r) {
-      ['reason1','reason2','reason3'].forEach((id, i) => { document.getElementById(id).value = state.r[i] || ''; });
-    }
+    if (state.r) [1,2,3].forEach((_, i) => { document.getElementById('reason'+(i+1)).value = state.r[i] || ''; });
+    if (state.rt) [1,2,3].forEach((_, i) => { document.getElementById('rate'+(i+1)).value = state.rt[i] || 0; });
     render();
   } catch(e) { console.warn('URL 파싱 실패', e); }
 }
@@ -1525,17 +1520,10 @@ function downloadExcel() {
   if (selected.length === 0) { alert('과목을 하나 이상 선택해주세요.'); return; }
 
   const courseType = document.getElementById('courseType').value;
-  const discountRate = parseInt(document.getElementById('discountSlider').value) / 100;
-  const reason1 = document.getElementById('reason1').value.trim();
-  const reason2 = document.getElementById('reason2').value.trim();
-  const reason3 = document.getElementById('reason3').value.trim();
+  const dd = getDiscountData();
+  const { total, totalDiscount: discountAmt, final, reasons: discReasons } = dd;
   const consultant = document.getElementById('consultantName').value.trim();
   const phone = document.getElementById('consultantPhone').value.trim();
-
-  const total = selected.reduce((s, c) => s + c.price, 0);
-  const discountAmt = Math.floor(total * discountRate / 1000) * 1000;
-  const final = total - discountAmt;
-  const reasons = [reason1, reason2, reason3].filter(Boolean);
 
   // 템플릿 로드
   const binary = atob(TEMPLATE_BASE64);
@@ -1603,7 +1591,6 @@ function downloadExcel() {
     if (av.includes('총 등록금')) finalRow = R;
   }
 
-  const perR = reasons.length > 0 ? Math.round(discountAmt / reasons.length / 1000) * 1000 : 0;
   const setDisc = (rowIdx, reason, amt, running) => {
     if (rowIdx < 0) return;
     ws[XLSX.utils.encode_cell({ r: rowIdx, c: 1 })] = { v: reason || '', t: 's' };
@@ -1611,10 +1598,14 @@ function downloadExcel() {
     ws[XLSX.utils.encode_cell({ r: rowIdx, c: 5 })] = { v: running, t: 'n' };
   };
 
-  setDisc(discRow1, reason1, perR, total - perR);
-  setDisc(discRow2, reason2, reasons.length > 1 ? perR : 0, total - perR * Math.min(2, reasons.length));
-  setDisc(discRow3, reason3, reasons.length > 2 ? perR : 0, final);
-  setDisc(discRow4, '', 0, final);
+  const discRowIdxs = [discRow1, discRow2, discRow3, discRow4];
+  discReasons.forEach((r, i) => {
+    setDisc(discRowIdxs[i], r.text || '', r.amt, r.running);
+  });
+  // 나머지 빈 행 초기화
+  for (let i = discReasons.length; i < 4; i++) {
+    setDisc(discRowIdxs[i], '', 0, final);
+  }
 
   if (totDiscRow >= 0) ws[XLSX.utils.encode_cell({ r: totDiscRow, c: 3 })] = { v: discountAmt, t: 'n' };
   if (finalRow >= 0)   ws[XLSX.utils.encode_cell({ r: finalRow,   c: 3 })] = { v: final, t: 'n' };
