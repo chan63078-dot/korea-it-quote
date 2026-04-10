@@ -677,10 +677,14 @@
     <div class="flex items-center justify-between mb-3">
       <h3 class="font-bold text-slate-700">분할납부 시뮬레이터</h3>
       <div class="flex gap-2" id="installmentBtns">
-        <button onclick="calcInstallment(2)" class="inst-btn btn-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300">2개월</button>
-        <button onclick="calcInstallment(3)" class="inst-btn btn-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300">3개월</button>
-        <button onclick="calcInstallment(6)" class="inst-btn btn-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300">6개월</button>
-        <button onclick="calcInstallment(12)" class="inst-btn btn-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300">12개월</button>
+        <button onclick="calcInstallment(2,this)" class="inst-btn btn-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300">2개월</button>
+        <button onclick="calcInstallment(3,this)" class="inst-btn btn-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300">3개월</button>
+        <button onclick="calcInstallment(6,this)" class="inst-btn btn-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300">6개월</button>
+        <button onclick="calcInstallment(12,this)" class="inst-btn btn-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300">12개월</button>
+        <div class="flex items-center gap-1">
+          <input type="number" id="customInstallmentInput" min="1" max="60" placeholder="직접" class="w-14 border border-slate-200 rounded px-1.5 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400 text-center" onkeydown="if(event.key==='Enter'){calcInstallment(parseInt(this.value)||1,null)}" />
+          <button onclick="calcInstallment(parseInt(document.getElementById('customInstallmentInput').value)||1,null)" class="inst-btn btn-sm bg-slate-100 text-slate-600 border border-slate-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300">계산</button>
+        </div>
       </div>
     </div>
     <div id="installmentResult" class="grid grid-cols-4 gap-3 text-center">
@@ -739,6 +743,7 @@
         <div class="flex gap-2">
           <button onclick="saveDiary()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-sm transition-colors">상담일지 저장</button>
           <button onclick="viewDiaryList()" class="px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2.5 rounded-xl text-sm transition-colors">이력 보기</button>
+          <button onclick="exportDiaryCSV()" title="CSV 내보내기" class="px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold py-2.5 rounded-xl text-sm transition-colors border border-emerald-200">CSV</button>
         </div>
       </div>
     </div>
@@ -878,7 +883,7 @@
           <button onclick="copyBlogContent()" id="copyBlogBtn"
             class="btn-sm bg-green-50 text-green-700 border border-green-200 hover:bg-green-100">복사</button>
           <button onclick="downloadBlogMd()"
-            class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100">MD 다운로드</button>
+            class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100">TXT 다운로드</button>
         </div>
       </div>
       <!-- Raw 뷰 -->
@@ -1830,7 +1835,7 @@ function downloadBlogMd() {
   const keyword = document.getElementById('blogKeyword').value.replace(/\s+/g, '_') || 'blog';
   const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = `${keyword}_원고.md`; a.click(); URL.revokeObjectURL(a.href);
+  a.download = `${keyword}_원고.txt`; a.click(); URL.revokeObjectURL(a.href);
 }
 
 // ============ Gemini 키 테스트 ============
@@ -2089,11 +2094,13 @@ async function processNextWpItem() {
   renderWpQueue();
   updateWpStats();
 
-  // 다음 항목: 간격 후 처리
+  // 다음 항목: 두 번째부터 간격 적용 (첫 항목은 이미 즉시 처리됨)
   const intervalMin = parseInt(document.getElementById('wpIntervalSlider')?.value || '5', 10);
   const nextPending = wpQueue.find(i => i.status === 'pending');
   if (nextPending && wpProcessing) {
-    wpIntervalTimer = setTimeout(processNextWpItem, intervalMin * 60 * 1000);
+    const alreadyDone = wpQueue.filter(i => i.status === 'success' || i.status === 'failed').length;
+    const delay = alreadyDone <= 1 ? 500 : intervalMin * 60 * 1000; // 첫 항목 후 즉시, 이후 간격
+    wpIntervalTimer = setTimeout(processNextWpItem, delay);
   } else {
     wpProcessing = false;
     setWpGenBtn(false);
@@ -2310,6 +2317,27 @@ function renderDiaryList() {
       <div class="text-xs text-slate-400 text-right flex-shrink-0">${d.date}<br>${d.savedAt.split(' ')[1] || ''}</div>
     </div>
   `).join('');
+}
+
+// ============ 상담일지 CSV 내보내기 ============
+function exportDiaryCSV() {
+  const diaries = JSON.parse(localStorage.getItem('diaryLog') || '[]');
+  if (!diaries.length) { alert('저장된 상담일지가 없습니다.'); return; }
+  const header = ['상담일자','저장시각','고객명','연락처','희망분야','담당상담사','상담결과','과정','과목(쉼표구분)','정가(원)','최종금액(원)','메모'];
+  const rows = diaries.map(d => [
+    d.date, d.savedAt, d.customer, d.phone || '',
+    d.wishField || '', d.consultant || '',
+    d.result, d.courseType || '',
+    (d.subjects || []).join(' / '),
+    d.total || '', d.final || '',
+    (d.memo || '').replace(/,/g,'，')
+  ]);
+  const csv = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `상담일지_${todayStr()}.csv`;
+  a.click(); URL.revokeObjectURL(a.href);
 }
 
 // ============ 상담일지 섹션 표시 업데이트 ============
@@ -2903,12 +2931,11 @@ function printQuote() {
 }
 
 // ============ 분할납부 시뮬레이터 ============
-function calcInstallment(months) {
+function calcInstallment(months, triggerBtn) {
   const { final } = getDiscountData();
-  const perMonth = Math.ceil(final / months / 1000) * 1000;
 
   document.querySelectorAll('.inst-btn').forEach(b => b.classList.remove('bg-blue-600','text-white','border-blue-600'));
-  event.target.classList.add('bg-blue-600','text-white','border-blue-600');
+  if (triggerBtn) triggerBtn.classList.add('bg-blue-600','text-white','border-blue-600');
 
   const cols = [2, 3, 6, 12];
   document.getElementById('installmentResult').innerHTML = cols.map(m => {
@@ -3306,7 +3333,12 @@ function shareURL() {
     s: Object.keys(selectedPrices),
     p: Object.values(selectedPrices),
     r: [1,2,3].map(i => document.getElementById('reason'+i).value),
-    rt: [1,2,3].map(i => parseFloat(document.getElementById('rate'+i).value)||0)
+    rt: [1,2,3].map(i => parseFloat(document.getElementById('rate'+i).value)||0),
+    n: document.getElementById('customerName').value.trim(),
+    ph: document.getElementById('customerPhone').value.trim(),
+    wf: document.getElementById('customerWishField')?.value.trim() || '',
+    cn: document.getElementById('consultantName').value.trim(),
+    cp: document.getElementById('consultantPhone')?.value.trim() || '',
   };
   const encoded = btoa(encodeURIComponent(JSON.stringify(state)));
   const url = location.href.split('?')[0] + '?q=' + encoded;
@@ -3333,6 +3365,11 @@ function loadFromURL() {
     });
     if (state.r) [1,2,3].forEach((_, i) => { document.getElementById('reason'+(i+1)).value = state.r[i] || ''; });
     if (state.rt) [1,2,3].forEach((_, i) => { document.getElementById('rate'+(i+1)).value = state.rt[i] || 0; });
+    if (state.n) { const el = document.getElementById('customerName'); if (el) el.value = state.n; }
+    if (state.ph) { const el = document.getElementById('customerPhone'); if (el) el.value = state.ph; }
+    if (state.wf) { const el = document.getElementById('customerWishField'); if (el) el.value = state.wf; }
+    if (state.cn) { const el = document.getElementById('consultantName'); if (el) el.value = state.cn; }
+    if (state.cp) { const el = document.getElementById('consultantPhone'); if (el) el.value = state.cp; }
     render();
   } catch(e) { console.warn('URL 파싱 실패', e); }
 }
