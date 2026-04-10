@@ -71,6 +71,9 @@
     .section-body { transition: max-height 0.2s ease, opacity 0.2s; overflow: hidden; }
     .section-body.collapsed { max-height: 0 !important; opacity: 0; }
 
+    /* 워드프레스 간격 슬라이더 */
+    #wpIntervalSlider { height: 4px; cursor: pointer; }
+
     /* 블로그 미리보기 마크다운 스타일 */
     #blogPreviewContent h1 { font-size: 1.4em; font-weight: 800; margin: 1.2em 0 0.5em; color: #1e293b; }
     #blogPreviewContent h2 { font-size: 1.2em; font-weight: 700; margin: 1.1em 0 0.4em; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.25em; }
@@ -185,6 +188,10 @@
     <button onclick="setSidebarTab('blog')" id="tabBlog"
       class="sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-500 hover:bg-slate-50">
       <span class="w-2 h-2 rounded-full bg-slate-300 flex-shrink-0"></span> 🔥 블로그 자동화
+    </button>
+    <button onclick="setSidebarTab('wp')" id="tabWp"
+      class="sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-500 hover:bg-slate-50">
+      <span class="w-2 h-2 rounded-full bg-slate-300 flex-shrink-0"></span> 🗓 워드프레스 발행
     </button>
   </div>
 
@@ -809,7 +816,9 @@
         class="w-24 border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white"
         onkeydown="if(event.key==='Enter') addApiKey()" />
       <button onclick="addApiKey()" class="px-4 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-sm font-bold whitespace-nowrap">추가</button>
+      <button onclick="testApiKey()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-sm whitespace-nowrap border border-slate-200">🔍 테스트</button>
     </div>
+    <div id="apiTestResult" class="hidden px-4 pb-3 text-xs rounded-b-xl"></div>
     <div id="blogApiKeyBanner" class="hidden px-4 pb-3 text-xs text-yellow-700">⚠️ 키를 하나 이상 추가하면 AI 기능을 사용할 수 있습니다</div>
   </div>
 
@@ -880,6 +889,149 @@
   </div>
 
 </div><!-- /blogPage -->
+
+<!-- ===== 워드프레스 예약 발행 페이지 ===== -->
+<div id="wpPage" class="hidden">
+
+  <!-- 다크 네이비 히어로 배너 -->
+  <div class="mb-5 rounded-2xl text-white px-6 py-5" style="background:linear-gradient(135deg,#1e1b4b 0%,#3730a3 100%)">
+    <div class="flex items-center gap-2 mb-1">
+      <span class="text-xl">🗓</span>
+      <h1 class="text-xl font-bold">워드프레스 예약 발행 시스템</h1>
+    </div>
+    <p class="text-sm opacity-70">키워드 입력 → 원고 선생성 → 예약 시간 설정 → 워드프레스 '예약함'으로 전송</p>
+  </div>
+
+  <!-- 통계 카드 -->
+  <div class="grid grid-cols-4 gap-3 mb-5">
+    <div class="rounded-2xl text-white text-center py-4 px-2" style="background:#1e1b4b">
+      <div id="wpStatTotal" class="text-3xl font-bold mb-1">0</div>
+      <div class="text-xs opacity-70">전체 원고</div>
+    </div>
+    <div class="rounded-2xl text-white text-center py-4 px-2" style="background:#14532d">
+      <div id="wpStatPending" class="text-3xl font-bold mb-1">0</div>
+      <div class="text-xs opacity-70">대기 중</div>
+    </div>
+    <div class="rounded-2xl text-white text-center py-4 px-2" style="background:#064e3b">
+      <div id="wpStatSuccess" class="text-3xl font-bold mb-1">0</div>
+      <div class="text-xs opacity-70">발행 성공</div>
+    </div>
+    <div class="rounded-2xl text-white text-center py-4 px-2" style="background:#450a0a">
+      <div id="wpStatFailed" class="text-3xl font-bold mb-1">0</div>
+      <div class="text-xs opacity-70">실패</div>
+    </div>
+  </div>
+
+  <!-- 워드프레스 연동 설정 (접기) -->
+  <div class="mb-4 bg-white rounded-2xl shadow-sm overflow-hidden">
+    <div class="flex items-center gap-2 px-5 py-4 cursor-pointer select-none hover:bg-slate-50 border-b border-slate-100"
+      onclick="toggleSection('wpSettingsBody','wpSettingsArrow')">
+      <span class="text-slate-400 transition-transform" id="wpSettingsArrow">▾</span>
+      <span class="text-indigo-400">⚙</span>
+      <span class="font-semibold text-slate-700 text-sm">워드프레스 연동 설정</span>
+      <span id="wpConnBadge" class="ml-auto text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-400">미설정</span>
+    </div>
+    <div id="wpSettingsBody" class="section-body collapsed" style="max-height:600px">
+      <div class="px-5 pt-4 pb-4 space-y-3">
+        <div>
+          <label class="text-xs font-semibold text-slate-500 mb-1 block">워드프레스 사이트 URL</label>
+          <input type="url" id="wpSiteUrl" placeholder="https://yourblog.com"
+            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-semibold text-slate-500 mb-1 block">사용자명</label>
+            <input type="text" id="wpUsername" placeholder="admin"
+              class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-500 mb-1 block">앱 비밀번호</label>
+            <input type="password" id="wpAppPassword" placeholder="xxxx xxxx xxxx xxxx"
+              class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500 mb-1 block">Pexels API 키 <span class="font-normal text-slate-400">(이미지 자동 첨부용, 선택)</span></label>
+          <input type="password" id="wpPexelsKey" placeholder="Pexels API 키 입력"
+            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+        </div>
+        <div class="flex gap-2">
+          <button onclick="saveWpSettings()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-colors">저장</button>
+          <button onclick="testWpConnection()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition-colors border border-slate-200">연결 테스트</button>
+        </div>
+        <div id="wpConnTestResult" class="hidden text-xs px-3 py-2 rounded-lg"></div>
+        <p class="text-xs text-slate-400">※ 앱 비밀번호: 워드프레스 → 사용자 → 프로필 → 앱 비밀번호에서 생성</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 메인 입력 영역 -->
+  <div class="flex gap-4 mb-4">
+    <!-- 키워드 입력 -->
+    <div class="flex-1 bg-white rounded-2xl shadow-sm p-5">
+      <h3 class="font-bold text-slate-700 mb-2 text-sm">키워드 입력 <span class="text-slate-400 font-normal">(한 줄에 하나씩)</span></h3>
+      <textarea id="wpKeywords" rows="6" placeholder="코리아IT아카데미 대구 파이썬 과정&#10;코리아IT아카데미 대구 정보보안 취업&#10;코리아IT아카데미 AI 빅데이터 과정..."
+        class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-y bg-slate-50"></textarea>
+    </div>
+    <!-- 옵션 -->
+    <div class="w-52 bg-white rounded-2xl shadow-sm p-5 flex-shrink-0">
+      <h3 class="font-bold text-slate-700 mb-3 text-sm">원고 생성 옵션</h3>
+      <div class="space-y-3">
+        <label class="flex items-start gap-2 cursor-pointer">
+          <input type="checkbox" id="wpUsePexels" checked class="mt-0.5 accent-indigo-600" />
+          <span class="text-xs text-slate-600">🖼 Pexels 이미지 자동 검색</span>
+        </label>
+        <label class="flex items-start gap-2 cursor-pointer">
+          <input type="checkbox" id="wpSetFeatured" checked class="mt-0.5 accent-indigo-600" />
+          <span class="text-xs text-slate-600">🌄 대표 이미지(Featured Image)로 등록</span>
+        </label>
+        <label class="flex items-start gap-2 cursor-pointer">
+          <input type="checkbox" id="wpAutoPublish" class="mt-0.5 accent-indigo-600" />
+          <span class="text-xs text-slate-600">🚀 워드프레스 자동 전송</span>
+        </label>
+      </div>
+      <!-- 발행 상태 -->
+      <div class="mt-4">
+        <label class="text-xs font-semibold text-slate-500 mb-1 block">발행 상태</label>
+        <select id="wpPostStatus" class="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+          <option value="future">예약 발행</option>
+          <option value="draft">임시저장</option>
+          <option value="publish">즉시 발행</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 간격 슬라이더 -->
+  <div class="bg-white rounded-2xl shadow-sm px-5 py-4 mb-4">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-sm font-semibold text-slate-700">글 생성 간격 설정 (분)</span>
+      <span id="wpIntervalLabel" class="text-sm font-bold text-indigo-600">5분</span>
+    </div>
+    <input type="range" id="wpIntervalSlider" min="1" max="60" value="5"
+      oninput="document.getElementById('wpIntervalLabel').textContent=this.value+'분'"
+      class="w-full accent-indigo-600" />
+    <div class="flex justify-between text-xs text-slate-400 mt-1"><span>1분</span><span>60분</span></div>
+  </div>
+
+  <!-- 액션 버튼 -->
+  <div class="flex gap-3 mb-5">
+    <button onclick="startBatchGeneration()" id="wpGenBtn"
+      class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+      <span id="wpGenIcon">🔥</span>
+      <span id="wpGenText">원고 일괄 생성</span>
+    </button>
+    <button onclick="resetWpQueue()"
+      class="px-6 py-3.5 bg-white border border-slate-200 text-slate-600 font-semibold rounded-xl hover:bg-slate-50 transition-colors text-sm">
+      🗑 목록 초기화
+    </button>
+  </div>
+  <div id="wpBatchError" class="hidden mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 whitespace-pre-line"></div>
+
+  <!-- 큐 목록 -->
+  <div id="wpQueueList" class="space-y-2"></div>
+
+</div><!-- /wpPage -->
 
 </main>
 
@@ -1087,8 +1239,7 @@ let selectedDeptIds = new Set(DEPT_MAP.map(d => d.id)); // 초기 전체 선택
 
 // ============ 사이드바 탭 ============
 function setSidebarTab(tab) {
-  const tabs = { quote: 'tabQuote', blog: 'tabBlog', dashboard: 'tabDashboard' };
-  const pages = { quote: 'quotePage', blog: 'blogPage' };
+  const tabs = { quote: 'tabQuote', blog: 'tabBlog', wp: 'tabWp' };
   const activeClass = 'sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors bg-red-50 text-red-700';
   const inactiveClass = 'sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-500 hover:bg-slate-50';
 
@@ -1097,16 +1248,16 @@ function setSidebarTab(tab) {
     if (el) el.className = t === tab ? activeClass : inactiveClass;
   });
 
-  // 페이지 전환
-  const quoteP = document.getElementById('quotePage');
-  const blogP = document.getElementById('blogPage');
-  if (quoteP) quoteP.classList.toggle('hidden', tab !== 'quote');
-  if (blogP) blogP.classList.toggle('hidden', tab !== 'blog');
+  ['quotePage','blogPage','wpPage'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
+  const pageMap = { quote: 'quotePage', blog: 'blogPage', wp: 'wpPage' };
+  const pageEl = document.getElementById(pageMap[tab]);
+  if (pageEl) pageEl.classList.remove('hidden');
 
-  // 블로그 탭 진입 시 초기화
-  if (tab === 'blog') {
-    initBlogPage();
-  }
+  if (tab === 'blog') initBlogPage();
+  if (tab === 'wp') initWpPage();
 }
 
 // ============ 학과 칩 렌더링 ============
@@ -1679,6 +1830,344 @@ function downloadBlogMd() {
   const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = `${keyword}_원고.md`; a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ============ Gemini 키 테스트 ============
+async function testApiKey() {
+  const box = document.getElementById('apiTestResult');
+  box.className = 'px-4 py-2.5 text-xs bg-slate-50 border-t border-slate-100';
+  box.textContent = '⏳ 테스트 중...';
+  box.classList.remove('hidden');
+
+  const keys = loadApiKeys();
+  if (!keys.length) {
+    box.textContent = '⚠️ 등록된 키가 없습니다.';
+    box.className = 'px-4 py-2.5 text-xs bg-yellow-50 border-t border-yellow-100 text-yellow-700';
+    return;
+  }
+  const key = keys[getActiveKeyIdx()].key;
+  const model = 'gemini-2.0-flash';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: '안녕' }] }], generationConfig: { maxOutputTokens: 5 } })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      box.textContent = `✅ 키 정상 (${model}) — 응답: "${data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'OK'}"`;
+      box.className = 'px-4 py-2.5 text-xs bg-green-50 border-t border-green-100 text-green-700';
+    } else {
+      const errStatus = data?.error?.status || res.status;
+      const errMsg = data?.error?.message || '알 수 없는 오류';
+      box.textContent = `❌ [${errStatus}] ${errMsg}`;
+      box.className = 'px-4 py-2.5 text-xs bg-red-50 border-t border-red-100 text-red-700';
+    }
+  } catch (e) {
+    box.textContent = `❌ 네트워크 오류: ${e.message}`;
+    box.className = 'px-4 py-2.5 text-xs bg-red-50 border-t border-red-100 text-red-700';
+  }
+}
+
+// ============ 워드프레스 예약 발행 ============
+let wpQueue = [];
+let wpProcessing = false;
+let wpIntervalTimer = null;
+
+function initWpPage() {
+  loadWpSettings();
+  updateWpStats();
+  renderWpQueue();
+}
+
+function loadWpSettings() {
+  const s = JSON.parse(localStorage.getItem('wpSettings') || '{}');
+  if (s.url) document.getElementById('wpSiteUrl').value = s.url;
+  if (s.username) document.getElementById('wpUsername').value = s.username;
+  if (s.appPassword) document.getElementById('wpAppPassword').value = s.appPassword;
+  if (s.pexelsKey) document.getElementById('wpPexelsKey').value = s.pexelsKey;
+  updateWpConnBadge(s.url && s.username && s.appPassword);
+}
+
+function saveWpSettings() {
+  const s = {
+    url: document.getElementById('wpSiteUrl').value.trim().replace(/\/$/, ''),
+    username: document.getElementById('wpUsername').value.trim(),
+    appPassword: document.getElementById('wpAppPassword').value.trim(),
+    pexelsKey: document.getElementById('wpPexelsKey').value.trim(),
+  };
+  localStorage.setItem('wpSettings', JSON.stringify(s));
+  updateWpConnBadge(s.url && s.username && s.appPassword);
+  alert('저장됐습니다.');
+}
+
+function updateWpConnBadge(connected) {
+  const b = document.getElementById('wpConnBadge');
+  if (!b) return;
+  b.textContent = connected ? '설정됨' : '미설정';
+  b.className = `ml-auto text-xs px-2 py-0.5 rounded-full ${connected ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-400'}`;
+}
+
+async function testWpConnection() {
+  const s = JSON.parse(localStorage.getItem('wpSettings') || '{}');
+  const box = document.getElementById('wpConnTestResult');
+  box.classList.remove('hidden');
+  box.textContent = '⏳ 연결 테스트 중...';
+  box.className = 'text-xs px-3 py-2 rounded-lg bg-slate-50 text-slate-500';
+  if (!s.url || !s.username || !s.appPassword) {
+    box.textContent = '⚠️ 설정을 먼저 저장해주세요.';
+    box.className = 'text-xs px-3 py-2 rounded-lg bg-yellow-50 text-yellow-700';
+    return;
+  }
+  try {
+    const cred = btoa(`${s.username}:${s.appPassword}`);
+    const res = await fetch(`${s.url}/wp-json/wp/v2/users/me`, {
+      headers: { 'Authorization': `Basic ${cred}` }
+    });
+    if (res.ok) {
+      const user = await res.json();
+      box.textContent = `✅ 연결 성공 — 사용자: ${user.name} (${user.slug})`;
+      box.className = 'text-xs px-3 py-2 rounded-lg bg-green-50 text-green-700';
+    } else {
+      const err = await res.json().catch(() => ({}));
+      box.textContent = `❌ [${res.status}] ${err?.message || '인증 실패'}`;
+      box.className = 'text-xs px-3 py-2 rounded-lg bg-red-50 text-red-700';
+    }
+  } catch (e) {
+    box.textContent = `❌ 연결 실패: ${e.message} (CORS 또는 URL 확인)`;
+    box.className = 'text-xs px-3 py-2 rounded-lg bg-red-50 text-red-700';
+  }
+}
+
+function updateWpStats() {
+  document.getElementById('wpStatTotal').textContent = wpQueue.length;
+  document.getElementById('wpStatPending').textContent = wpQueue.filter(i => i.status === 'pending' || i.status === 'generating').length;
+  document.getElementById('wpStatSuccess').textContent = wpQueue.filter(i => i.status === 'success').length;
+  document.getElementById('wpStatFailed').textContent = wpQueue.filter(i => i.status === 'failed').length;
+}
+
+function renderWpQueue() {
+  const container = document.getElementById('wpQueueList');
+  if (!container) return;
+  if (!wpQueue.length) {
+    container.innerHTML = '<div class="text-center text-slate-400 text-sm py-8">위에서 키워드를 입력하고 원고 일괄 생성을 눌러주세요.</div>';
+    return;
+  }
+  const statusInfo = {
+    pending:    { icon: '⏳', color: 'bg-slate-100 text-slate-500', label: '대기 중' },
+    generating: { icon: '⚡', color: 'bg-blue-50 text-blue-600',   label: '생성 중' },
+    success:    { icon: '✅', color: 'bg-green-50 text-green-700',  label: '완료' },
+    failed:     { icon: '❌', color: 'bg-red-50 text-red-600',     label: '실패' },
+  };
+  container.innerHTML = wpQueue.map((item, i) => {
+    const s = statusInfo[item.status] || statusInfo.pending;
+    return `
+    <div class="bg-white rounded-xl shadow-sm px-4 py-3 flex items-start gap-3">
+      <span class="text-lg flex-shrink-0 mt-0.5">${s.icon}</span>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="font-semibold text-slate-700 text-sm truncate">${item.keyword}</span>
+          <span class="text-xs px-2 py-0.5 rounded-full ${s.color}">${s.label}</span>
+        </div>
+        ${item.error ? `<div class="text-xs text-red-500 mt-1">${item.error}</div>` : ''}
+        ${item.postUrl ? `<a href="${item.postUrl}" target="_blank" class="text-xs text-indigo-600 hover:underline mt-1 block">🔗 발행된 글 보기</a>` : ''}
+        ${item.content && item.status === 'success' ? `
+          <button onclick="toggleWpItemContent(${i})" class="text-xs text-slate-400 hover:text-slate-600 mt-1">원고 보기/접기</button>
+          <div id="wpItemContent_${i}" class="hidden mt-2 bg-slate-50 rounded-lg px-3 py-2 text-xs font-mono whitespace-pre-wrap max-h-40 overflow-y-auto text-slate-600">${item.content.slice(0,500)}${item.content.length > 500 ? '...' : ''}</div>
+        ` : ''}
+      </div>
+      <button onclick="removeWpItem(${i})" class="text-slate-300 hover:text-red-400 text-sm flex-shrink-0">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function toggleWpItemContent(i) {
+  const el = document.getElementById(`wpItemContent_${i}`);
+  if (el) el.classList.toggle('hidden');
+}
+
+function removeWpItem(i) {
+  wpQueue.splice(i, 1);
+  updateWpStats();
+  renderWpQueue();
+}
+
+function resetWpQueue() {
+  if (wpProcessing && !confirm('생성 중입니다. 초기화할까요?')) return;
+  wpProcessing = false;
+  clearTimeout(wpIntervalTimer);
+  wpQueue = [];
+  updateWpStats();
+  renderWpQueue();
+  setWpGenBtn(false);
+}
+
+function setWpGenBtn(loading) {
+  const btn = document.getElementById('wpGenBtn');
+  const icon = document.getElementById('wpGenIcon');
+  const text = document.getElementById('wpGenText');
+  if (!btn) return;
+  btn.disabled = loading;
+  icon.textContent = loading ? '⏳' : '🔥';
+  text.textContent = loading ? '생성 중...' : '원고 일괄 생성';
+}
+
+async function startBatchGeneration() {
+  const raw = document.getElementById('wpKeywords').value.trim();
+  if (!raw) { alert('키워드를 입력해주세요.'); return; }
+
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) { alert('블로그 자동화 탭에서 Gemini API 키를 먼저 등록해주세요.'); return; }
+
+  const keywords = raw.split('\n').map(k => k.trim()).filter(Boolean);
+  if (!keywords.length) return;
+
+  // 새 항목만 추가 (이미 있는 키워드 제외)
+  const existing = new Set(wpQueue.map(i => i.keyword));
+  const newItems = keywords.filter(k => !existing.has(k)).map(k => ({
+    id: Date.now() + Math.random(),
+    keyword: k,
+    status: 'pending',
+    content: null,
+    error: null,
+    postUrl: null,
+  }));
+  wpQueue = [...wpQueue, ...newItems];
+
+  updateWpStats();
+  renderWpQueue();
+  setWpGenBtn(true);
+  wpProcessing = true;
+
+  await processNextWpItem();
+}
+
+async function processNextWpItem() {
+  if (!wpProcessing) return;
+  const item = wpQueue.find(i => i.status === 'pending');
+  if (!item) {
+    wpProcessing = false;
+    setWpGenBtn(false);
+    return;
+  }
+
+  item.status = 'generating';
+  renderWpQueue();
+  updateWpStats();
+
+  try {
+    // 1. 원고 생성
+    const sysPrompt = document.getElementById('systemPromptText')?.value || DEFAULT_SYSTEM_PROMPT;
+    const content = await callGeminiAPI(`다음 키워드로 블로그 원고를 작성해주세요: "${item.keyword}"`, sysPrompt);
+    item.content = content;
+
+    // 2. Pexels 이미지 검색
+    let pexelsImageUrl = null;
+    const usePexels = document.getElementById('wpUsePexels')?.checked;
+    const pexelsKey = JSON.parse(localStorage.getItem('wpSettings') || '{}').pexelsKey;
+    if (usePexels && pexelsKey) {
+      const imgKwMatch = content.match(/\[IMAGE_KEYWORD\]:\s*(.+)/);
+      const imgKw = imgKwMatch ? imgKwMatch[1].trim() : item.keyword;
+      pexelsImageUrl = await fetchPexelsImage(imgKw, pexelsKey);
+    }
+
+    // 3. 워드프레스 자동 전송
+    const autoPublish = document.getElementById('wpAutoPublish')?.checked;
+    const s = JSON.parse(localStorage.getItem('wpSettings') || '{}');
+    if (autoPublish && s.url && s.username && s.appPassword) {
+      item.postUrl = await postToWordPress(item, content, pexelsImageUrl, s);
+    }
+
+    item.status = 'success';
+  } catch (err) {
+    item.status = 'failed';
+    item.error = err.message?.slice(0, 120) || '알 수 없는 오류';
+  }
+
+  renderWpQueue();
+  updateWpStats();
+
+  // 다음 항목: 간격 후 처리
+  const intervalMin = parseInt(document.getElementById('wpIntervalSlider')?.value || '5', 10);
+  const nextPending = wpQueue.find(i => i.status === 'pending');
+  if (nextPending && wpProcessing) {
+    wpIntervalTimer = setTimeout(processNextWpItem, intervalMin * 60 * 1000);
+  } else {
+    wpProcessing = false;
+    setWpGenBtn(false);
+  }
+}
+
+async function fetchPexelsImage(keyword, apiKey) {
+  try {
+    const res = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(keyword)}&per_page=1&orientation=landscape`, {
+      headers: { Authorization: apiKey }
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.photos?.[0]?.src?.large2x || data.photos?.[0]?.src?.large || null;
+  } catch { return null; }
+}
+
+async function postToWordPress(item, content, pexelsImageUrl, settings) {
+  const cred = btoa(`${settings.username}:${settings.appPassword}`);
+  const headers = { 'Authorization': `Basic ${cred}`, 'Content-Type': 'application/json' };
+  const baseUrl = settings.url;
+
+  // 이미지 업로드 (Pexels → WP 미디어)
+  let featuredMediaId = 0;
+  const setFeatured = document.getElementById('wpSetFeatured')?.checked;
+  if (pexelsImageUrl && setFeatured) {
+    try {
+      const imgRes = await fetch(pexelsImageUrl);
+      const imgBlob = await imgRes.blob();
+      const imgFormData = new FormData();
+      imgFormData.append('file', imgBlob, `${item.keyword.replace(/\s+/g,'_')}.jpg`);
+      const uploadRes = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
+        method: 'POST',
+        headers: { 'Authorization': `Basic ${cred}` },
+        body: imgFormData
+      });
+      if (uploadRes.ok) {
+        const media = await uploadRes.json();
+        featuredMediaId = media.id;
+      }
+    } catch { /* 이미지 업로드 실패 무시 */ }
+  }
+
+  // 본문 HTML 변환
+  const htmlContent = markdownToHtml(content);
+
+  // 예약 시간 계산 (현재 시각 + 대기 중 항목 수 × 간격)
+  const intervalMin = parseInt(document.getElementById('wpIntervalSlider')?.value || '5', 10);
+  const pendingBefore = wpQueue.filter(i => i.status === 'success').length;
+  const scheduleDate = new Date(Date.now() + pendingBefore * intervalMin * 60 * 1000);
+  const postStatus = document.getElementById('wpPostStatus')?.value || 'future';
+
+  // 제목 추출 (첫 H1 또는 키워드)
+  const titleMatch = content.match(/^#\s+(.+)/m);
+  const title = titleMatch ? titleMatch[1].trim() : item.keyword;
+
+  const postData = {
+    title,
+    content: htmlContent,
+    status: postStatus,
+    ...(postStatus === 'future' ? { date: scheduleDate.toISOString() } : {}),
+    ...(featuredMediaId ? { featured_media: featuredMediaId } : {}),
+  };
+
+  const res = await fetch(`${baseUrl}/wp-json/wp/v2/posts`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(postData)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`WP 오류 [${res.status}]: ${err?.message || '발행 실패'}`);
+  }
+  const post = await res.json();
+  return post.link || '';
 }
 
 // ============ AI 멘토링 어시스턴트 ============
