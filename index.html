@@ -71,6 +71,26 @@
     .section-body { transition: max-height 0.2s ease, opacity 0.2s; overflow: hidden; }
     .section-body.collapsed { max-height: 0 !important; opacity: 0; }
 
+    /* 블로그 미리보기 마크다운 스타일 */
+    #blogPreviewContent h1 { font-size: 1.4em; font-weight: 800; margin: 1.2em 0 0.5em; color: #1e293b; }
+    #blogPreviewContent h2 { font-size: 1.2em; font-weight: 700; margin: 1.1em 0 0.4em; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.25em; }
+    #blogPreviewContent h3 { font-size: 1.05em; font-weight: 700; margin: 1em 0 0.3em; color: #334155; }
+    #blogPreviewContent h4 { font-size: 0.95em; font-weight: 700; margin: 0.8em 0 0.2em; color: #475569; }
+    #blogPreviewContent p { margin: 0.5em 0; color: #374151; }
+    #blogPreviewContent ul, #blogPreviewContent ol { padding-left: 1.5em; margin: 0.5em 0; }
+    #blogPreviewContent li { margin: 0.2em 0; color: #374151; }
+    #blogPreviewContent strong { font-weight: 700; color: #1e293b; }
+    #blogPreviewContent em { font-style: italic; }
+    #blogPreviewContent table { width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.9em; }
+    #blogPreviewContent th { background: #f1f5f9; font-weight: 700; padding: 6px 10px; border: 1px solid #cbd5e1; text-align: left; }
+    #blogPreviewContent td { padding: 5px 10px; border: 1px solid #e2e8f0; }
+    #blogPreviewContent tr:nth-child(even) td { background: #f8fafc; }
+    #blogPreviewContent code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 0.88em; font-family: monospace; color: #0f172a; }
+    #blogPreviewContent pre { background: #1e293b; color: #e2e8f0; padding: 12px 16px; border-radius: 8px; overflow-x: auto; margin: 0.8em 0; }
+    #blogPreviewContent pre code { background: none; color: inherit; padding: 0; }
+    #blogPreviewContent blockquote { border-left: 3px solid #94a3b8; padding-left: 12px; color: #64748b; margin: 0.8em 0; font-style: italic; }
+    #blogPreviewContent hr { border: none; border-top: 1px solid #e2e8f0; margin: 1em 0; }
+
     /* 사이드바 리사이즈 핸들 */
     #resizeHandle { width: 5px; cursor: col-resize; background: transparent; flex-shrink: 0; transition: background .15s; }
     #resizeHandle:hover { background: #bfdbfe; }
@@ -767,7 +787,7 @@
       <span class="text-xl">🔥</span>
       <h1 class="text-xl font-bold">블로그 자동화 · SEO 원고 생성</h1>
     </div>
-    <p class="text-sm opacity-80">Gemini 1.5 Flash 기반 · 네이버/구글 SEO 최적화 · 코리아IT아카데미 대구지점</p>
+    <p class="text-sm opacity-80"><span id="heroBannerModel">Gemini 1.5 Flash</span> 기반 · 네이버/구글 SEO 최적화 · 코리아IT아카데미 대구지점</p>
   </div>
 
   <!-- Gemini API 키 관리 -->
@@ -815,8 +835,13 @@
   <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
     <h3 class="font-bold text-slate-700 mb-3">메인 키워드 입력</h3>
     <input type="text" id="blogKeyword" placeholder="예: 코리아IT아카데미 대전 파이썬 과정"
-      class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 mb-3"
+      class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 mb-2"
       onkeydown="if(event.key==='Enter') generateBlogPost()" />
+    <!-- 최근 키워드 -->
+    <div id="recentKeywordsRow" class="hidden flex flex-wrap gap-1.5 mb-3">
+      <span class="text-xs text-slate-400 self-center">최근:</span>
+      <div id="recentKeywordChips" class="flex flex-wrap gap-1.5"></div>
+    </div>
     <button onclick="generateBlogPost()" id="blogGenBtn"
       class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2">
       <span id="blogGenIcon">🔥</span>
@@ -828,16 +853,29 @@
   <!-- 생성 결과 -->
   <div id="blogResultArea" class="hidden">
     <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-      <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
-        <h3 class="font-bold text-slate-700">생성된 원고</h3>
-        <div class="flex gap-2">
+      <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-3">
+          <h3 class="font-bold text-slate-700">생성된 원고</h3>
+          <span id="blogCharCount" class="text-xs text-slate-400"></span>
+        </div>
+        <div class="flex gap-2 items-center">
+          <!-- Raw / 미리보기 토글 -->
+          <div class="flex rounded-lg overflow-hidden border border-slate-200 text-xs">
+            <button id="viewRawBtn" onclick="setBlogView('raw')"
+              class="px-3 py-1 bg-slate-700 text-white font-semibold transition-colors">Raw</button>
+            <button id="viewPreviewBtn" onclick="setBlogView('preview')"
+              class="px-3 py-1 bg-white text-slate-500 font-semibold hover:bg-slate-50 transition-colors">미리보기</button>
+          </div>
           <button onclick="copyBlogContent()" id="copyBlogBtn"
             class="btn-sm bg-green-50 text-green-700 border border-green-200 hover:bg-green-100">복사</button>
           <button onclick="downloadBlogMd()"
             class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100">MD 다운로드</button>
         </div>
       </div>
+      <!-- Raw 뷰 -->
       <div id="blogRawContent" class="px-5 py-4 text-sm text-slate-700 font-mono whitespace-pre-wrap leading-relaxed bg-slate-50 max-h-[60vh] overflow-y-auto"></div>
+      <!-- 미리보기 뷰 -->
+      <div id="blogPreviewContent" class="hidden px-6 py-5 prose prose-slate max-w-none max-h-[60vh] overflow-y-auto text-sm leading-relaxed"></div>
     </div>
   </div>
 
@@ -1374,9 +1412,9 @@ function getActiveModel() {
 async function _fetchGemini(apiKey, userPrompt, systemInstruction, modelName) {
   const model = modelName || getActiveModel();
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-  const fullPrompt = systemInstruction ? `${systemInstruction}\n\n---\n\n${userPrompt}` : userPrompt;
   const body = {
-    contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
+    ...(systemInstruction ? { system_instruction: { parts: [{ text: systemInstruction }] } } : {}),
+    contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
     generationConfig: { temperature: 0.8, maxOutputTokens: 8192 }
   };
   const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -1420,8 +1458,11 @@ async function callGeminiAPI(userPrompt, systemInstruction) {
 }
 
 function updateModelBadge() {
+  const model = getActiveModel();
   const el = document.getElementById('activeModelBadge');
-  if (el) el.textContent = getActiveModel();
+  if (el) el.textContent = model;
+  const hero = document.getElementById('heroBannerModel');
+  if (hero) hero.textContent = model;
 }
 
 // ============ 블로그 자동화 ============
@@ -1455,6 +1496,98 @@ function initBlogPage() {
   renderApiKeyList();
   updateApiKeyBanners();
   updateModelBadge();
+  renderRecentKeywords();
+}
+
+// ── 최근 키워드 히스토리 ──
+function loadRecentKeywords() {
+  try { return JSON.parse(localStorage.getItem('blogRecentKeywords') || '[]'); } catch { return []; }
+}
+function saveRecentKeyword(kw) {
+  if (!kw) return;
+  let list = loadRecentKeywords().filter(k => k !== kw);
+  list.unshift(kw);
+  if (list.length > 8) list = list.slice(0, 8);
+  localStorage.setItem('blogRecentKeywords', JSON.stringify(list));
+}
+function renderRecentKeywords() {
+  const list = loadRecentKeywords();
+  const row = document.getElementById('recentKeywordsRow');
+  const chips = document.getElementById('recentKeywordChips');
+  if (!row || !chips) return;
+  if (!list.length) { row.classList.add('hidden'); return; }
+  row.classList.remove('hidden');
+  chips.innerHTML = list.map(kw =>
+    `<button onclick="document.getElementById('blogKeyword').value=${JSON.stringify(kw)}"
+      class="px-2.5 py-0.5 rounded-full bg-green-50 border border-green-200 text-green-700 text-xs hover:bg-green-100 transition-colors whitespace-nowrap">${kw}</button>`
+  ).join('');
+}
+
+// ── 마크다운 → HTML 렌더러 ──
+function markdownToHtml(md) {
+  let html = md
+    // 코드 블록 (먼저 처리)
+    .replace(/```[\w]*\n?([\s\S]*?)```/g, (_, c) => `<pre><code>${c.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code></pre>`)
+    // 인라인 코드
+    .replace(/`([^`]+)`/g, (_, c) => `<code>${c.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code>`)
+    // 수평선
+    .replace(/^---$/gm, '<hr>')
+    // 헤딩
+    .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    // 볼드/이탤릭
+    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // 인용구
+    .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
+
+  // 표 처리
+  html = html.replace(/(\|.+\|\n)+/g, tableBlock => {
+    const rows = tableBlock.trim().split('\n').filter(r => !/^\|[-| :]+\|$/.test(r));
+    if (!rows.length) return tableBlock;
+    const [head, ...body] = rows;
+    const th = head.split('|').filter((_, i, a) => i > 0 && i < a.length - 1)
+      .map(c => `<th>${c.trim()}</th>`).join('');
+    const tb = body.map(r => {
+      const tds = r.split('|').filter((_, i, a) => i > 0 && i < a.length - 1)
+        .map(c => `<td>${c.trim()}</td>`).join('');
+      return `<tr>${tds}</tr>`;
+    }).join('');
+    return `<table><thead><tr>${th}</tr></thead><tbody>${tb}</tbody></table>`;
+  });
+
+  // 리스트
+  html = html.replace(/(^[-*] .+\n?)+/gm, block => {
+    const items = block.trim().split('\n').map(l => `<li>${l.replace(/^[-*] /, '')}</li>`).join('');
+    return `<ul>${items}</ul>`;
+  });
+  html = html.replace(/(^\d+\. .+\n?)+/gm, block => {
+    const items = block.trim().split('\n').map(l => `<li>${l.replace(/^\d+\. /, '')}</li>`).join('');
+    return `<ol>${items}</ol>`;
+  });
+
+  // 빈 줄 → 단락
+  html = html.split(/\n{2,}/).map(seg => {
+    seg = seg.trim();
+    if (!seg) return '';
+    if (/^<(h[1-4]|ul|ol|table|pre|blockquote|hr)/.test(seg)) return seg;
+    return `<p>${seg.replace(/\n/g, '<br>')}</p>`;
+  }).join('\n');
+
+  return html;
+}
+
+// ── Raw / 미리보기 전환 ──
+let blogViewMode = 'raw';
+function setBlogView(mode) {
+  blogViewMode = mode;
+  document.getElementById('blogRawContent').classList.toggle('hidden', mode !== 'raw');
+  document.getElementById('blogPreviewContent').classList.toggle('hidden', mode !== 'preview');
+  document.getElementById('viewRawBtn').className = `px-3 py-1 font-semibold transition-colors text-xs ${mode === 'raw' ? 'bg-slate-700 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`;
+  document.getElementById('viewPreviewBtn').className = `px-3 py-1 font-semibold transition-colors text-xs ${mode === 'preview' ? 'bg-slate-700 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`;
 }
 
 function resetSystemPrompt() {
@@ -1470,7 +1603,7 @@ async function generateBlogPost() {
   const apiKey = getGeminiApiKey();
   if (!apiKey) {
     alert('Gemini API 키를 먼저 입력해주세요.');
-    document.getElementById('geminiApiKeyInput').focus();
+    document.getElementById('newApiKeyInput').focus();
     return;
   }
 
@@ -1494,7 +1627,17 @@ async function generateBlogPost() {
 
     document.getElementById('blogErrorBox').classList.add('hidden');
     document.getElementById('blogRawContent').textContent = result;
+    document.getElementById('blogPreviewContent').innerHTML = markdownToHtml(result);
+    // 글자 수 표시
+    const charCount = result.length;
+    const charEl = document.getElementById('blogCharCount');
+    if (charEl) charEl.textContent = `${charCount.toLocaleString()}자`;
+    // Raw 뷰로 초기화
+    setBlogView('raw');
     document.getElementById('blogResultArea').classList.remove('hidden');
+    // 최근 키워드 저장
+    saveRecentKeyword(keyword);
+    renderRecentKeywords();
     document.getElementById('blogResultArea').scrollIntoView({ behavior: 'smooth' });
   } catch (err) {
     const errBox = document.getElementById('blogErrorBox');
