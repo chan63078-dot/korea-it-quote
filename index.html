@@ -406,12 +406,22 @@
       </svg>
       견적 저장 / 불러오기
     </button>
-    <button onclick="shareURL()" id="shareURLBtn"
-      class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-      </svg>
-      견적 URL 복사 (공유용)
+    <div class="flex gap-2">
+      <button onclick="shareURL()" id="shareURLBtn"
+        class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+        </svg>
+        URL 복사
+      </button>
+      <button onclick="openQrModal()"
+        class="px-4 bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-1 text-sm border border-teal-200" title="QR 코드 생성">
+        QR
+      </button>
+    </div>
+    <button onclick="openStatsModal()"
+      class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+      📊 상담 통계 대시보드
     </button>
     <button onclick="toggleLogSection()"
       class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
@@ -450,6 +460,7 @@
         </div>
         <p class="text-sm opacity-80">수강료 계산·커리큘럼 설계·상담일지 자동 생성</p>
         <p class="text-xs opacity-60 mt-0.5" id="todayDate"></p>
+        <p id="quoteValidUntil" class="hidden text-xs mt-0.5 bg-white/20 rounded px-2 py-0.5 inline-block"></p>
       </div>
       <div id="customerBadge" class="hidden bg-white/20 border border-white/30 rounded-xl px-4 py-2 text-right">
         <div id="customerBadgeName" class="font-bold text-white text-sm"></div>
@@ -845,6 +856,21 @@
     </div>
   </div>
 
+  <!-- 카테고리 칩 -->
+  <div class="bg-white rounded-2xl shadow-sm p-4 mb-4">
+    <div class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">빠른 키워드 선택</div>
+    <div class="flex flex-wrap gap-1.5">
+      <button onclick="setBlogKeyword('코리아IT아카데미 대구 파이썬 과정')" class="blog-cat-chip px-3 py-1.5 rounded-full text-xs font-semibold border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition-colors">파이썬</button>
+      <button onclick="setBlogKeyword('코리아IT아카데미 대구 정보보안 취업')" class="blog-cat-chip px-3 py-1.5 rounded-full text-xs font-semibold border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-colors">정보보안</button>
+      <button onclick="setBlogKeyword('코리아IT아카데미 AI 빅데이터 과정')" class="blog-cat-chip px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">AI 빅데이터</button>
+      <button onclick="setBlogKeyword('코리아IT아카데미 대구 정보처리기사')" class="blog-cat-chip px-3 py-1.5 rounded-full text-xs font-semibold border border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors">정보처리기사</button>
+      <button onclick="setBlogKeyword('코리아IT아카데미 웹개발 취업과정')" class="blog-cat-chip px-3 py-1.5 rounded-full text-xs font-semibold border border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100 transition-colors">웹개발</button>
+      <button onclick="setBlogKeyword('코리아IT아카데미 대구 영상편집 과정')" class="blog-cat-chip px-3 py-1.5 rounded-full text-xs font-semibold border border-pink-200 bg-pink-50 text-pink-700 hover:bg-pink-100 transition-colors">영상편집</button>
+      <button onclick="setBlogKeyword('코리아IT아카데미 n8n 자동화 수익화')" class="blog-cat-chip px-3 py-1.5 rounded-full text-xs font-semibold border border-cyan-200 bg-cyan-50 text-cyan-700 hover:bg-cyan-100 transition-colors">n8n 자동화</button>
+      <button onclick="setBlogKeyword('코리아IT아카데미 대구 UI UX 디자인')" class="blog-cat-chip px-3 py-1.5 rounded-full text-xs font-semibold border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors">UI/UX</button>
+    </div>
+  </div>
+
   <!-- 메인 키워드 입력 -->
   <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
     <h3 class="font-bold text-slate-700 mb-3">메인 키워드 입력</h3>
@@ -855,6 +881,17 @@
     <div id="recentKeywordsRow" class="hidden flex flex-wrap gap-1.5 mb-3">
       <span class="text-xs text-slate-400 self-center">최근:</span>
       <div id="recentKeywordChips" class="flex flex-wrap gap-1.5"></div>
+    </div>
+    <!-- 분량 슬라이더 -->
+    <div class="mb-3 bg-slate-50 rounded-xl px-4 py-3">
+      <div class="flex items-center justify-between mb-1.5">
+        <span class="text-xs font-semibold text-slate-600">원고 분량</span>
+        <span id="blogLengthLabel" class="text-xs font-bold text-green-700">보통 (~4000자)</span>
+      </div>
+      <input type="range" id="blogLengthSlider" min="0" max="2" value="1" step="1"
+        oninput="updateBlogLengthLabel(this.value)"
+        class="w-full accent-green-600" />
+      <div class="flex justify-between text-xs text-slate-400 mt-1"><span>간단</span><span>보통</span><span>상세</span></div>
     </div>
     <button onclick="generateBlogPost()" id="blogGenBtn"
       class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2">
@@ -886,11 +923,20 @@
             class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100">TXT 다운로드</button>
         </div>
       </div>
-      <!-- Raw 뷰 -->
-      <div id="blogRawContent" class="px-5 py-4 text-sm text-slate-700 font-mono whitespace-pre-wrap leading-relaxed bg-slate-50 max-h-[60vh] overflow-y-auto"></div>
+      <!-- Raw 뷰 (편집 가능한 textarea) -->
+      <textarea id="blogRawContent" class="w-full px-5 py-4 text-sm text-slate-700 font-mono leading-relaxed bg-slate-50 max-h-[60vh] overflow-y-auto border-0 focus:outline-none resize-none" rows="20" placeholder="생성된 원고가 여기에 표시됩니다..." oninput="syncPreviewFromRaw()"></textarea>
       <!-- 미리보기 뷰 -->
       <div id="blogPreviewContent" class="hidden px-6 py-5 prose prose-slate max-w-none max-h-[60vh] overflow-y-auto text-sm leading-relaxed"></div>
     </div>
+  </div>
+
+  <!-- 생성 이력 -->
+  <div class="mt-4">
+    <button onclick="toggleBlogHistory()" class="w-full flex items-center justify-between bg-white rounded-2xl shadow-sm px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+      <span>📚 생성 이력 <span id="blogHistoryCount" class="text-xs font-normal text-slate-400"></span></span>
+      <span id="blogHistoryArrow" class="text-slate-400">▾</span>
+    </button>
+    <div id="blogHistoryBody" class="hidden mt-2 space-y-2"></div>
   </div>
 
 </div><!-- /blogPage -->
@@ -974,7 +1020,10 @@
   <div class="flex gap-4 mb-4">
     <!-- 키워드 입력 -->
     <div class="flex-1 bg-white rounded-2xl shadow-sm p-5">
-      <h3 class="font-bold text-slate-700 mb-2 text-sm">키워드 입력 <span class="text-slate-400 font-normal">(한 줄에 하나씩)</span></h3>
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-bold text-slate-700 text-sm">키워드 입력 <span class="text-slate-400 font-normal">(한 줄에 하나씩)</span></h3>
+        <button onclick="autoFillWpKeywords()" class="btn-sm bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 text-xs px-3 py-1.5 rounded-lg font-semibold" title="과정 데이터에서 키워드 자동 생성">과정 키워드 자동 생성</button>
+      </div>
       <textarea id="wpKeywords" rows="6" placeholder="코리아IT아카데미 대구 파이썬 과정&#10;코리아IT아카데미 대구 정보보안 취업&#10;코리아IT아카데미 AI 빅데이터 과정..."
         class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-y bg-slate-50"></textarea>
     </div>
@@ -1033,6 +1082,17 @@
   </div>
   <div id="wpBatchError" class="hidden mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 whitespace-pre-line"></div>
 
+  <!-- 스케줄 미리보기 -->
+  <div class="mb-4 bg-white rounded-2xl shadow-sm overflow-hidden">
+    <button onclick="toggleWpSchedule()" class="w-full flex items-center justify-between px-5 py-3 hover:bg-slate-50 transition-colors">
+      <span class="text-sm font-semibold text-slate-700">🗓 발행 스케줄 미리보기</span>
+      <span id="wpScheduleArrow" class="text-slate-400 text-sm">▾</span>
+    </button>
+    <div id="wpScheduleBody" class="hidden px-5 pb-4">
+      <div id="wpScheduleTimeline" class="space-y-1.5 text-xs text-slate-600"></div>
+    </div>
+  </div>
+
   <!-- 큐 목록 -->
   <div id="wpQueueList" class="space-y-2"></div>
 
@@ -1081,7 +1141,38 @@
     <div class="p-5 space-y-3">
       <div id="msgTemplateList" class="flex gap-2 flex-wrap"></div>
       <textarea id="msgTemplateBody" rows="12" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono resize-none focus:outline-none focus:ring-2 focus:ring-purple-300"></textarea>
-      <button id="msgCopyBtn" onclick="copyMsgTemplate()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl text-sm">클립보드 복사</button>
+      <div class="flex gap-2">
+        <button id="msgCopyBtn" onclick="copyMsgTemplate()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl text-sm">클립보드 복사</button>
+        <button onclick="openMailtoTemplate()" class="px-4 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-2.5 rounded-xl text-sm border border-blue-200" title="이메일로 보내기">✉ 이메일</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ QR 코드 모달 ============ -->
+<div id="qrModal" class="modal-overlay hidden" onclick="if(event.target===this)document.getElementById('qrModal').classList.add('hidden')">
+  <div class="modal-box" style="width:400px">
+    <div class="bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
+      <div class="text-lg font-bold">QR 코드 생성</div>
+      <button onclick="document.getElementById('qrModal').classList.add('hidden')" class="text-white opacity-70 hover:opacity-100 text-2xl">&times;</button>
+    </div>
+    <div class="p-6 text-center">
+      <div id="qrCodeImg" class="flex justify-center mb-4"></div>
+      <p class="text-xs text-slate-500 mb-3" id="qrUrlLabel"></p>
+      <button onclick="downloadQr()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-xl text-sm">QR 이미지 다운로드</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 상담 통계 대시보드 모달 ============ -->
+<div id="statsModal" class="modal-overlay hidden" onclick="if(event.target===this)document.getElementById('statsModal').classList.add('hidden')">
+  <div class="modal-box" style="width:760px">
+    <div class="bg-gradient-to-r from-violet-600 to-purple-700 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
+      <div class="text-lg font-bold">📊 상담 통계 대시보드</div>
+      <button onclick="document.getElementById('statsModal').classList.add('hidden')" class="text-white opacity-70 hover:opacity-100 text-2xl">&times;</button>
+    </div>
+    <div class="p-6 overflow-y-auto" style="max-height:70vh">
+      <div id="statsContent"></div>
     </div>
   </div>
 </div>
@@ -1566,13 +1657,13 @@ function getActiveModel() {
   return GEMINI_MODELS[Math.min(activeModelIdx, GEMINI_MODELS.length - 1)];
 }
 
-async function _fetchGemini(apiKey, userPrompt, systemInstruction, modelName) {
+async function _fetchGemini(apiKey, userPrompt, systemInstruction, modelName, maxTokens) {
   const model = modelName || getActiveModel();
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const body = {
     ...(systemInstruction ? { system_instruction: { parts: [{ text: systemInstruction }] } } : {}),
     contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-    generationConfig: { temperature: 0.8, maxOutputTokens: 8192 }
+    generationConfig: { temperature: 0.8, maxOutputTokens: maxTokens || 8192 }
   };
   const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   if (!res.ok) {
@@ -1589,7 +1680,7 @@ async function _fetchGemini(apiKey, userPrompt, systemInstruction, modelName) {
   return data.candidates?.[0]?.content?.parts?.[0]?.text || '응답이 없습니다.';
 }
 
-async function callGeminiAPI(userPrompt, systemInstruction) {
+async function callGeminiAPI(userPrompt, systemInstruction, maxTokens) {
   const keys = loadApiKeys();
   if (!keys.length) throw new Error('API 키가 없습니다. 키를 추가해주세요.');
 
@@ -1602,7 +1693,7 @@ async function callGeminiAPI(userPrompt, systemInstruction) {
 
     for (let mi = 0; mi < GEMINI_MODELS.length; mi++) {
       try {
-        const result = await _fetchGemini(apiKey, userPrompt, systemInstruction, GEMINI_MODELS[mi]);
+        const result = await _fetchGemini(apiKey, userPrompt, systemInstruction, GEMINI_MODELS[mi], maxTokens);
         // 성공 시 활성 키/모델 저장
         if (keyIdx !== startKeyIdx) {
           setActiveKeyIdx(keyIdx);
@@ -1664,6 +1755,7 @@ function initBlogPage() {
   updateApiKeyBanners();
   updateModelBadge();
   renderRecentKeywords();
+  updateBlogHistoryCount();
 }
 
 // ── 최근 키워드 히스토리 ──
@@ -1753,6 +1845,10 @@ function setBlogView(mode) {
   blogViewMode = mode;
   document.getElementById('blogRawContent').classList.toggle('hidden', mode !== 'raw');
   document.getElementById('blogPreviewContent').classList.toggle('hidden', mode !== 'preview');
+  if (mode === 'preview') {
+    const raw = document.getElementById('blogRawContent').value;
+    document.getElementById('blogPreviewContent').innerHTML = markdownToHtml(raw);
+  }
   document.getElementById('viewRawBtn').className = `px-3 py-1 font-semibold transition-colors text-xs ${mode === 'raw' ? 'bg-slate-700 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`;
   document.getElementById('viewPreviewBtn').className = `px-3 py-1 font-semibold transition-colors text-xs ${mode === 'preview' ? 'bg-slate-700 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`;
 }
@@ -1787,13 +1883,17 @@ async function generateBlogPost() {
   btnIcon.textContent = '⏳';
 
   try {
+    // 분량 슬라이더 설정 반영
+    const maxTokens = getBlogMaxTokens();
+
     const result = await callGeminiAPI(
       `다음 키워드로 블로그 원고를 작성해주세요: "${keyword}"`,
-      sysPrompt
+      sysPrompt,
+      maxTokens
     );
 
     document.getElementById('blogErrorBox').classList.add('hidden');
-    document.getElementById('blogRawContent').textContent = result;
+    document.getElementById('blogRawContent').value = result;
     document.getElementById('blogPreviewContent').innerHTML = markdownToHtml(result);
     // 글자 수 표시
     const charCount = result.length;
@@ -1805,6 +1905,8 @@ async function generateBlogPost() {
     // 최근 키워드 저장
     saveRecentKeyword(keyword);
     renderRecentKeywords();
+    // 생성 이력 저장
+    saveBlogHistory(keyword, result);
     document.getElementById('blogResultArea').scrollIntoView({ behavior: 'smooth' });
   } catch (err) {
     const errBox = document.getElementById('blogErrorBox');
@@ -1822,7 +1924,7 @@ async function generateBlogPost() {
 }
 
 function copyBlogContent() {
-  const text = document.getElementById('blogRawContent').textContent;
+  const text = document.getElementById('blogRawContent').value;
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.getElementById('copyBlogBtn');
     btn.textContent = '복사됨!';
@@ -1831,7 +1933,7 @@ function copyBlogContent() {
 }
 
 function downloadBlogMd() {
-  const text = document.getElementById('blogRawContent').textContent;
+  const text = document.getElementById('blogRawContent').value;
   const keyword = document.getElementById('blogKeyword').value.replace(/\s+/g, '_') || 'blog';
   const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
@@ -2487,6 +2589,17 @@ function render() {
   } else {
     badge.classList.add('hidden');
   }
+  // 견적 유효기간 표시 (과목 선택 시)
+  const validEl = document.getElementById('quoteValidUntil');
+  if (validEl) {
+    if (selected.length > 0) {
+      const expiry = new Date(); expiry.setDate(expiry.getDate() + 7);
+      validEl.textContent = `견적 유효: ${expiry.toLocaleDateString('ko-KR')}까지`;
+      validEl.classList.remove('hidden');
+    } else {
+      validEl.classList.add('hidden');
+    }
+  }
 
   // 예상 수강기간
   if (selected.length > 0) {
@@ -2859,6 +2972,10 @@ function printQuote() {
           <td style="width:22%;padding:2px 4px;">${todayStr()}</td>
           <td style="width:14%;padding:2px 4px;">상 담 자 :</td>
           <td style="padding:2px 4px;">${consultant}</td>
+        </tr>
+        <tr>
+          <td style="padding:2px 4px;color:#dc2626;font-weight:bold;">견적 유효기간 :</td>
+          <td colspan="3" style="padding:2px 4px;color:#dc2626;font-weight:bold;">${(()=>{const d=new Date();d.setDate(d.getDate()+7);return d.toLocaleDateString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit'})})()}까지 (7일)</td>
         </tr>
         <tr>
           <td style="padding:2px 4px;">고 객 명 :</td>
@@ -3816,6 +3933,244 @@ function checkDiscountLimit() {
   if (sum > 50) { el.textContent = `⚠️ 할인율 ${sum}% — 팀장 승인이 필요합니다`; el.classList.remove('hidden'); }
   else if (sum > 35) { el.textContent = `🔶 할인율 ${sum}% — 내부 기준을 초과합니다`; el.classList.remove('hidden'); }
   else { el.classList.add('hidden'); }
+}
+
+// ============ QR 코드 모달 ============
+function openQrModal() {
+  const url = location.href;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(url)}`;
+  const modal = document.getElementById('qrModal');
+  document.getElementById('qrCodeImg').innerHTML = `<img src="${qrUrl}" alt="QR Code" class="rounded-xl shadow-md" style="width:240px;height:240px" id="qrImg" />`;
+  document.getElementById('qrUrlLabel').textContent = url.length > 60 ? url.slice(0,60)+'...' : url;
+  modal.classList.remove('hidden');
+}
+function downloadQr() {
+  const img = document.getElementById('qrImg');
+  if (!img) return;
+  const a = document.createElement('a');
+  a.href = img.src;
+  a.download = 'korea_it_qr.png';
+  a.target = '_blank';
+  a.click();
+}
+
+// ============ 상담 통계 대시보드 ============
+function openStatsModal() {
+  const logs = JSON.parse(localStorage.getItem('consultLog') || '[]');
+  const el = document.getElementById('statsContent');
+  if (!logs.length) {
+    el.innerHTML = '<div class="text-center text-slate-400 py-12">상담 이력이 없습니다.<br>견적 작성 후 "상담일지 저장" 버튼을 눌러 이력을 쌓아보세요.</div>';
+    document.getElementById('statsModal').classList.remove('hidden');
+    return;
+  }
+  // 과정별 빈도
+  const byType = {};
+  const byGoal = {};
+  const byRoute = {};
+  const finals = [];
+  logs.forEach(l => {
+    byType[l.courseType] = (byType[l.courseType] || 0) + 1;
+    if (l.goal) byGoal[l.goal] = (byGoal[l.goal] || 0) + 1;
+    if (l.consultant) byRoute[l.consultant] = (byRoute[l.consultant] || 0) + 1;
+    if (l.final) finals.push(l.final);
+  });
+  const avgFinal = finals.length ? Math.round(finals.reduce((s,v)=>s+v,0) / finals.length) : 0;
+  const maxFinal = finals.length ? Math.max(...finals) : 0;
+  const minFinal = finals.length ? Math.min(...finals) : 0;
+  const maxTypeCount = Math.max(...Object.values(byType), 1);
+
+  function barRow(label, count, max, color='bg-violet-500') {
+    const pct = Math.round(count / max * 100);
+    return `<div class="flex items-center gap-3 mb-1.5">
+      <div class="w-32 text-xs text-slate-600 text-right flex-shrink-0 truncate">${label}</div>
+      <div class="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
+        <div class="${color} h-4 rounded-full transition-all" style="width:${pct}%"></div>
+      </div>
+      <div class="w-8 text-xs font-bold text-slate-700 text-right">${count}</div>
+    </div>`;
+  }
+
+  el.innerHTML = `
+    <div class="grid grid-cols-3 gap-4 mb-6">
+      <div class="rounded-2xl bg-violet-50 border border-violet-100 p-4 text-center">
+        <div class="text-2xl font-bold text-violet-700 mb-1">${logs.length}</div>
+        <div class="text-xs text-slate-500">총 상담 수</div>
+      </div>
+      <div class="rounded-2xl bg-green-50 border border-green-100 p-4 text-center">
+        <div class="text-2xl font-bold text-green-700 mb-1">${fmt(avgFinal)}</div>
+        <div class="text-xs text-slate-500">평균 최종 수강료</div>
+      </div>
+      <div class="rounded-2xl bg-blue-50 border border-blue-100 p-4 text-center">
+        <div class="text-2xl font-bold text-blue-700 mb-1">${fmt(maxFinal)}</div>
+        <div class="text-xs text-slate-500">최고 견적금액</div>
+      </div>
+    </div>
+    <div class="mb-5">
+      <div class="font-semibold text-slate-700 mb-3 text-sm">과정별 상담 빈도</div>
+      ${Object.entries(byType).sort((a,b)=>b[1]-a[1]).map(([k,v])=>barRow(k,v,maxTypeCount,'bg-violet-500')).join('')}
+    </div>
+    ${Object.keys(byGoal).length ? `<div class="mb-5">
+      <div class="font-semibold text-slate-700 mb-3 text-sm">수강 목적별</div>
+      ${Object.entries(byGoal).sort((a,b)=>b[1]-a[1]).map(([k,v])=>barRow(k,v,Math.max(...Object.values(byGoal),1),'bg-blue-400')).join('')}
+    </div>` : ''}
+    <div class="bg-slate-50 rounded-2xl p-4">
+      <div class="font-semibold text-slate-700 mb-2 text-sm">수강료 분포</div>
+      <div class="grid grid-cols-3 gap-3 text-center text-xs">
+        <div><div class="font-bold text-red-600 text-lg">${fmt(maxFinal)}원</div><div class="text-slate-400">최고</div></div>
+        <div><div class="font-bold text-green-600 text-lg">${fmt(avgFinal)}원</div><div class="text-slate-400">평균</div></div>
+        <div><div class="font-bold text-slate-600 text-lg">${fmt(minFinal)}원</div><div class="text-slate-400">최저</div></div>
+      </div>
+    </div>`;
+  document.getElementById('statsModal').classList.remove('hidden');
+}
+
+// ============ 이메일 보내기 (mailto) ============
+function openMailtoTemplate() {
+  const body = document.getElementById('msgTemplateBody').value;
+  const name = document.getElementById('customerName')?.value?.trim() || '';
+  const subject = encodeURIComponent(`[코리아IT아카데미] ${name ? name + '님 ' : ''}수강료 견적 안내`);
+  const encodedBody = encodeURIComponent(body);
+  window.location.href = `mailto:?subject=${subject}&body=${encodedBody}`;
+}
+
+// ============ 블로그 카테고리 칩 ============
+function setBlogKeyword(kw) {
+  const input = document.getElementById('blogKeyword');
+  if (input) { input.value = kw; input.focus(); }
+}
+
+// ============ 블로그 분량 슬라이더 ============
+const BLOG_LENGTH_CONFIG = [
+  { label: '간단 (~2000자)', tokens: 3000 },
+  { label: '보통 (~4000자)', tokens: 6000 },
+  { label: '상세 (~6000자)', tokens: 8192 },
+];
+function updateBlogLengthLabel(val) {
+  const cfg = BLOG_LENGTH_CONFIG[parseInt(val)];
+  document.getElementById('blogLengthLabel').textContent = cfg.label;
+}
+function getBlogMaxTokens() {
+  const val = parseInt(document.getElementById('blogLengthSlider')?.value || '1');
+  return BLOG_LENGTH_CONFIG[val]?.tokens || 6000;
+}
+
+// ============ 블로그 Raw → 미리보기 동기화 ============
+function syncPreviewFromRaw() {
+  const raw = document.getElementById('blogRawContent').value;
+  document.getElementById('blogPreviewContent').innerHTML = markdownToHtml(raw);
+  const charEl = document.getElementById('blogCharCount');
+  if (charEl) charEl.textContent = `${raw.length.toLocaleString()}자`;
+}
+
+// ============ 블로그 생성 이력 ============
+function loadBlogHistory() {
+  try { return JSON.parse(localStorage.getItem('blogHistory') || '[]'); } catch { return []; }
+}
+function saveBlogHistory(keyword, content) {
+  let hist = loadBlogHistory();
+  hist.unshift({ keyword, content, time: new Date().toLocaleString('ko-KR'), chars: content.length });
+  if (hist.length > 20) hist = hist.slice(0, 20);
+  localStorage.setItem('blogHistory', JSON.stringify(hist));
+  updateBlogHistoryCount();
+}
+function updateBlogHistoryCount() {
+  const hist = loadBlogHistory();
+  const el = document.getElementById('blogHistoryCount');
+  if (el) el.textContent = hist.length ? `(${hist.length}개)` : '';
+}
+function toggleBlogHistory() {
+  const body = document.getElementById('blogHistoryBody');
+  const arrow = document.getElementById('blogHistoryArrow');
+  const isHidden = body.classList.toggle('hidden');
+  arrow.textContent = isHidden ? '▾' : '▴';
+  if (!isHidden) renderBlogHistory();
+}
+function renderBlogHistory() {
+  const hist = loadBlogHistory();
+  const el = document.getElementById('blogHistoryBody');
+  if (!hist.length) {
+    el.innerHTML = '<div class="bg-white rounded-2xl shadow-sm p-4 text-sm text-slate-400 text-center">이력이 없습니다</div>';
+    return;
+  }
+  el.innerHTML = hist.map((h, i) => `
+    <div class="bg-white rounded-2xl shadow-sm px-4 py-3 flex items-start gap-3">
+      <div class="flex-1 min-w-0">
+        <div class="font-semibold text-slate-700 text-sm truncate">${h.keyword}</div>
+        <div class="text-xs text-slate-400 mt-0.5">${h.time} · ${h.chars.toLocaleString()}자</div>
+      </div>
+      <button onclick="restoreBlogHistory(${i})" class="btn-sm bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 flex-shrink-0">불러오기</button>
+      <button onclick="deleteBlogHistory(${i})" class="text-slate-300 hover:text-red-400 flex-shrink-0">✕</button>
+    </div>`).join('');
+}
+function restoreBlogHistory(i) {
+  const hist = loadBlogHistory();
+  const h = hist[i];
+  if (!h) return;
+  document.getElementById('blogKeyword').value = h.keyword;
+  document.getElementById('blogRawContent').value = h.content;
+  document.getElementById('blogPreviewContent').innerHTML = markdownToHtml(h.content);
+  const charEl = document.getElementById('blogCharCount');
+  if (charEl) charEl.textContent = `${h.content.length.toLocaleString()}자`;
+  document.getElementById('blogResultArea').classList.remove('hidden');
+  setBlogView('raw');
+  document.getElementById('blogResultArea').scrollIntoView({ behavior: 'smooth' });
+}
+function deleteBlogHistory(i) {
+  let hist = loadBlogHistory();
+  hist.splice(i, 1);
+  localStorage.setItem('blogHistory', JSON.stringify(hist));
+  updateBlogHistoryCount();
+  renderBlogHistory();
+}
+
+// ============ WP 과정 데이터 연동 키워드 자동 생성 ============
+function autoFillWpKeywords() {
+  const courseTypes = Object.keys(COURSE_DATA);
+  const keywords = [];
+  const prefix = '코리아IT아카데미 대구';
+  courseTypes.forEach(type => {
+    keywords.push(`${prefix} ${type} 과정`);
+    keywords.push(`${prefix} ${type} 취업`);
+  });
+  // 추가 상위 과목명으로도 생성
+  const topCourses = [];
+  courseTypes.forEach(type => {
+    COURSE_DATA[type].slice(0, 2).forEach(c => {
+      topCourses.push(`${prefix} ${c.name}`);
+    });
+  });
+  const all = [...new Set([...keywords, ...topCourses.slice(0, 10)])];
+  document.getElementById('wpKeywords').value = all.join('\n');
+}
+
+// ============ WP 발행 스케줄 미리보기 ============
+function toggleWpSchedule() {
+  const body = document.getElementById('wpScheduleBody');
+  const arrow = document.getElementById('wpScheduleArrow');
+  const isHidden = body.classList.toggle('hidden');
+  arrow.textContent = isHidden ? '▾' : '▴';
+  if (!isHidden) renderWpSchedule();
+}
+function renderWpSchedule() {
+  const el = document.getElementById('wpScheduleTimeline');
+  const raw = (document.getElementById('wpKeywords')?.value || '').trim();
+  const keywords = raw.split('\n').map(k => k.trim()).filter(Boolean);
+  const intervalMin = parseInt(document.getElementById('wpIntervalSlider')?.value || '5', 10);
+  if (!keywords.length) {
+    el.innerHTML = '<div class="text-slate-400 py-2">키워드를 입력하면 스케줄이 표시됩니다</div>';
+    return;
+  }
+  const now = new Date();
+  el.innerHTML = keywords.map((kw, i) => {
+    const d = new Date(now.getTime() + i * intervalMin * 60 * 1000);
+    const timeStr = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+    const dateStr = d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+    return `<div class="flex items-center gap-2 py-1 border-b border-slate-50 last:border-0">
+      <div class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold flex-shrink-0">${i+1}</div>
+      <div class="text-indigo-600 font-mono text-xs flex-shrink-0">${dateStr} ${timeStr}</div>
+      <div class="text-slate-600 truncate">${kw}</div>
+    </div>`;
+  }).join('');
 }
 </script>
 </body>
