@@ -1436,25 +1436,35 @@ async function callGeminiAPI(userPrompt, systemInstruction) {
   const keys = loadApiKeys();
   if (!keys.length) throw new Error('API 키가 없습니다. 키를 추가해주세요.');
 
-  const apiKey = keys[getActiveKeyIdx()].key;
+  const startKeyIdx = getActiveKeyIdx();
 
-  // 1. 현재 모델로 시도, 안 되면 다음 모델로 자동 전환
-  for (let mi = activeModelIdx; mi < GEMINI_MODELS.length; mi++) {
-    try {
-      const result = await _fetchGemini(apiKey, userPrompt, systemInstruction, GEMINI_MODELS[mi]);
-      if (mi !== activeModelIdx) {
-        activeModelIdx = mi;
-        localStorage.setItem('geminiModelIdx', String(mi));
-        updateModelBadge();
+  // 키 순환 → 모델 순환: 할당량 초과 시 다음 모델, 모든 모델 소진 시 다음 키
+  for (let ki = 0; ki < keys.length; ki++) {
+    const keyIdx = (startKeyIdx + ki) % keys.length;
+    const apiKey = keys[keyIdx].key;
+
+    for (let mi = 0; mi < GEMINI_MODELS.length; mi++) {
+      try {
+        const result = await _fetchGemini(apiKey, userPrompt, systemInstruction, GEMINI_MODELS[mi]);
+        // 성공 시 활성 키/모델 저장
+        if (keyIdx !== startKeyIdx) {
+          setActiveKeyIdx(keyIdx);
+          renderApiKeyList();
+          updateApiKeyBanners();
+        }
+        if (mi !== activeModelIdx) {
+          activeModelIdx = mi;
+          localStorage.setItem('geminiModelIdx', String(mi));
+          updateModelBadge();
+        }
+        return result;
+      } catch (err) {
+        if (err.isQuota || err.isNotFound) continue; // 다음 모델 시도
+        throw err; // 인증 오류 등 다른 에러는 즉시 중단
       }
-      return result;
-    } catch (err) {
-      if (err.isNotFound && mi < GEMINI_MODELS.length - 1) continue; // 다음 모델 시도
-      if (err.isQuota) throw new Error(`할당량 초과 (${GEMINI_MODELS[mi]})\n\n잠시 후 다시 시도하거나 새 API 키를 추가해주세요.\n새 키 발급: aistudio.google.com`);
-      throw err;
     }
   }
-  throw new Error('사용 가능한 모델을 찾지 못했습니다. API 키를 확인해주세요.');
+  throw new Error('모든 API 키와 모델의 할당량이 초과되었습니다.\n새 API 키를 추가해주세요.\n새 키 발급: aistudio.google.com');
 }
 
 function updateModelBadge() {
