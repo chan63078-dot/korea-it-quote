@@ -802,7 +802,7 @@
     <div class="flex items-center gap-2 px-5 py-3 bg-yellow-50 border-b border-yellow-100">
       <span class="text-yellow-500 text-base">🔑</span>
       <span class="font-semibold text-yellow-800 text-sm flex-1">API 키 관리</span>
-      <span id="activeModelBadge" class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 mr-1">gemini-1.5-flash</span>
+      <span id="activeModelBadge" class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 mr-1">gemini-2.5-flash-lite</span>
       <span id="apiKeyStatusBadge" class="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-500">키 없음</span>
     </div>
     <!-- 키 목록 -->
@@ -1548,11 +1548,12 @@ function updateApiKeyBanners() {
 
 // 시도할 모델 목록 (순서대로 fallback)
 const GEMINI_MODELS = [
-  'gemini-1.5-flash',
-  'gemini-1.5-flash-8b',
-  'gemini-1.5-pro',
+  'gemini-2.5-flash-lite',
+  'gemini-2.5-flash',
   'gemini-2.0-flash-lite',
   'gemini-2.0-flash',
+  'gemini-flash-lite-latest',
+  'gemini-flash-latest',
 ];
 let activeModelIdx = parseInt(localStorage.getItem('geminiModelIdx') || '0', 10);
 
@@ -1846,7 +1847,7 @@ async function testApiKey() {
     return;
   }
   const key = keys[getActiveKeyIdx()].key;
-  const model = 'gemini-2.0-flash';
+  const model = 'gemini-2.5-flash-lite';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
   try {
     const res = await fetch(url, {
