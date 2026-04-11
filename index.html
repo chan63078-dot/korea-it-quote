@@ -187,7 +187,11 @@
     </button>
     <button onclick="setSidebarTab('blog')" id="tabBlog"
       class="sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-500 hover:bg-slate-50">
-      <span class="w-2 h-2 rounded-full bg-slate-300 flex-shrink-0"></span> 🔥 블로그 자동화
+      <span class="w-2 h-2 rounded-full bg-slate-300 flex-shrink-0"></span> 🔥 IT 홍보글
+    </button>
+    <button onclick="setSidebarTab('daily')" id="tabDaily"
+      class="sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-500 hover:bg-slate-50">
+      <span class="w-2 h-2 rounded-full bg-slate-300 flex-shrink-0"></span> 📝 일상 블로그
     </button>
     <button onclick="setSidebarTab('wp')" id="tabWp"
       class="sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-500 hover:bg-slate-50">
@@ -903,6 +907,17 @@
 
   <!-- 생성 결과 -->
   <div id="blogResultArea" class="hidden">
+    <!-- 메타 정보 카드 -->
+    <div id="blogMetaCard" class="hidden mb-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-4">
+      <div class="text-xs font-bold text-green-700 uppercase tracking-wide mb-2">📊 SEO 메타 정보</div>
+      <div class="space-y-1.5">
+        <div><span class="text-xs font-semibold text-slate-500">제목</span><div id="metaTitle" class="text-sm font-bold text-slate-800 mt-0.5"></div></div>
+        <div><span class="text-xs font-semibold text-slate-500">메타설명</span><div id="metaDesc" class="text-xs text-slate-600 mt-0.5"></div></div>
+        <div><span class="text-xs font-semibold text-slate-500">태그</span><div id="metaTags" class="flex flex-wrap gap-1 mt-1"></div></div>
+        <div><span class="text-xs font-semibold text-slate-500">연관키워드</span><div id="metaKeywords" class="text-xs text-slate-500 mt-0.5"></div></div>
+      </div>
+      <button onclick="copyMetaInfo()" class="mt-3 px-3 py-1 text-xs bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">메타 정보 복사</button>
+    </div>
     <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
       <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
         <div class="flex items-center gap-3">
@@ -910,7 +925,6 @@
           <span id="blogCharCount" class="text-xs text-slate-400"></span>
         </div>
         <div class="flex gap-2 items-center">
-          <!-- Raw / 미리보기 토글 -->
           <div class="flex rounded-lg overflow-hidden border border-slate-200 text-xs">
             <button id="viewRawBtn" onclick="setBlogView('raw')"
               class="px-3 py-1 bg-slate-700 text-white font-semibold transition-colors">Raw</button>
@@ -923,9 +937,7 @@
             class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100">TXT 다운로드</button>
         </div>
       </div>
-      <!-- Raw 뷰 (편집 가능한 textarea) -->
       <textarea id="blogRawContent" class="w-full px-5 py-4 text-sm text-slate-700 font-mono leading-relaxed bg-slate-50 max-h-[60vh] overflow-y-auto border-0 focus:outline-none resize-none" rows="20" placeholder="생성된 원고가 여기에 표시됩니다..." oninput="syncPreviewFromRaw()"></textarea>
-      <!-- 미리보기 뷰 -->
       <div id="blogPreviewContent" class="hidden px-6 py-5 prose prose-slate max-w-none max-h-[60vh] overflow-y-auto text-sm leading-relaxed"></div>
     </div>
   </div>
@@ -940,6 +952,134 @@
   </div>
 
 </div><!-- /blogPage -->
+
+<!-- ===== 일상 블로그 페이지 ===== -->
+<div id="dailyPage" class="hidden">
+
+  <!-- 히어로 배너 -->
+  <div class="mb-5 rounded-2xl text-white px-6 py-5" style="background:linear-gradient(135deg,#6d28d9 0%,#a855f7 100%)">
+    <div class="flex items-center gap-2 mb-1">
+      <span class="text-xl">📝</span>
+      <h1 class="text-xl font-bold">일상 블로그 · 정보성 글 생성</h1>
+    </div>
+    <p class="text-sm opacity-80">네이버 크리에이터 어드바이저 기반 · 유입 최적화 · 검색 상위노출</p>
+  </div>
+
+  <!-- 네이버 어드바이저 안내 -->
+  <div class="mb-4 bg-green-50 border border-green-200 rounded-2xl px-4 py-3">
+    <div class="flex items-start gap-2">
+      <span class="text-green-600 mt-0.5">💡</span>
+      <div class="text-xs text-green-800">
+        <strong>사용 방법:</strong> 네이버 크리에이터 어드바이저에서 추천 키워드를 확인하고 아래에 입력하세요.<br>
+        AI가 해당 키워드로 정보를 분석해 검색 유입에 최적화된 일상 블로그 글을 작성해 드립니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- 글 유형 선택 -->
+  <div class="bg-white rounded-2xl shadow-sm p-4 mb-4">
+    <div class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">글 유형 선택</div>
+    <div class="flex flex-wrap gap-2">
+      <button onclick="setDailyType('info')" id="dtypeInfo"
+        class="daily-type-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-purple-300 bg-purple-100 text-purple-700">📖 정보성</button>
+      <button onclick="setDailyType('review')" id="dtypeReview"
+        class="daily-type-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 bg-white text-slate-500 hover:bg-slate-50">⭐ 후기/경험</button>
+      <button onclick="setDailyType('compare')" id="dtypeCompare"
+        class="daily-type-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 bg-white text-slate-500 hover:bg-slate-50">⚖️ 비교분석</button>
+      <button onclick="setDailyType('tips')" id="dtypeTips"
+        class="daily-type-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 bg-white text-slate-500 hover:bg-slate-50">🔑 꿀팁/노하우</button>
+      <button onclick="setDailyType('daily')" id="dtypeDaily"
+        class="daily-type-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 bg-white text-slate-500 hover:bg-slate-50">☀️ 일상/에세이</button>
+    </div>
+  </div>
+
+  <!-- 키워드 입력 -->
+  <div class="bg-white rounded-2xl shadow-sm p-5 mb-4">
+    <h3 class="font-bold text-slate-700 mb-1">키워드 입력</h3>
+    <p class="text-xs text-slate-400 mb-3">네이버 크리에이터 어드바이저 추천 키워드를 입력하세요</p>
+    <input type="text" id="dailyKeyword" placeholder="예: 대구 맛집 추천, 직장인 부업, 운동 습관 만들기"
+      class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 mb-2"
+      onkeydown="if(event.key==='Enter') generateDailyPost()" />
+
+    <!-- 최근 키워드 -->
+    <div id="dailyRecentRow" class="hidden flex flex-wrap gap-1.5 mb-3">
+      <span class="text-xs text-slate-400 self-center">최근:</span>
+      <div id="dailyRecentChips" class="flex flex-wrap gap-1.5"></div>
+    </div>
+
+    <!-- 추가 정보 입력 (선택) -->
+    <div class="mb-3">
+      <label class="text-xs font-semibold text-slate-500 mb-1 block">추가 정보 / 경험 메모 <span class="font-normal text-slate-400">(선택 — 입력하면 더 자연스러운 글이 생성됩니다)</span></label>
+      <textarea id="dailyMemo" rows="3" placeholder="예: 실제로 가봤는데 주차가 어려웠음, 가격대는 1인 1.5만원 정도"
+        class="w-full border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none bg-slate-50"></textarea>
+    </div>
+
+    <!-- 분량 슬라이더 -->
+    <div class="mb-3 bg-slate-50 rounded-xl px-4 py-3">
+      <div class="flex items-center justify-between mb-1.5">
+        <span class="text-xs font-semibold text-slate-600">원고 분량</span>
+        <span id="dailyLengthLabel" class="text-xs font-bold text-purple-700">보통 (~3000자)</span>
+      </div>
+      <input type="range" id="dailyLengthSlider" min="0" max="2" value="1" step="1"
+        oninput="updateDailyLengthLabel(this.value)" class="w-full accent-purple-600" />
+      <div class="flex justify-between text-xs text-slate-400 mt-1"><span>간단</span><span>보통</span><span>상세</span></div>
+    </div>
+
+    <button onclick="generateDailyPost()" id="dailyGenBtn"
+      class="w-full text-white font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2"
+      style="background:linear-gradient(135deg,#6d28d9,#a855f7)">
+      <span id="dailyGenIcon">📝</span>
+      <span id="dailyGenText">블로그 글 생성</span>
+    </button>
+    <div id="dailyErrorBox" class="hidden mt-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 whitespace-pre-line"></div>
+  </div>
+
+  <!-- 생성 결과 -->
+  <div id="dailyResultArea" class="hidden">
+    <!-- 메타 카드 -->
+    <div id="dailyMetaCard" class="hidden mb-3 bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-2xl p-4">
+      <div class="text-xs font-bold text-purple-700 uppercase tracking-wide mb-2">📊 네이버 최적화 정보</div>
+      <div class="space-y-1.5">
+        <div><span class="text-xs font-semibold text-slate-500">제목</span><div id="dailyMetaTitle" class="text-sm font-bold text-slate-800 mt-0.5"></div></div>
+        <div><span class="text-xs font-semibold text-slate-500">태그</span><div id="dailyMetaTags" class="flex flex-wrap gap-1 mt-1"></div></div>
+        <div><span class="text-xs font-semibold text-slate-500">연관키워드</span><div id="dailyMetaKeywords" class="text-xs text-slate-500 mt-0.5"></div></div>
+      </div>
+      <button onclick="copyDailyMetaInfo()" class="mt-3 px-3 py-1 text-xs bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">메타 정보 복사</button>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-3">
+          <h3 class="font-bold text-slate-700">생성된 글</h3>
+          <span id="dailyCharCount" class="text-xs text-slate-400"></span>
+        </div>
+        <div class="flex gap-2 items-center">
+          <div class="flex rounded-lg overflow-hidden border border-slate-200 text-xs">
+            <button id="dailyViewRawBtn" onclick="setDailyView('raw')"
+              class="px-3 py-1 bg-slate-700 text-white font-semibold">Raw</button>
+            <button id="dailyViewPreviewBtn" onclick="setDailyView('preview')"
+              class="px-3 py-1 bg-white text-slate-500 font-semibold hover:bg-slate-50">미리보기</button>
+          </div>
+          <button onclick="copyDailyContent()"
+            class="btn-sm bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100">복사</button>
+          <button onclick="downloadDailyTxt()"
+            class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100">TXT 다운로드</button>
+        </div>
+      </div>
+      <textarea id="dailyRawContent" class="w-full px-5 py-4 text-sm text-slate-700 font-mono leading-relaxed bg-slate-50 max-h-[60vh] overflow-y-auto border-0 focus:outline-none resize-none" rows="20" oninput="syncDailyPreview()"></textarea>
+      <div id="dailyPreviewContent" class="hidden px-6 py-5 max-h-[60vh] overflow-y-auto text-sm leading-relaxed"></div>
+    </div>
+  </div>
+
+  <!-- 생성 이력 -->
+  <div class="mt-4">
+    <button onclick="toggleDailyHistory()" class="w-full flex items-center justify-between bg-white rounded-2xl shadow-sm px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+      <span>📚 생성 이력 <span id="dailyHistoryCount" class="text-xs font-normal text-slate-400"></span></span>
+      <span id="dailyHistoryArrow" class="text-slate-400">▾</span>
+    </button>
+    <div id="dailyHistoryBody" class="hidden mt-2 space-y-2"></div>
+  </div>
+
+</div><!-- /dailyPage -->
 
 <!-- ===== 워드프레스 예약 발행 페이지 ===== -->
 <div id="wpPage" class="hidden">
@@ -1335,7 +1475,7 @@ let selectedDeptIds = new Set(DEPT_MAP.map(d => d.id)); // 초기 전체 선택
 
 // ============ 사이드바 탭 ============
 function setSidebarTab(tab) {
-  const tabs = { quote: 'tabQuote', blog: 'tabBlog', wp: 'tabWp' };
+  const tabs = { quote: 'tabQuote', blog: 'tabBlog', daily: 'tabDaily', wp: 'tabWp' };
   const activeClass = 'sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors bg-red-50 text-red-700';
   const inactiveClass = 'sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-500 hover:bg-slate-50';
 
@@ -1344,15 +1484,16 @@ function setSidebarTab(tab) {
     if (el) el.className = t === tab ? activeClass : inactiveClass;
   });
 
-  ['quotePage','blogPage','wpPage'].forEach(id => {
+  ['quotePage','blogPage','dailyPage','wpPage'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.add('hidden');
   });
-  const pageMap = { quote: 'quotePage', blog: 'blogPage', wp: 'wpPage' };
+  const pageMap = { quote: 'quotePage', blog: 'blogPage', daily: 'dailyPage', wp: 'wpPage' };
   const pageEl = document.getElementById(pageMap[tab]);
   if (pageEl) pageEl.classList.remove('hidden');
 
   if (tab === 'blog') initBlogPage();
+  if (tab === 'daily') initDailyPage();
   if (tab === 'wp') initWpPage();
 }
 
@@ -1723,23 +1864,32 @@ function updateModelBadge() {
   if (hero) hero.textContent = model;
 }
 
-// ============ 블로그 자동화 ============
+// ============ IT 홍보글 자동화 ============
 const DEFAULT_SYSTEM_PROMPT = `당신은 코리아IT아카데미 대구지점의 전문 SEO 블로그 작가입니다.
-- 결과물은 바로 복사-붙여넣기 가능한 마크다운으로만 출력
-- 홍보 대상: 코리아IT아카데미 대구지점
-- 문단 규칙: 한 문단 1-3문장, 220자 이내 준수
-- 본문에 마크다운 표 최소 1개 포함
+결과물은 아래 형식을 반드시 지켜 마크다운으로만 출력합니다.
 
-# Task
-- 구성: 제목(H1), 도입, 목차, 본문(H2/H3/H4), 표, Q&A(5개), 마무리, CTA(1개)
-- CTA는 마지막 줄에 "코리아IT아카데미 대구지점" 문의 유도로 고정
-- 본문 소제목은 반드시 H2부터 시작한다. 본문에서 H1은 절대 사용하지 않는다.
-- SEO를 위해 키워드를 제목과 소제목에 자연스럽게 배치한다.
+# 출력 형식 (반드시 이 순서대로)
 
-# Image Keyword
-원고 작성이 끝나면 반드시 본문 맨 마지막 줄에 아래 형식으로 Pexels 이미지 검색 키워드 1개를 추가한다.
-다른 내용과 반드시 한 줄 띄우고 출력한다:
-[IMAGE_KEYWORD]: (글 전체 주제와 가장 잘 어울리는 영어 이미지 검색 단어 또는 짧은 구문 1개)
+## [메타 정보 블록]
+원고 맨 위에 아래 형식을 그대로 출력한다:
+---
+제목: (네이버/구글 검색 최적화 제목, 30자 내외, 키워드 포함)
+메타설명: (검색결과에 표시될 요약문, 80자 내외, 클릭 유도)
+대표태그: #태그1 #태그2 #태그3 #태그4 #태그5 #태그6 #태그7 #태그8 #태그9 #태그10
+연관키워드: 키워드1, 키워드2, 키워드3, 키워드4, 키워드5
+---
+
+## [본문]
+- 구성: H1(제목), 도입(2~3문장), 목차, 본문(H2/H3), 마크다운 표 최소 1개, Q&A 5개, 마무리, CTA
+- H1은 제목에만 1회 사용. 본문 소제목은 H2~H3만 사용.
+- 한 문단 1~3문장, 200자 이내
+- SEO 키워드를 제목·소제목·첫 문단에 자연스럽게 배치
+- CTA 마지막 줄: 코리아IT아카데미 대구지점 문의 유도로 고정
+- Q&A는 실제 수강 예정자가 궁금해할 내용으로 구성
+
+## [이미지 키워드]
+본문 맨 마지막에 한 줄 띄우고 아래 형식으로 출력:
+[IMAGE_KEYWORD]: (본문 주제와 어울리는 영어 이미지 검색어 1개)
 예시: [IMAGE_KEYWORD]: coding bootcamp students learning`;
 
 function initBlogPage() {
@@ -1895,11 +2045,10 @@ async function generateBlogPost() {
     document.getElementById('blogErrorBox').classList.add('hidden');
     document.getElementById('blogRawContent').value = result;
     document.getElementById('blogPreviewContent').innerHTML = markdownToHtml(result);
-    // 글자 수 표시
     const charCount = result.length;
     const charEl = document.getElementById('blogCharCount');
     if (charEl) charEl.textContent = `${charCount.toLocaleString()}자`;
-    // Raw 뷰로 초기화
+    renderBlogMeta(result);
     setBlogView('raw');
     document.getElementById('blogResultArea').classList.remove('hidden');
     // 최근 키워드 저장
@@ -1923,6 +2072,42 @@ async function generateBlogPost() {
   }
 }
 
+// ── IT 홍보글 메타 정보 파싱 ──
+function parseBlogMeta(text) {
+  const meta = { title: '', desc: '', tags: [], keywords: [] };
+  const block = text.match(/---\n([\s\S]*?)\n---/);
+  if (!block) return meta;
+  const lines = block[1].split('\n');
+  lines.forEach(line => {
+    if (line.startsWith('제목:')) meta.title = line.replace('제목:', '').trim();
+    else if (line.startsWith('메타설명:')) meta.desc = line.replace('메타설명:', '').trim();
+    else if (line.startsWith('대표태그:')) meta.tags = line.replace('대표태그:', '').trim().split(/\s+/).filter(t => t.startsWith('#'));
+    else if (line.startsWith('연관키워드:')) meta.keywords = line.replace('연관키워드:', '').trim().split(',').map(k => k.trim()).filter(Boolean);
+  });
+  return meta;
+}
+
+function renderBlogMeta(text) {
+  const meta = parseBlogMeta(text);
+  const card = document.getElementById('blogMetaCard');
+  if (!meta.title && !meta.tags.length) { card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  document.getElementById('metaTitle').textContent = meta.title;
+  document.getElementById('metaDesc').textContent = meta.desc;
+  document.getElementById('metaTags').innerHTML = meta.tags.map(t =>
+    `<span class="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold">${t}</span>`).join('');
+  document.getElementById('metaKeywords').textContent = meta.keywords.join(' · ');
+}
+
+function copyMetaInfo() {
+  const title = document.getElementById('metaTitle').textContent;
+  const desc = document.getElementById('metaDesc').textContent;
+  const tags = document.getElementById('metaTags').innerText.replace(/\n/g, ' ');
+  const kw = document.getElementById('metaKeywords').textContent;
+  const text = `제목: ${title}\n메타설명: ${desc}\n태그: ${tags}\n연관키워드: ${kw}`;
+  navigator.clipboard.writeText(text).then(() => alert('메타 정보가 복사됐습니다!'));
+}
+
 function copyBlogContent() {
   const text = document.getElementById('blogRawContent').value;
   navigator.clipboard.writeText(text).then(() => {
@@ -1938,6 +2123,298 @@ function downloadBlogMd() {
   const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = `${keyword}_원고.txt`; a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ============ 일상 블로그 자동화 ============
+const DAILY_SYSTEM_PROMPTS = {
+  info: `당신은 네이버 블로그 정보성 글 전문 작가입니다.
+독자가 검색 후 이 글 하나로 궁금증이 해결되는 완결형 정보 글을 작성합니다.
+
+# 출력 형식 (반드시 순서대로)
+---
+제목: (검색의도를 반영한 제목, 25자 내외, 숫자·연도 포함 권장)
+대표태그: #태그1 #태그2 #태그3 #태그4 #태그5 #태그6 #태그7 #태그8 #태그9 #태그10
+연관키워드: 키워드1, 키워드2, 키워드3, 키워드4, 키워드5
+---
+
+# 본문 규칙
+- 구어체 사용 (합니다 체, 친근하되 정보는 정확하게)
+- 구성: 도입(검색자 공감) → 핵심 정보(H2/H3) → 표 또는 목록 → 요약 → 마무리
+- 한 단락 2~4문장, 줄바꿈 활용해 가독성 높이기
+- 본문에 숫자·데이터·비교 표 최소 1개 포함
+- 마지막에 "이 글이 도움이 됐다면 공감과 댓글 부탁드립니다 😊" 추가`,
+
+  review: `당신은 네이버 블로그 후기/경험 글 전문 작가입니다.
+실제 경험자처럼 자연스럽고 신뢰감 있는 후기 글을 작성합니다.
+
+# 출력 형식 (반드시 순서대로)
+---
+제목: (후기/경험 느낌이 나는 제목, 25자 내외)
+대표태그: #태그1 #태그2 #태그3 #태그4 #태그5 #태그6 #태그7 #태그8 #태그9 #태그10
+연관키워드: 키워드1, 키워드2, 키워드3, 키워드4, 키워드5
+---
+
+# 본문 규칙
+- 1인칭 구어체 (저는, 제가, 솔직히 등 자연스럽게)
+- 구성: 방문/사용 계기 → 상세 후기(좋은점/아쉬운점) → 총평 및 추천 대상
+- 별점 또는 평가 항목표 포함
+- 마지막에 "이 글이 도움이 됐다면 공감과 댓글 부탁드립니다 😊" 추가`,
+
+  compare: `당신은 네이버 블로그 비교분석 글 전문 작가입니다.
+독자가 선택에 확신을 가질 수 있도록 명확한 비교 정보를 제공합니다.
+
+# 출력 형식 (반드시 순서대로)
+---
+제목: (vs 또는 비교 느낌이 나는 제목, 25자 내외)
+대표태그: #태그1 #태그2 #태그3 #태그4 #태그5 #태그6 #태그7 #태그8 #태그9 #태그10
+연관키워드: 키워드1, 키워드2, 키워드3, 키워드4, 키워드5
+---
+
+# 본문 규칙
+- 객관적 비교 + 추천 결론 명확히 제시
+- 비교표 필수 포함 (항목별 차이를 한눈에)
+- 구성: 비교 개요 → 항목별 비교 → 종합 비교표 → 추천 대상별 결론
+- 마지막에 "이 글이 도움이 됐다면 공감과 댓글 부탁드립니다 😊" 추가`,
+
+  tips: `당신은 네이버 블로그 꿀팁/노하우 글 전문 작가입니다.
+실용적이고 바로 써먹을 수 있는 팁을 명확하게 전달합니다.
+
+# 출력 형식 (반드시 순서대로)
+---
+제목: (숫자+팁 형식 권장, 예: "○○ 꿀팁 7가지", 25자 내외)
+대표태그: #태그1 #태그2 #태그3 #태그4 #태그5 #태그6 #태그7 #태그8 #태그9 #태그10
+연관키워드: 키워드1, 키워드2, 키워드3, 키워드4, 키워드5
+---
+
+# 본문 규칙
+- 번호 목록으로 팁을 명확히 구분
+- 각 팁마다 이유·방법·예시 포함
+- 도입부에 "이 글에서 알려드릴 것" 미리 요약
+- 마지막에 "이 글이 도움이 됐다면 공감과 댓글 부탁드립니다 😊" 추가`,
+
+  daily: `당신은 네이버 블로그 일상/에세이 글 전문 작가입니다.
+공감가고 따뜻한 일상 이야기를 자연스럽게 풀어냅니다.
+
+# 출력 형식 (반드시 순서대로)
+---
+제목: (일상적이고 공감 가는 제목, 20자 내외)
+대표태그: #태그1 #태그2 #태그3 #태그4 #태그5 #태그6 #태그7 #태그8 #태그9 #태그10
+연관키워드: 키워드1, 키워드2, 키워드3, 키워드4, 키워드5
+---
+
+# 본문 규칙
+- 친근한 1인칭 구어체
+- 구성: 오늘의 이야기 → 느낀 점/생각 → 마무리 인사
+- 짧은 문단, 이모지 자연스럽게 활용
+- 독자와 대화하는 느낌으로 마무리`
+};
+
+let currentDailyType = 'info';
+
+function setDailyType(type) {
+  currentDailyType = type;
+  document.querySelectorAll('.daily-type-btn').forEach(btn => {
+    btn.className = 'daily-type-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 bg-white text-slate-500 hover:bg-slate-50';
+  });
+  const activeBtn = document.getElementById('dtype' + type.charAt(0).toUpperCase() + type.slice(1));
+  if (activeBtn) activeBtn.className = 'daily-type-btn px-3 py-1.5 rounded-full text-xs font-semibold border border-purple-300 bg-purple-100 text-purple-700';
+}
+
+function updateDailyLengthLabel(v) {
+  const labels = ['간단 (~1500자)', '보통 (~3000자)', '상세 (~5000자)'];
+  document.getElementById('dailyLengthLabel').textContent = labels[v];
+}
+
+function getDailyMaxTokens() {
+  const v = parseInt(document.getElementById('dailyLengthSlider').value);
+  return [2048, 4096, 8192][v];
+}
+
+function initDailyPage() {
+  renderDailyRecentKeywords();
+  updateDailyHistoryCount();
+}
+
+function loadDailyRecentKeywords() {
+  try { return JSON.parse(localStorage.getItem('dailyRecentKeywords') || '[]'); } catch { return []; }
+}
+function saveDailyRecentKeyword(kw) {
+  if (!kw) return;
+  let list = loadDailyRecentKeywords().filter(k => k !== kw);
+  list.unshift(kw); if (list.length > 8) list = list.slice(0, 8);
+  localStorage.setItem('dailyRecentKeywords', JSON.stringify(list));
+}
+function renderDailyRecentKeywords() {
+  const list = loadDailyRecentKeywords();
+  const row = document.getElementById('dailyRecentRow');
+  const chips = document.getElementById('dailyRecentChips');
+  if (!row || !chips) return;
+  if (!list.length) { row.classList.add('hidden'); return; }
+  row.classList.remove('hidden');
+  chips.innerHTML = list.map(kw =>
+    `<button onclick="document.getElementById('dailyKeyword').value=${JSON.stringify(kw)}"
+      class="px-2.5 py-0.5 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs hover:bg-purple-100 transition-colors whitespace-nowrap">${kw}</button>`
+  ).join('');
+}
+
+let dailyViewMode = 'raw';
+function setDailyView(mode) {
+  dailyViewMode = mode;
+  document.getElementById('dailyRawContent').classList.toggle('hidden', mode !== 'raw');
+  document.getElementById('dailyPreviewContent').classList.toggle('hidden', mode !== 'preview');
+  if (mode === 'preview') {
+    const raw = document.getElementById('dailyRawContent').value;
+    document.getElementById('dailyPreviewContent').innerHTML = markdownToHtml(raw);
+  }
+  document.getElementById('dailyViewRawBtn').className = `px-3 py-1 font-semibold transition-colors text-xs ${mode === 'raw' ? 'bg-slate-700 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`;
+  document.getElementById('dailyViewPreviewBtn').className = `px-3 py-1 font-semibold transition-colors text-xs ${mode === 'preview' ? 'bg-slate-700 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`;
+}
+function syncDailyPreview() {
+  if (dailyViewMode === 'preview') {
+    document.getElementById('dailyPreviewContent').innerHTML = markdownToHtml(document.getElementById('dailyRawContent').value);
+  }
+}
+
+function parseDailyMeta(text) {
+  const meta = { title: '', tags: [], keywords: [] };
+  const block = text.match(/---\n([\s\S]*?)\n---/);
+  if (!block) return meta;
+  block[1].split('\n').forEach(line => {
+    if (line.startsWith('제목:')) meta.title = line.replace('제목:', '').trim();
+    else if (line.startsWith('대표태그:')) meta.tags = line.replace('대표태그:', '').trim().split(/\s+/).filter(t => t.startsWith('#'));
+    else if (line.startsWith('연관키워드:')) meta.keywords = line.replace('연관키워드:', '').trim().split(',').map(k => k.trim()).filter(Boolean);
+  });
+  return meta;
+}
+
+function renderDailyMeta(text) {
+  const meta = parseDailyMeta(text);
+  const card = document.getElementById('dailyMetaCard');
+  if (!meta.title && !meta.tags.length) { card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  document.getElementById('dailyMetaTitle').textContent = meta.title;
+  document.getElementById('dailyMetaTags').innerHTML = meta.tags.map(t =>
+    `<span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">${t}</span>`).join('');
+  document.getElementById('dailyMetaKeywords').textContent = meta.keywords.join(' · ');
+}
+
+function copyDailyMetaInfo() {
+  const title = document.getElementById('dailyMetaTitle').textContent;
+  const tags = document.getElementById('dailyMetaTags').innerText.replace(/\n/g, ' ');
+  const kw = document.getElementById('dailyMetaKeywords').textContent;
+  navigator.clipboard.writeText(`제목: ${title}\n태그: ${tags}\n연관키워드: ${kw}`)
+    .then(() => alert('메타 정보가 복사됐습니다!'));
+}
+
+function copyDailyContent() {
+  navigator.clipboard.writeText(document.getElementById('dailyRawContent').value)
+    .then(() => { const b = document.querySelector('[onclick="copyDailyContent()"]'); b.textContent = '복사됨!'; setTimeout(() => b.textContent = '복사', 2000); });
+}
+
+function downloadDailyTxt() {
+  const text = document.getElementById('dailyRawContent').value;
+  const kw = document.getElementById('dailyKeyword').value.replace(/\s+/g, '_') || 'daily';
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `${kw}_블로그.txt`; a.click(); URL.revokeObjectURL(a.href);
+}
+
+async function generateDailyPost() {
+  const keyword = document.getElementById('dailyKeyword').value.trim();
+  if (!keyword) { alert('키워드를 입력해주세요.'); return; }
+
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) { alert('Gemini API 키를 IT 홍보글 탭에서 먼저 입력해주세요.'); return; }
+
+  const btn = document.getElementById('dailyGenBtn');
+  const btnText = document.getElementById('dailyGenText');
+  const btnIcon = document.getElementById('dailyGenIcon');
+  btn.disabled = true; btnText.textContent = '생성 중...'; btnIcon.textContent = '⏳';
+
+  try {
+    const memo = document.getElementById('dailyMemo').value.trim();
+    const sysPrompt = DAILY_SYSTEM_PROMPTS[currentDailyType] || DAILY_SYSTEM_PROMPTS.info;
+    const maxTokens = getDailyMaxTokens();
+
+    const userMsg = memo
+      ? `키워드: "${keyword}"\n\n추가 정보/메모:\n${memo}\n\n위 키워드와 메모를 바탕으로 블로그 글을 작성해주세요.`
+      : `키워드: "${keyword}"\n\n위 키워드를 검색한 독자에게 도움이 되는 블로그 글을 작성해주세요.`;
+
+    const result = await callGeminiAPI(userMsg, sysPrompt, maxTokens);
+
+    document.getElementById('dailyErrorBox').classList.add('hidden');
+    document.getElementById('dailyRawContent').value = result;
+    const charEl = document.getElementById('dailyCharCount');
+    if (charEl) charEl.textContent = `${result.length.toLocaleString()}자`;
+    renderDailyMeta(result);
+    setDailyView('raw');
+    document.getElementById('dailyResultArea').classList.remove('hidden');
+    saveDailyRecentKeyword(keyword);
+    renderDailyRecentKeywords();
+    saveDailyHistory(keyword, result);
+    document.getElementById('dailyResultArea').scrollIntoView({ behavior: 'smooth' });
+  } catch (err) {
+    const errBox = document.getElementById('dailyErrorBox');
+    errBox.textContent = err.message; errBox.classList.remove('hidden');
+  } finally {
+    btn.disabled = false; btnText.textContent = '블로그 글 생성'; btnIcon.textContent = '📝';
+  }
+}
+
+// ── 일상 블로그 이력 ──
+function saveDailyHistory(keyword, content) {
+  try {
+    let hist = JSON.parse(localStorage.getItem('dailyHistory') || '[]');
+    hist.unshift({ keyword, content, type: currentDailyType, date: new Date().toLocaleString('ko-KR') });
+    if (hist.length > 20) hist = hist.slice(0, 20);
+    localStorage.setItem('dailyHistory', JSON.stringify(hist));
+    updateDailyHistoryCount();
+  } catch(e) {}
+}
+function updateDailyHistoryCount() {
+  try {
+    const hist = JSON.parse(localStorage.getItem('dailyHistory') || '[]');
+    const el = document.getElementById('dailyHistoryCount');
+    if (el) el.textContent = hist.length ? `(${hist.length}개)` : '';
+  } catch(e) {}
+}
+function toggleDailyHistory() {
+  const body = document.getElementById('dailyHistoryBody');
+  const arrow = document.getElementById('dailyHistoryArrow');
+  const isHidden = body.classList.toggle('hidden');
+  arrow.textContent = isHidden ? '▾' : '▴';
+  if (!isHidden) renderDailyHistory();
+}
+function renderDailyHistory() {
+  const body = document.getElementById('dailyHistoryBody');
+  try {
+    const hist = JSON.parse(localStorage.getItem('dailyHistory') || '[]');
+    if (!hist.length) { body.innerHTML = '<div class="text-center text-slate-400 text-sm py-4">이력이 없습니다</div>'; return; }
+    const typeLabels = { info:'📖 정보성', review:'⭐ 후기', compare:'⚖️ 비교', tips:'🔑 꿀팁', daily:'☀️ 일상' };
+    body.innerHTML = hist.map((h, i) => `
+      <div class="bg-white rounded-xl shadow-sm p-4">
+        <div class="flex items-start justify-between gap-2 mb-2">
+          <div>
+            <span class="text-xs text-purple-600 font-semibold">${typeLabels[h.type]||'블로그'}</span>
+            <div class="font-semibold text-sm text-slate-700 mt-0.5">${h.keyword}</div>
+            <div class="text-xs text-slate-400">${h.date} · ${h.content.length.toLocaleString()}자</div>
+          </div>
+          <button onclick="loadDailyHistory(${i})" class="px-3 py-1 text-xs bg-purple-50 text-purple-700 border border-purple-200 rounded-lg hover:bg-purple-100 whitespace-nowrap">불러오기</button>
+        </div>
+      </div>`).join('');
+  } catch(e) { body.innerHTML = '<div class="text-red-500 text-sm p-4">이력 로드 오류</div>'; }
+}
+function loadDailyHistory(idx) {
+  try {
+    const hist = JSON.parse(localStorage.getItem('dailyHistory') || '[]');
+    const h = hist[idx]; if (!h) return;
+    document.getElementById('dailyKeyword').value = h.keyword;
+    document.getElementById('dailyRawContent').value = h.content;
+    document.getElementById('dailyCharCount').textContent = `${h.content.length.toLocaleString()}자`;
+    renderDailyMeta(h.content);
+    setDailyView('raw');
+    document.getElementById('dailyResultArea').classList.remove('hidden');
+  } catch(e) {}
 }
 
 // ============ Gemini 키 테스트 ============
