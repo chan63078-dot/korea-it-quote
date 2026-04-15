@@ -1475,7 +1475,7 @@ let selectedDeptIds = new Set(DEPT_MAP.map(d => d.id)); // 초기 전체 선택
 
 // ============ 사이드바 탭 ============
 function setSidebarTab(tab) {
-  const tabs = { quote: 'tabQuote', blog: 'tabBlog', daily: 'tabDaily', wp: 'tabWp' };
+  const tabs = { quote: 'tabQuote', blog: 'tabBlog', daily: 'tabDaily', wp: 'tabWp', instagram: 'tabInstagram' };
   const activeClass = 'sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors bg-red-50 text-red-700';
   const inactiveClass = 'sidebar-tab flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-slate-500 hover:bg-slate-50';
 
@@ -1484,17 +1484,18 @@ function setSidebarTab(tab) {
     if (el) el.className = t === tab ? activeClass : inactiveClass;
   });
 
-  ['quotePage','blogPage','dailyPage','wpPage'].forEach(id => {
+  ['quotePage','blogPage','dailyPage','wpPage','instagramPage'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.add('hidden');
   });
-  const pageMap = { quote: 'quotePage', blog: 'blogPage', daily: 'dailyPage', wp: 'wpPage' };
+  const pageMap = { quote: 'quotePage', blog: 'blogPage', daily: 'dailyPage', wp: 'wpPage', instagram: 'instagramPage' };
   const pageEl = document.getElementById(pageMap[tab]);
   if (pageEl) pageEl.classList.remove('hidden');
 
   if (tab === 'blog') initBlogPage();
   if (tab === 'daily') initDailyPage();
   if (tab === 'wp') initWpPage();
+  if (tab === 'instagram') initInstagramPage();
 }
 
 // ============ 학과 칩 렌더링 ============
@@ -4643,3 +4644,4 @@ function renderWpSchedule() {
 </script>
 </body>
 </html>
+ 
