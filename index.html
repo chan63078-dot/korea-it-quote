@@ -915,30 +915,13 @@
 
 
           <button class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" onclick="addReason('학사 지원 할인', 25)">학사지원 25%</button>
-
-
-
           <button class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" onclick="addReason('당일등록 추가할인', 10)">당일등록 10%</button>
-
-
-
+          <button class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" onclick="addReason('취준생 / 비전공자 할인', 5)">취준생 5%</button>
           <button class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" onclick="addReason('친구 추천 할인', 5)">친구추천 5%</button>
-
-
-
-          <button class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" onclick="addReason('리뷰 후기 작성 할인', 0)">리뷰</button>
-
-
-
-          <button class="btn-sm bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100" onclick="addReason('팀장 직권 할인', 0)">직권</button>
-
-
-
-          <button class="btn-sm bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100" onclick="addReason('재수강 할인', 0)">재수강</button>
-
-
-
           <button class="btn-sm bg-green-50 text-green-700 border border-green-200 hover:bg-green-100" onclick="addReason('원서 접수 할인', 5)">원서접수 5%</button>
+          <button class="btn-sm bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100" onclick="addReason('네이버 리뷰 상담 후기 작성', 0)">리뷰</button>
+          <button class="btn-sm bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100" onclick="addReason('팀장 직권 할인', 0)">직권</button>
+          <button class="btn-sm bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100" onclick="addReason('재수강 할인', 0)">재수강</button>
 
 
 
@@ -1044,11 +1027,14 @@
 
         </div>
 
-
-
-
-
-
+        <!-- 고정 할인 금액 행 -->
+        <div class="reason-card bg-white rounded-lg px-3 py-2 flex items-center gap-2">
+          <input type="text" id="fixedReason" placeholder="고정 할인 명분 (예: 네이버 리뷰 작성)" oninput="render()"
+            class="flex-1 text-sm border-none outline-none placeholder-slate-300 min-w-0" />
+          <input type="number" id="fixedAmt" min="0" step="10000" value="0" oninput="render()"
+            class="w-24 text-right text-sm font-bold text-green-700 border border-slate-200 rounded px-1 py-0.5 focus:outline-none focus:border-green-400" />
+          <span class="text-xs text-slate-400 flex-shrink-0">원</span>
+        </div>
 
       </div><!-- /discSection -->
 
@@ -5576,7 +5562,7 @@
 
 
 
-const COURSE_DATA = {"기초과정_자율1~2 버전": [{"name": "AI 파이썬 1", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "AI 파이썬 2", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "AI 파이썬 3", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 1", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 2", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 3", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "SQLD", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스마스터 2급", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "ChatGPT 활용 마스터 클래스", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "ADSP 1", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}], "기초과정_자율1버전": [{"name": "AI 파이썬 1", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "AI 파이썬 2", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "AI 파이썬 3", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 1", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 2", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 3", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "SQLD", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스마스터 2급", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "ChatGPT 활용 마스터 클래스", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "ADSP 1", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}], "정보보안정규": [{"name": "AI 파이썬 1", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "AI 파이썬 2", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "AI 파이썬 3", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "파이썬 1", "price": 500000, "day": "주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "파이썬 2", "price": 500000, "day": "주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "파이썬 3", "price": 500000, "day": "주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "C언어 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "C언어 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "자바 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "자바 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "SQLD", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "리눅스마스터 2급", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 1 (네트워크보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 2 (네트워크보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 3 (네트워크보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 4 (시스템보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 5 (시스템보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 6 (시스템보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 7 (웹보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 8 (웹보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 9 (웹보안)", "price": 500000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}], "AI빅데이터": [{"name": "AI 파이썬 1", "price": 500000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI 파이썬 2", "price": 500000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI 파이썬 3", "price": 500000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "파이썬 1", "price": 500000, "day": "주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "파이썬 2", "price": 500000, "day": "주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "파이썬 3", "price": 500000, "day": "주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "ADSP 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "ADSP 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "SQLD", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI 프로젝트 1", "price": 500000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI 프로젝트 2", "price": 500000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI 프로젝트 3", "price": 500000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI 프로젝트 4", "price": 500000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}], "기타자격증": [{"name": "SQLD", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "자격증 과정"}, {"name": "ADSP 1", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "ADSP 2", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "리눅스마스터 2급", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "자격증 과정"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "빅데이터분석기사 필기 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "빅데이터분석기사 실기 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "정보처리기사 필기 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "정보처리기사 실기 1 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "정보처리기사 실기 2 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}], "정처기": [{"name": "AI 파이썬 1", "price": 500000, "day": "평일", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "AI 파이썬 2", "price": 500000, "day": "평일", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "AI 파이썬 3", "price": 500000, "day": "평일", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "파이썬 1", "price": 500000, "day": "주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "파이썬 2", "price": 500000, "day": "주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "파이썬 3", "price": 500000, "day": "주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "C언어 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "C언어 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "자바 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "자바 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "리눅스 1 (운영체제)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "리눅스 2 (운영체제)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "정보처리기사 필기 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "정보처리기사 실기 1 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "정보처리기사 실기 2 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}], "2+1 할인율": [{"name": "파이썬 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "DBMS", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "Notion & Git", "price": 300000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}], "기초과정_방학특강": [{"name": "파이썬 1 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 2 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 1 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 2 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 1 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 2 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "DBMS", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "Notion & Git", "price": 300000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}], "AI아카데미": [{"name": "AI 올인원: 기획·문서·자동화 끝판왕", "price": 500000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "칼퇴 부르는 데이터 비밀병기: 수집부터 자동화까지 풀코스", "price": 500000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "국가공인 AI자격증 AICE 어소시에이트 취득과정", "price": 1000000, "day": "주말", "course": "2mon", "category": "AI아카데미"}, {"name": "단 10일 만에 완성하는 AI영상 크리에이터 과정", "price": 400000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "마케팅 자동화의 모든 것: 생성형AI 실전 클래스", "price": 400000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "AI와 Blender로 완성하는 3D 브랜드 광고 콘텐츠 제작", "price": 400000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "아직도 감으로 주식해!? AI 데이터 활용으로 똑똑하게 투자하는법", "price": 500000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "월급은 내가 받을게, 일은 네가 해라: n8n활용 AI 업무 비서 만들기", "price": 500000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "n8n과 함께라면 업무 잔소리는 down, 연봉은 Up! 업무효율 극대화", "price": 500000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "바이브코딩: Cursor AI로 나 혼자 끝내는 웹사이트 구축", "price": 1000000, "day": "평일", "course": "2mon", "category": "AI아카데미"}, {"name": "AI Canvas로 완성하는 노코드 머신러닝: 앱 서비스 제작", "price": 500000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "구글애널리틱스(GA4) 자격증으로 레벨업 하는 마케팅 스킬", "price": 500000, "day": "평일", "course": "1mon", "category": "AI아카데미"}, {"name": "매출로 증명하는 전략 퍼포먼스 마케팅 실무 올인원", "price": 500000, "day": "평일", "course": "1mon", "category": "AI아카데미"}]};
+const COURSE_DATA = {"기초과정_자율1~2 버전": [{"name": "파이썬 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "바이브코딩 기초", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "바이브코딩 심화", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "SQLD", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "ADSP 1", "price": 600000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "ADSP 2", "price": 600000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "AWS 자격증", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크관리사 2급", "price": 250000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스마스터 2급", "price": 250000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "정보처리기사,빅데이터분석기사 필기/주말", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "정보처리기사 빅데이터분석기사 실기1/주말", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "정보처리기사,빅데이터분석기사 실기2/주말", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "코딩테스트 1 (자바) (파이썬)", "price": 600000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "코딩테스트 2 (자바) (파이썬)", "price": 600000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C++ (방특)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어[코딩테스트] (방특)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자료구조 (방특)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}], "AI아카데미": [{"name": "바이브코딩 기초", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI아카데미"}, {"name": "바이브코딩 심화", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI아카데미"}, {"name": "칼퇴 부르는 데이터 비밀병기:수집~자동화 까지 풀코스 (비대면)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI아카데미"}, {"name": "야근이 뭐죠? AI 올인원: 기획·문서·자동화 끝판왕(비대면)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI아카데미"}, {"name": "마케팅 자동화의 모든것: 생성형 AI 실전 클래스(비대면)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI아카데미"}, {"name": "3D 브랜드 광고 콘텐츠 제작 (비대면)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI아카데미"}, {"name": "단 10일 만에 완성하는 AI영상 크리에이터 과정(비대면)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI아카데미"}, {"name": "국가공인 AI자격증 AICE 어소시에이트 취득과정 1 (비대면)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI아카데미"}, {"name": "AI데이터로 투자하는 법", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI아카데미"}, {"name": "n8n 업무효율 극대화", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI아카데미"}, {"name": "AI로 시작하는 8컷 웹툰 메이커", "price": 500000, "day": "주말", "course": "1mon", "category": "AI아카데미"}, {"name": "국가공인 AI자격증 AICE 어소시에이트 취득과정 1 (비대면)", "price": 500000, "day": "주말", "course": "1mon", "category": "AI아카데미"}, {"name": "국가공인 AI자격증 AICE 어소시에이트 취득과정 2 (비대면)", "price": 500000, "day": "주말", "course": "1mon", "category": "AI아카데미"}], "웹개발": [{"name": "파이썬 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "웹개발 취업과정"}, {"name": "파이썬 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "웹개발 취업과정"}, {"name": "자바 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "웹개발 취업과정"}, {"name": "자바 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "웹개발 취업과정"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "웹개발 취업과정"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "웹개발 취업과정"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "웹개발 취업과정"}, {"name": "스프링부트1 or Fast API1 (中 택1)", "price": 800000, "day": "평일 / 주말", "course": "1mon", "category": "웹개발 취업과정"}, {"name": "스프링부트2 or Fast API2 (中 택1)", "price": 800000, "day": "평일 / 주말", "course": "1mon", "category": "웹개발 취업과정"}, {"name": "스프링부트3 or Fast API3 (中 택1)", "price": 800000, "day": "평일 / 주말", "course": "1mon", "category": "웹개발 취업과정"}, {"name": "웹 PJ1", "price": 1000000, "day": "평일 / 주말", "course": "1mon", "category": "웹개발 취업과정"}, {"name": "웹 PJ2", "price": 1000000, "day": "평일 / 주말", "course": "1mon", "category": "웹개발 취업과정"}], "정보보안정규": [{"name": "파이썬 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "파이썬 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "C언어 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "C언어 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "자바 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "자바 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "네트워크관리사 2급", "price": 250000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "리눅스마스터 2급", "price": 250000, "day": "평일 / 주말", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 1 (네트워크보안 기초)", "price": 900000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 2 (네트워크보안 심화 PJ)", "price": 900000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 3 (시스템보안 기초)", "price": 900000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 4 (시스템보안 심화 PJ)", "price": 900000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 5 (웹보안 기초)", "price": 900000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}, {"name": "정보보안 6 (웹보안 심화 PJ)", "price": 900000, "day": "평일", "course": "1mon", "category": "정보보안 취업과정"}], "AI빅데이터": [{"name": "파이썬 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "파이썬 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "ADSP 1", "price": 600000, "day": "평일 / 주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "ADSP 2", "price": 600000, "day": "평일 / 주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "SQLD", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI활용 컴퓨터비전 멀티 모달 프로젝트1 (Python)", "price": 500000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI활용 컴퓨터비전  멀티 모달 프로젝트2 (웹구현/분석/시각화)", "price": 700000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI활용 컴퓨터비전  멀티 모달 프로젝트 3 (시각화/알고리즘)", "price": 700000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI활용 컴퓨터비전  멀티 모달 프로젝트4 (데이터분석 Project)", "price": 700000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI활용 컴퓨터비전 멀티 모달 프로젝트 5 (머신러닝,딥러닝)", "price": 700000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}, {"name": "AI활용 컴퓨터비전  멀티 모달 프로젝트 6 (Project)", "price": 950000, "day": "평일", "course": "1mon", "category": "AI 인공지능 빅데이터"}], "기타자격증": [{"name": "SQLD", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "자격증 과정"}, {"name": "ADSP 1", "price": 600000, "day": "평일 / 주말", "course": "1mon", "category": "자격증 과정"}, {"name": "ADSP 2", "price": 600000, "day": "평일 / 주말", "course": "1mon", "category": "자격증 과정"}, {"name": "AWS 자격증", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "자격증 과정"}, {"name": "네트워크관리사 2급", "price": 250000, "day": "평일 / 주말", "course": "1mon", "category": "자격증 과정"}, {"name": "리눅스마스터 2급", "price": 250000, "day": "평일 / 주말", "course": "1mon", "category": "자격증 과정"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "자격증 과정"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "자격증 과정"}, {"name": "빅데이터분석기사 필기/주말", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "빅데이터분석기사 실기 1/주말", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}, {"name": "빅데이터분석기사 실기 2/주말", "price": 500000, "day": "주말", "course": "1mon", "category": "자격증 과정"}], "정처기": [{"name": "파이썬 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "파이썬 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "C언어 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "C언어 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "자바 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "자바 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "리눅스 1 (운영체제)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "리눅스 2 (운영체제)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "정보처리기사 필기 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "정보처리기사 실기 1 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}, {"name": "정보처리기사 실기 2 (자격증)", "price": 500000, "day": "주말", "course": "1mon", "category": "정보처리 기사 자격증 취득과정"}], "프로그래밍 올인원 패키지": [{"name": "파이썬 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 올인원 패키지"}, {"name": "파이썬 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 올인원 패키지"}, {"name": "C언어 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 올인원 패키지"}, {"name": "C언어 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 올인원 패키지"}, {"name": "자바 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 올인원 패키지"}, {"name": "자바 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 올인원 패키지"}, {"name": "웹기초1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 올인원 패키지"}, {"name": "웹기초2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 올인원 패키지"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 올인원 패키지"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 올인원 패키지"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 올인원 패키지"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 올인원 패키지"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 올인원 패키지"}, {"name": "온라인 강의 2년권", "price": 390000, "day": "평일 / 주말", "course": "24mon", "category": "프로그래밍 올인원 패키지"}], "프로그래밍 입문 패키지": [{"name": "파이썬 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 입문 패키지"}, {"name": "파이썬 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 입문 패키지"}, {"name": "C언어 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 입문 패키지"}, {"name": "C언어 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 입문 패키지"}, {"name": "자바 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 입문 패키지"}, {"name": "자바 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "프로그래밍 입문 패키지"}, {"name": "온라인 강의 2년권", "price": 390000, "day": "평일 / 주말", "course": "24mon", "category": "프로그래밍 입문 패키지"}], "국비선수학습패키지": [{"name": "자바 1 or 파이썬 1 or C언어1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "국비선수학습패키지"}, {"name": "자바 2 or 파이썬 2 or C언어2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "국비선수학습패키지"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "국비선수학습패키지"}, {"name": "웹기초1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "국비선수학습패키지"}, {"name": "웹기초2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "국비선수학습패키지"}, {"name": "온라인 강의 2년권", "price": 390000, "day": "평일 / 주말", "course": "1mon", "category": "국비선수학습패키지"}], "프리패스": [{"name": "6개월 프리패스", "price": 4200000, "day": "평일 / 주말", "course": "6mon", "category": "프리패스"}, {"name": "9개월 프리패스", "price": 6300000, "day": "평일 / 주말", "course": "9mon", "category": "프리패스"}, {"name": "12개월 프리패스", "price": 8400000, "day": "평일 / 주말", "course": "12mon", "category": "프리패스"}], "앱개발": [{"name": "파이썬 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "앱(App) 개발과정"}, {"name": "파이썬 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "앱(App) 개발과정"}, {"name": "자바 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "앱(App) 개발과정"}, {"name": "자바 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "앱(App) 개발과정"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "앱(App) 개발과정"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "앱(App) 개발과정"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "앱(App) 개발과정"}, {"name": "앱개발 1 (Dart, Kotlin, Swift)", "price": 600000, "day": "주말", "course": "1mon", "category": "앱(App) 개발과정"}, {"name": "앱개발 2 (Dart, Kotlin, Swift)", "price": 600000, "day": "주말", "course": "1mon", "category": "앱(App) 개발과정"}, {"name": "앱개발 3 (Flutter)", "price": 800000, "day": "주말", "course": "1mon", "category": "앱(App) 개발과정"}, {"name": "앱개발 4 (Flutter/PJ)", "price": 800000, "day": "주말", "course": "1mon", "category": "앱(App) 개발과정"}, {"name": "앱개발 5 (Docker/PJ)", "price": 950000, "day": "주말", "course": "1mon", "category": "앱(App) 개발과정"}], "기초과정_자율1버전": [{"name": "파이썬 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 1", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 2", "price": 450000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "DBMS (SQL)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "바이브코딩 기초", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "바이브코딩 심화", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "SQLD", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "ADSP 1", "price": 600000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "ADSP 2", "price": 600000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "AWS 자격증", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크관리사 2급", "price": 250000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스마스터 2급", "price": 250000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "정보처리기사,빅데이터분석기사 필기/주말", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "정보처리기사 빅데이터분석기사 실기1/주말", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "정보처리기사,빅데이터분석기사 실기2/주말", "price": 500000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "코딩테스트 1 (자바) (파이썬)", "price": 600000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "코딩테스트 2 (자바) (파이썬)", "price": 600000, "day": "주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C++ (방특)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어[코딩테스트] (방특)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자료구조 (방특)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}], "2+1 할인율": [{"name": "파이썬 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "DBMS", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "Notion & Git", "price": 300000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}], "기초과정_방학특강": [{"name": "파이썬 1 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "파이썬 2 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 1 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "C언어 2 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 1 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "자바 2 (방학특강)", "price": 400000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "DBMS", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 1", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "리눅스 2", "price": 500000, "day": "평일 / 주말", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 1 (CCNA)", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "네트워크 2 (CCNA)", "price": 500000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}, {"name": "Notion & Git", "price": 300000, "day": "평일", "course": "1mon", "category": "기초 프로그래밍"}]};
 
 
 
@@ -5589,29 +5575,15 @@ const COURSE_DATA = {"기초과정_자율1~2 버전": [{"name": "AI 파이썬 1"
 
 
 const DEPT_MAP = [
-
-
-
   { id: 'basic', name: '기초과정', courseKeys: ['기초과정_자율1~2 버전','기초과정_자율1버전','기초과정_방학특강','2+1 할인율'] },
-
-
-
   { id: 'security', name: '정보보안', courseKeys: ['정보보안정규'] },
-
-
-
+  { id: 'web', name: '웹개발', courseKeys: ['웹개발'] },
   { id: 'ai_big', name: 'AI/빅데이터', courseKeys: ['AI빅데이터'] },
-
-
-
   { id: 'cert', name: '자격증', courseKeys: ['기타자격증','정처기'] },
-
-
-
   { id: 'ai_acad', name: 'AI아카데미', courseKeys: ['AI아카데미'] },
-
-
-
+  { id: 'app', name: '앱개발', courseKeys: ['앱개발'] },
+  { id: 'package', name: '패키지', courseKeys: ['프로그래밍 올인원 패키지','프로그래밍 입문 패키지','국비선수학습패키지'] },
+  { id: 'freepass', name: '프리패스', courseKeys: ['프리패스'] },
 ];
 
 
@@ -5625,129 +5597,16 @@ const DEPT_MAP = [
 
 
 const CURR_PRESETS_DISPLAY = [
-
-
-
-  {
-
-
-
-    id: 'security_full', icon: '🔐', name: '보안 풀코스',
-
-
-
-    desc: '정보보안 취업과정', courseCount: '21개 과목', duration: '약 21개월',
-
-
-
-    courseType: '정보보안정규',
-
-
-
-  },
-
-
-
-  {
-
-
-
-    id: 'ai_big_full', icon: '🤖', name: 'AI 빅데이터',
-
-
-
-    desc: 'AI 인공지능 빅데이터 풀코스', courseCount: '14개 과목', duration: '약 14개월',
-
-
-
-    courseType: 'AI빅데이터',
-
-
-
-  },
-
-
-
-  {
-
-
-
-    id: 'jcheogi', icon: '📋', name: '정처기 취득',
-
-
-
-    desc: '정보처리기사 자격증', courseCount: '9개 과목', duration: '약 9개월',
-
-
-
-    courseType: '정처기',
-
-
-
-  },
-
-
-
-  {
-
-
-
-    id: 'basic', icon: '💻', name: '기초 프로그래밍',
-
-
-
-    desc: '기초과정 입문', courseCount: '6개 과목', duration: '약 6개월',
-
-
-
-    courseType: '기초과정_자율1~2 버전',
-
-
-
-  },
-
-
-
-  {
-
-
-
-    id: 'ai_acad', icon: '⊙', name: 'AI아카데미',
-
-
-
-    desc: 'AI 실무·자동화 과정', courseCount: '13개 과목', duration: '최신 트렌드',
-
-
-
-    courseType: 'AI아카데미',
-
-
-
-  },
-
-
-
-  {
-
-
-
-    id: 'cert', icon: '🏆', name: '자격증 집중',
-
-
-
-    desc: '핵심 자격증 취득', courseCount: '6개 과목', duration: '약 6개월',
-
-
-
-    courseType: '기타자격증',
-
-
-
-  },
-
-
-
+  { id: 'security_full', icon: '🔐', name: '보안 풀코스', desc: '정보보안 취업과정', courseCount: '19개 과목', duration: '약 19개월', courseType: '정보보안정규' },
+  { id: 'ai_big_full', icon: '🤖', name: 'AI 빅데이터', desc: 'AI 인공지능 빅데이터 풀코스', courseCount: '12개 과목', duration: '약 12개월', courseType: 'AI빅데이터' },
+  { id: 'jcheogi', icon: '📋', name: '정처기 취득', desc: '정보처리기사 자격증', courseCount: '14개 과목', duration: '약 14개월', courseType: '정처기' },
+  { id: 'basic', icon: '💻', name: '기초 프로그래밍', desc: '기초과정 입문', courseCount: '27개 과목', duration: '자율 선택', courseType: '기초과정_자율1~2 버전' },
+  { id: 'web_full', icon: '🌐', name: '웹개발 풀코스', desc: '웹개발 취업과정', courseCount: '12개 과목', duration: '약 12개월', courseType: '웹개발' },
+  { id: 'app_full', icon: '📱', name: '앱개발 과정', desc: '앱(App) 개발과정', courseCount: '12개 과목', duration: '약 12개월', courseType: '앱개발' },
+  { id: 'ai_acad', icon: '⊙', name: 'AI아카데미', desc: 'AI 실무·자동화 과정', courseCount: '13개 과목', duration: '최신 트렌드', courseType: 'AI아카데미' },
+  { id: 'cert', icon: '🏆', name: '자격증 집중', desc: '핵심 자격증 취득', courseCount: '11개 과목', duration: '자율 선택', courseType: '기타자격증' },
+  { id: 'allone_pkg', icon: '📦', name: '올인원 패키지', desc: '프로그래밍 올인원 패키지', courseCount: '14개 과목', duration: '약 14개월', courseType: '프로그래밍 올인원 패키지' },
+  { id: 'freepass', icon: '🎟️', name: '프리패스', desc: '6·9·12개월 무제한 수강', courseCount: '3개 옵션', duration: '선택형', courseType: '프리패스' },
 ];
 
 
@@ -12013,33 +11872,19 @@ function getDiscountData() {
 
 
   // 복리 할인: 각 할인을 이전 할인 후 금액에 적용
-
-
-
   let running = total;
-
-
-
   const reasons = rows.filter(r => r.text || r.rate > 0).map(r => {
-
-
-
     const amt = Math.floor(running * r.rate / 100 / 1000) * 1000;
-
-
-
     running -= amt;
-
-
-
     return { ...r, amt, running };
-
-
-
   });
-
-
-
+  // 고정 할인 금액 적용
+  const fixedAmt = parseInt(document.getElementById('fixedAmt')?.value) || 0;
+  const fixedReason = document.getElementById('fixedReason')?.value.trim() || '';
+  if (fixedAmt > 0) {
+    running = Math.max(0, running - fixedAmt);
+    reasons.push({ text: fixedReason || '고정 할인', rate: 0, amt: fixedAmt, running, isFixed: true });
+  }
   const totalDiscount = total - running;
 
 
@@ -13589,21 +13434,13 @@ function clearReasons() {
 
 
   [1,2,3].forEach(i => {
-
-
-
     document.getElementById('reason'+i).value = '';
-
-
-
     document.getElementById('rate'+i).value = 0;
-
-
-
   });
-
-
-
+  const fa = document.getElementById('fixedAmt');
+  const fr = document.getElementById('fixedReason');
+  if (fa) fa.value = 0;
+  if (fr) fr.value = '';
   render();
 
 
@@ -13709,33 +13546,16 @@ function printQuote() {
 
 
   const discRows = dd.reasons.map((r, i) => {
-
-
-
-    const base = i === 0 ? total : dd.reasons[i-1].running;
-
-
-
+    const prevReasons = dd.reasons.filter(x => !x.isFixed);
+    const base = r.isFixed ? null : (i === 0 ? total : dd.reasons[i-1].running);
+    const desc = r.isFixed
+      ? `${r.text || '고정 할인'} (고정 ${fmt(r.amt)}원)`
+      : `${r.text || '(명분 미입력)'} (${fmt(base)}원 × ${r.rate}%)`;
     return `<tr>
-
-
-
-      <td>${r.text || '(명분 미입력)'} (${fmt(base)}원 × ${r.rate}%)</td>
-
-
-
+      <td>${desc}</td>
       <td class="right">-${fmt(r.amt)}</td>
-
-
-
       <td class="right">${fmt(r.running)}</td>
-
-
-
     </tr>`;
-
-
-
   }).join('');
 
 
