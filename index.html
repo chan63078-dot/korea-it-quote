@@ -3668,7 +3668,7 @@
 
 
 
-        <div><span class="text-xs font-semibold text-slate-500">연관키워드</span><div id="metaKeywords" class="text-xs text-slate-500 mt-0.5"></div></div>
+        <div class="hidden"><span class="text-xs font-semibold text-slate-500">연관키워드</span><div id="metaKeywords" class="text-xs text-slate-500 mt-0.5"></div></div>
 
 
 
@@ -4180,7 +4180,7 @@
 
 
 
-        <div><span class="text-xs font-semibold text-slate-500">연관키워드</span><div id="dailyMetaKeywords" class="text-xs text-slate-500 mt-0.5"></div></div>
+        <div class="hidden"><span class="text-xs font-semibold text-slate-500">연관키워드</span><div id="dailyMetaKeywords" class="text-xs text-slate-500 mt-0.5"></div></div>
 
 
 
@@ -7359,7 +7359,7 @@ const DEFAULT_SYSTEM_PROMPT = `당신은 코리아IT아카데미 대구지점의
 
 
 
-
+최신 IT 트렌드(2025~2026년 기준)를 반영하고, 현재 기업 채용 흐름에 맞게 작성하세요.
 
 
 
@@ -7379,15 +7379,11 @@ const DEFAULT_SYSTEM_PROMPT = `당신은 코리아IT아카데미 대구지점의
 
 
 
-
+- 오래된 자료나 과거형 표현 금지 (최신 기준으로 작성)
 
 
 
 ✅ 출력 규칙:
-
-
-
-
 
 
 
@@ -7407,19 +7403,7 @@ const DEFAULT_SYSTEM_PROMPT = `당신은 코리아IT아카데미 대구지점의
 
 
 
-대표태그: #태그1 #태그2 #태그3 #태그4 #태그5 #태그6 #태그7 #태그8 #태그9 #태그10
-
-
-
-연관키워드: 키워드1, 키워드2, 키워드3, 키워드4, 키워드5
-
-
-
 ---
-
-
-
-
 
 
 
@@ -7431,7 +7415,7 @@ const DEFAULT_SYSTEM_PROMPT = `당신은 코리아IT아카데미 대구지점의
 
 
 
-② 도입부 (2~3문장, 독자 공감 유도)
+② 도입부 (2~3문장, 독자 공감 유도, 현재 2025~2026년 시점으로 작성)
 
 
 
@@ -7440,6 +7424,10 @@ const DEFAULT_SYSTEM_PROMPT = `당신은 코리아IT아카데미 대구지점의
 
 
 ④ 본문 각 섹션 (소제목은 이모지+텍스트로, 예: ✅ 1. 과정 소개)
+
+
+
+   - 최신 기업 채용 동향과 현재 시장 흐름 반영
 
 
 
@@ -7452,10 +7440,6 @@ const DEFAULT_SYSTEM_PROMPT = `당신은 코리아IT아카데미 대구지점의
 
 
      → 내용을 한 줄씩 서술
-
-
-
-
 
 
 
@@ -7475,7 +7459,11 @@ const DEFAULT_SYSTEM_PROMPT = `당신은 코리아IT아카데미 대구지점의
 
 
 
-⑤ Q&A 5개 (실제 수강 예정자 질문 형식)
+   - 문장은 구어체와 문어체를 자연스럽게 섞어 읽기 쉽게 작성
+
+
+
+⑤ Q&A 5개 (실제 수강 예정자 질문 형식, 2025~2026년 취업 시장 반영)
 
 
 
@@ -7491,11 +7479,15 @@ const DEFAULT_SYSTEM_PROMPT = `당신은 코리아IT아카데미 대구지점의
 
 
 
+[대표태그] — 마무리 바로 다음 줄에 출력
 
 
 
+대표태그: #태그1 #태그2 #태그3 #태그4 #태그5 #태그6 #태그7 #태그8 #태그9 #태그10
 
-[이미지 키워드] — 본문 맨 마지막에 한 줄 띄우고 출력
+
+
+[이미지 키워드] — 맨 마지막에 출력
 
 
 
@@ -8091,7 +8083,7 @@ async function generateBlogPost() {
 
 
 
-      `다음 키워드로 블로그 원고를 작성해주세요: "${keyword}"`,
+      `오늘 날짜: ${new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'})}\n\n다음 키워드로 블로그 원고를 작성해주세요: "${keyword}"`,
 
 
 
@@ -8243,39 +8235,39 @@ function parseBlogMeta(text) {
 
 
 
-  const block = text.match(/---\n([\s\S]*?)\n---/);
+  const block = text.match(/---[\s\S]*?---/);
 
 
 
-  if (!block) return meta;
+  if (block) {
 
 
 
-  const lines = block[1].split('\n');
+    block[0].split('\n').forEach(line => {
 
 
 
-  lines.forEach(line => {
+      if (line.startsWith('제목:')) meta.title = line.replace('제목:', '').trim();
 
 
 
-    if (line.startsWith('제목:')) meta.title = line.replace('제목:', '').trim();
+      else if (line.startsWith('메타설명:')) meta.desc = line.replace('메타설명:', '').trim();
 
 
 
-    else if (line.startsWith('메타설명:')) meta.desc = line.replace('메타설명:', '').trim();
+    });
 
 
 
-    else if (line.startsWith('대표태그:')) meta.tags = line.replace('대표태그:', '').trim().split(/\s+/).filter(t => t.startsWith('#'));
+  }
 
 
 
-    else if (line.startsWith('연관키워드:')) meta.keywords = line.replace('연관키워드:', '').trim().split(',').map(k => k.trim()).filter(Boolean);
+  const tagMatch = text.match(/대표태그:([^\n]+)/);
 
 
 
-  });
+  if (tagMatch) meta.tags = tagMatch[1].trim().split(/\s+/).filter(t => t.startsWith('#'));
 
 
 
@@ -8327,7 +8319,6 @@ function renderBlogMeta(text) {
 
 
 
-  document.getElementById('metaKeywords').textContent = meta.keywords.join(' · ');
 
 
 
@@ -8351,15 +8342,7 @@ function copyMetaInfo() {
 
 
 
-  const tags = document.getElementById('metaTags').innerText.replace(/\n/g, ' ');
-
-
-
-  const kw = document.getElementById('metaKeywords').textContent;
-
-
-
-  const text = `제목: ${title}\n메타설명: ${desc}\n태그: ${tags}\n연관키워드: ${kw}`;
+  const text = `제목: ${title}\n메타설명: ${desc}`;
 
 
 
@@ -8379,7 +8362,15 @@ function copyBlogContent() {
 
 
 
-  const text = document.getElementById('blogRawContent').value;
+  let text = document.getElementById('blogRawContent').value;
+
+
+
+  text = text.replace(/^-{3}[\s\S]*?-{3}\s*/, '');
+
+
+
+  text = text.replace(/\[IMAGE_KEYWORD\]:[^\n]*/g, '').trim();
 
 
 
@@ -8455,10 +8446,6 @@ const BLOG_COMMON_FORMAT = `
 
 
 
-
-
-
-
 [메타 정보 블록] — 맨 위 고정 출력
 
 
@@ -8471,23 +8458,11 @@ const BLOG_COMMON_FORMAT = `
 
 
 
-대표태그: #태그1 #태그2 #태그3 #태그4 #태그5 #태그6 #태그7 #태그8 #태그9 #태그10
-
-
-
-연관키워드: 키워드1, 키워드2, 키워드3, 키워드4, 키워드5
-
-
-
 ---
 
 
 
-
-
-
-
-소제목: 이모지 + 텍스트 형식 (예: ✅ 1. 혼후순결이란?)
+소제목: 이모지 + 텍스트 형식 (예: ✅ 1. 내용이란?)
 
 
 
@@ -8503,10 +8478,6 @@ const BLOG_COMMON_FORMAT = `
 
 
 
-
-
-
-
   👎 아쉬운 점
 
 
@@ -8519,7 +8490,19 @@ const BLOG_COMMON_FORMAT = `
 
 
 
-한 문단: 2~4문장, 200자 이내, 줄바꿈 활용`;
+한 문단: 2~4문장, 200자 이내, 줄바꿈 활용
+
+
+
+최신 정보와 2025~2026년 트렌드를 반영해 작성
+
+
+
+[대표태그] — 글 마무리 바로 다음 줄에 출력
+
+
+
+대표태그: #태그1 #태그2 #태그3 #태그4 #태그5 #태그6 #태그7 #태그8 #태그9 #태그10`;
 
 
 
@@ -8963,31 +8946,35 @@ function parseDailyMeta(text) {
 
 
 
-  const block = text.match(/---\n([\s\S]*?)\n---/);
+  const block = text.match(/---[\s\S]*?---/);
 
 
 
-  if (!block) return meta;
+  if (block) {
 
 
 
-  block[1].split('\n').forEach(line => {
+    block[0].split('\n').forEach(line => {
 
 
 
-    if (line.startsWith('제목:')) meta.title = line.replace('제목:', '').trim();
+      if (line.startsWith('제목:')) meta.title = line.replace('제목:', '').trim();
 
 
 
-    else if (line.startsWith('대표태그:')) meta.tags = line.replace('대표태그:', '').trim().split(/\s+/).filter(t => t.startsWith('#'));
+    });
 
 
 
-    else if (line.startsWith('연관키워드:')) meta.keywords = line.replace('연관키워드:', '').trim().split(',').map(k => k.trim()).filter(Boolean);
+  }
 
 
 
-  });
+  const tagMatch = text.match(/대표태그:([^\n]+)/);
+
+
+
+  if (tagMatch) meta.tags = tagMatch[1].trim().split(/\s+/).filter(t => t.startsWith('#'));
 
 
 
@@ -9035,7 +9022,6 @@ function renderDailyMeta(text) {
 
 
 
-  document.getElementById('dailyMetaKeywords').textContent = meta.keywords.join(' · ');
 
 
 
@@ -9055,15 +9041,7 @@ function copyDailyMetaInfo() {
 
 
 
-  const tags = document.getElementById('dailyMetaTags').innerText.replace(/\n/g, ' ');
-
-
-
-  const kw = document.getElementById('dailyMetaKeywords').textContent;
-
-
-
-  navigator.clipboard.writeText(`제목: ${title}\n태그: ${tags}\n연관키워드: ${kw}`)
+  navigator.clipboard.writeText(`제목: ${title}`)
 
 
 
@@ -9083,7 +9061,19 @@ function copyDailyContent() {
 
 
 
-  navigator.clipboard.writeText(document.getElementById('dailyRawContent').value)
+  let text = document.getElementById('dailyRawContent').value;
+
+
+
+  text = text.replace(/^-{3}[\s\S]*?-{3}\s*/, '');
+
+
+
+  text = text.replace(/\[IMAGE_KEYWORD\]:[^\n]*/g, '').trim();
+
+
+
+  navigator.clipboard.writeText(text)
 
 
 
@@ -9203,11 +9193,11 @@ async function generateDailyPost() {
 
 
 
-      ? `키워드: "${keyword}"\n\n추가 정보/메모:\n${memo}\n\n위 키워드와 메모를 바탕으로 블로그 글을 작성해주세요.`
+      ? `오늘 날짜: ${new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'})}\n\n키워드: "${keyword}"\n\n추가 정보/메모:\n${memo}\n\n위 키워드와 메모를 바탕으로 블로그 글을 작성해주세요.`
 
 
 
-      : `키워드: "${keyword}"\n\n위 키워드를 검색한 독자에게 도움이 되는 블로그 글을 작성해주세요.`;
+      : `오늘 날짜: ${new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'})}\n\n키워드: "${keyword}"\n\n위 키워드를 검색한 독자에게 도움이 되는 블로그 글을 작성해주세요.`;
 
 
 
