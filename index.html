@@ -9678,7 +9678,10 @@ function renderDailyHistory() {
 
 
 
-          <button onclick="loadDailyHistory(${i})" class="px-3 py-1 text-xs bg-purple-50 text-purple-700 border border-purple-200 rounded-lg hover:bg-purple-100 whitespace-nowrap">불러오기</button>
+          <div class="flex gap-1.5">
+            <button onclick="loadDailyHistory(${i})" class="px-3 py-1 text-xs bg-purple-50 text-purple-700 border border-purple-200 rounded-lg hover:bg-purple-100 whitespace-nowrap">불러오기</button>
+            <button onclick="deleteDailyHistory(${i})" class="px-2 py-1 text-xs text-slate-300 hover:text-red-400 rounded-lg hover:bg-red-50 transition-colors" title="삭제">✕</button>
+          </div>
 
 
 
@@ -9697,6 +9700,15 @@ function renderDailyHistory() {
 }
 
 
+
+function deleteDailyHistory(i) {
+  let hist = JSON.parse(localStorage.getItem('dailyHistory') || '[]');
+  hist.splice(i, 1);
+  localStorage.setItem('dailyHistory', JSON.stringify(hist));
+  renderDailyHistory();
+  const el = document.getElementById('dailyHistoryCount');
+  if (el) el.textContent = hist.length ? `(${hist.length})` : '';
+}
 
 function loadDailyHistory(idx) {
 
