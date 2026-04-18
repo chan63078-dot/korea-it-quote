@@ -7651,6 +7651,15 @@ function initBlogPage() {
 
 
 
+  // Unsplash 키 복원
+  const _uk = localStorage.getItem('ig_k_unsplash') || localStorage.getItem('blogUnsplashKey') || '';
+  if (_uk) {
+    const el = document.getElementById('blogUnsplashKey');
+    if (el) el.value = _uk;
+  }
+
+
+
 }
 
 
@@ -8092,18 +8101,6 @@ async function generateBlogPost() {
 
 
     document.getElementById('newApiKeyInput').focus();
-
-
-
-  // Unsplash 키 복원
-
-
-
-  const _uk = localStorage.getItem('ig_k_unsplash') || localStorage.getItem('blogUnsplashKey') || '';
-
-
-
-  if (_uk && document.getElementById('blogUnsplashKey')) document.getElementById('blogUnsplashKey').value = _uk;
 
 
 
