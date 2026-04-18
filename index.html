@@ -8424,8 +8424,7 @@ async function retryDailyImage() {
 // 복사 + 네이버 글쓰기 열기
 function copyAndOpenNaver(type) {
   let text = document.getElementById(type === 'blog' ? 'blogRawContent' : 'dailyRawContent').value;
-  text = text.replace(/^-{3}[\s\S]*?-{3}\s*/, '').replace(/\[IMAGE_KEYWORD\]:[^
-]*/g, '').trim();
+  text = text.replace(/^-{3}[\s\S]*?-{3}\s*/, '').replace(/\[IMAGE_KEYWORD\]:[^\n]*/g, '').trim();
   navigator.clipboard.writeText(text).then(() => {
     window.open('https://blog.naver.com/PostWriteForm.naver', '_blank');
   }).catch(() => {
