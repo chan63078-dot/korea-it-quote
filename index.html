@@ -3957,7 +3957,7 @@
 
   <!-- 네이버 바로가기 -->
   <div class="flex gap-2 mb-4">
-    <a href="https://creator.naver.com" target="_blank" rel="noopener"
+    <a href="https://creator-advisor.naver.com/naver_blog/chan63078" target="_blank" rel="noopener"
       class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90 active:scale-95"
       style="background:linear-gradient(135deg,#03C75A,#00a846)">
       📊 크리에이터 어드바이저
@@ -3967,7 +3967,7 @@
       style="background:linear-gradient(135deg,#1ec800,#03C75A)">
       💰 애드포스트
     </a>
-    <a href="https://blog.naver.com/PostWriteForm.naver" target="_blank" rel="noopener"
+    <a href="https://blog.naver.com/PostWriteForm.naver?blogId=chan63078" target="_blank" rel="noopener"
       class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all active:scale-95">
       ✏️ 글쓰기
     </a>
@@ -8426,9 +8426,9 @@ function copyAndOpenNaver(type) {
   let text = document.getElementById(type === 'blog' ? 'blogRawContent' : 'dailyRawContent').value;
   text = text.replace(/^-{3}[\s\S]*?-{3}\s*/, '').replace(/\[IMAGE_KEYWORD\]:[^\n]*/g, '').trim();
   navigator.clipboard.writeText(text).then(() => {
-    window.open('https://blog.naver.com/PostWriteForm.naver', '_blank');
+    window.open('https://blog.naver.com/PostWriteForm.naver?blogId=chan63078', '_blank');
   }).catch(() => {
-    window.open('https://blog.naver.com/PostWriteForm.naver', '_blank');
+    window.open('https://blog.naver.com/PostWriteForm.naver?blogId=chan63078', '_blank');
   });
 }
 
