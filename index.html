@@ -11819,7 +11819,7 @@ function selectAll(checked) {
 
 
 
-  selectedPrices = {};
+  if (!checked) selectedPrices = {};
 
 
 
@@ -11839,7 +11839,7 @@ function selectAll(checked) {
 
 
 
-      selectedPrices[name] = parseInt(cb.dataset.price);
+      if (selectedPrices[name] === undefined) selectedPrices[name] = parseInt(cb.dataset.price);
 
 
 
@@ -12460,7 +12460,7 @@ function render() {
 
 
 
-            <span class="text-xs text-slate-400 ml-1">${fmt(base)}원 × ${r.rate}%</span>
+            <span class="text-xs text-slate-400 ml-1">${r.isFixed ? `고정금액 ${fmt(r.amt)}원` : `${fmt(base)}원 × ${r.rate}%`}</span>
 
 
 
@@ -12868,11 +12868,11 @@ function logCurrentQuote() {
 
 
 
-    reasons: [1,2,3].map(i => document.getElementById('reason'+i).value),
+    reasons: [1,2,3,4,5].map(i => document.getElementById('reason'+i).value),
 
 
 
-    rates: [1,2,3].map(i => parseFloat(document.getElementById('rate'+i).value)||0),
+    rates: [1,2,3,4,5].map(i => parseFloat(document.getElementById('rate'+i).value)||0),
 
 
 
@@ -13072,11 +13072,11 @@ function restoreLog(i) {
 
 
 
-  if (l.reasons) [1,2,3].forEach((_, j) => { document.getElementById('reason'+(j+1)).value = l.reasons[j] || ''; });
+  if (l.reasons) [1,2,3,4,5].forEach((_, j) => { document.getElementById('reason'+(j+1)).value = l.reasons[j] || ''; });
 
 
 
-  if (l.rates) [1,2,3].forEach((_, j) => { document.getElementById('rate'+(j+1)).value = l.rates[j] || 0; });
+  if (l.rates) [1,2,3,4,5].forEach((_, j) => { document.getElementById('rate'+(j+1)).value = l.rates[j] || 0; });
 
 
 
@@ -13563,7 +13563,6 @@ function printQuote() {
 
 
   const discRows = dd.reasons.map((r, i) => {
-    const prevReasons = dd.reasons.filter(x => !x.isFixed);
     const base = r.isFixed ? null : (i === 0 ? total : dd.reasons[i-1].running);
     const desc = r.isFixed
       ? `${r.text || '고정 할인'} (고정 ${fmt(r.amt)}원)`
@@ -15277,11 +15276,11 @@ function saveQuote() {
 
 
 
-    reasons: [1,2,3].map(i => document.getElementById('reason'+i).value),
+    reasons: [1,2,3,4,5].map(i => document.getElementById('reason'+i).value),
 
 
 
-    rates: [1,2,3].map(i => parseFloat(document.getElementById('rate'+i).value)||0),
+    rates: [1,2,3,4,5].map(i => parseFloat(document.getElementById('rate'+i).value)||0),
 
 
 
@@ -15441,11 +15440,11 @@ function loadQuote(i) {
 
 
 
-  if (s.reasons) [1,2,3].forEach((_, j) => { document.getElementById('reason'+(j+1)).value = s.reasons[j] || ''; });
+  if (s.reasons) [1,2,3,4,5].forEach((_, j) => { document.getElementById('reason'+(j+1)).value = s.reasons[j] || ''; });
 
 
 
-  if (s.rates) [1,2,3].forEach((_, j) => { document.getElementById('rate'+(j+1)).value = s.rates[j] || 0; });
+  if (s.rates) [1,2,3,4,5].forEach((_, j) => { document.getElementById('rate'+(j+1)).value = s.rates[j] || 0; });
 
 
 
@@ -15529,11 +15528,11 @@ function shareURL() {
 
 
 
-    r: [1,2,3].map(i => document.getElementById('reason'+i).value),
+    r: [1,2,3,4,5].map(i => document.getElementById('reason'+i).value),
 
 
 
-    rt: [1,2,3].map(i => parseFloat(document.getElementById('rate'+i).value)||0),
+    rt: [1,2,3,4,5].map(i => parseFloat(document.getElementById('rate'+i).value)||0),
 
 
 
@@ -15653,11 +15652,11 @@ function loadFromURL() {
 
 
 
-    if (state.r) [1,2,3].forEach((_, i) => { document.getElementById('reason'+(i+1)).value = state.r[i] || ''; });
+    if (state.r) [1,2,3,4,5].forEach((_, i) => { document.getElementById('reason'+(i+1)).value = state.r[i] || ''; });
 
 
 
-    if (state.rt) [1,2,3].forEach((_, i) => { document.getElementById('rate'+(i+1)).value = state.rt[i] || 0; });
+    if (state.rt) [1,2,3,4,5].forEach((_, i) => { document.getElementById('rate'+(i+1)).value = state.rt[i] || 0; });
 
 
 
@@ -16709,7 +16708,7 @@ function captureCurrentQuote(label) {
 
 
 
-    reasons: [1,2,3].map(i => ({
+    reasons: [1,2,3,4,5].map(i => ({
 
 
 
