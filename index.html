@@ -19197,13 +19197,27 @@ async function clGenerate(){
   const apiKey=localStorage.getItem('cl_gemini_api_key');
   if(!apiKey){clShowErr('API 키를 먼저 저장해주세요.');return;}
   if(!clSelectedFile){clShowErr('녹취 파일을 업로드해주세요.');return;}
-  clHideErr();clSetLoading(true,'🎧 파일을 읽는 중...');
+  clHideErr();
   try{
-    const base64=await clToB64(clSelectedFile);
     const mime=clSelectedFile.type||'audio/wav';
+    clSetLoading(true,'📤 파일 업로드 중...');
+    const buf=await clSelectedFile.arrayBuffer();
+    const boundary='----ClBnd'+Math.random().toString(36).slice(2);
+    const meta=JSON.stringify({file:{display_name:clSelectedFile.name}});
+    const enc=new TextEncoder();
+    const p1=enc.encode(`--${boundary}\r\nContent-Type: application/json; charset=utf-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${mime}\r\n\r\n`);
+    const p2=enc.encode(`\r\n--${boundary}--`);
+    const body=new Uint8Array(p1.length+buf.byteLength+p2.length);
+    body.set(p1,0);body.set(new Uint8Array(buf),p1.length);body.set(p2,p1.length+buf.byteLength);
+    const upRes=await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`,
+      {method:'POST',headers:{'Content-Type':`multipart/related; boundary=${boundary}`},body});
+    const upData=await upRes.json();
+    if(!upRes.ok)throw new Error(`파일 업로드 오류 (${upRes.status}): ${upData?.error?.message||'알 수 없는 오류'}`);
+    const fileUri=upData?.file?.uri;
+    if(!fileUri)throw new Error('파일 업로드 실패: URI를 받지 못했습니다.');
     clSetLoading(true,'🤖 Gemini AI가 녹취를 분석 중... (30초~2분 소요)');
     const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CL_CONFIG.model}:generateContent?key=${apiKey}`,
-      {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{inline_data:{mime_type:mime,data:base64}},{text:document.getElementById('cl-prompt-text').value}]}],generationConfig:{temperature:0.15,maxOutputTokens:2048}})});
+      {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{file_data:{mime_type:mime,file_uri:fileUri}},{text:document.getElementById('cl-prompt-text').value}]}],generationConfig:{temperature:0.15,maxOutputTokens:2048}})});
     const data=await res.json();
     if(!res.ok)throw new Error(`API 오류 (${res.status}): ${data?.error?.message||'알 수 없는 오류'}`);
     const text=data?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -19211,7 +19225,6 @@ async function clGenerate(){
     clSetLoading(false);clShowResult(text);clSaveToHistory(text,clSelectedFile.name);clExtractKakaoInfo(text);
   }catch(err){clSetLoading(false);clShowErr(err.message);}
 }
-function clToB64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('파일 읽기 실패'));r.readAsDataURL(file);});}
 function clSetLoading(on,msg=''){document.getElementById('cl-btn-gen').disabled=on;const pw=document.getElementById('cl-prog-wrap');if(on){pw.classList.add('show');document.getElementById('cl-prog-msg').textContent=msg;}else pw.classList.remove('show');}
 function clShowErr(m){const el=document.getElementById('cl-errbox');el.textContent='⚠️ '+m;el.classList.add('show');}
 function clHideErr(){document.getElementById('cl-errbox').classList.remove('show');}
