@@ -19201,18 +19201,25 @@ async function clGenerate(){
   try{
     const mime=clSelectedFile.type||'audio/wav';
     clSetLoading(true,'📤 파일 업로드 중...');
-    const buf=await clSelectedFile.arrayBuffer();
-    const boundary='----ClBnd'+Math.random().toString(36).slice(2);
-    const meta=JSON.stringify({file:{display_name:clSelectedFile.name}});
-    const enc=new TextEncoder();
-    const p1=enc.encode(`--${boundary}\r\nContent-Type: application/json; charset=utf-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${mime}\r\n\r\n`);
-    const p2=enc.encode(`\r\n--${boundary}--`);
-    const body=new Uint8Array(p1.length+buf.byteLength+p2.length);
-    body.set(p1,0);body.set(new Uint8Array(buf),p1.length);body.set(p2,p1.length+buf.byteLength);
+    const boundary='ClBnd'+Date.now();
+    const metaJson=JSON.stringify({file:{display_name:clSelectedFile.name}});
+    const bodyBlob=new Blob([
+      `--${boundary}\r\nContent-Type: application/json; charset=utf-8\r\n\r\n`,
+      metaJson,
+      `\r\n--${boundary}\r\nContent-Type: ${mime}\r\n\r\n`,
+      clSelectedFile,
+      `\r\n--${boundary}--`
+    ]);
     const upRes=await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`,
-      {method:'POST',headers:{'Content-Type':`multipart/related; boundary=${boundary}`},body});
-    const upData=await upRes.json();
-    if(!upRes.ok)throw new Error(`파일 업로드 오류 (${upRes.status}): ${upData?.error?.message||'알 수 없는 오류'}`);
+      {method:'POST',headers:{'Content-Type':`multipart/related; boundary=${boundary}`},body:bodyBlob});
+    const upText=await upRes.text();
+    if(!upRes.ok){
+      let msg=upText.slice(0,300);
+      try{msg=JSON.parse(upText)?.error?.message||msg;}catch(e){}
+      throw new Error(`파일 업로드 오류 (${upRes.status}): ${msg}`);
+    }
+    let upData;
+    try{upData=JSON.parse(upText);}catch(e){throw new Error(`업로드 응답 오류: ${upText.slice(0,300)}`);}
     const fileUri=upData?.file?.uri;
     if(!fileUri)throw new Error('파일 업로드 실패: URI를 받지 못했습니다.');
     clSetLoading(true,'🤖 Gemini AI가 녹취를 분석 중... (30초~2분 소요)');
