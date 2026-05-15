@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 
 
@@ -3796,6 +3796,8 @@
 
             class="btn-sm bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100">🔄 다시 생성</button>
 
+          <button onclick="generateCardNewsHtml('blog')" class="btn-sm bg-indigo-600 text-white hover:bg-indigo-700">&#x1F0CF; 카드뉴스</button>
+
 
 
         </div>
@@ -4092,6 +4094,18 @@
 
     </div>
 
+    <!-- 연관 키워드 추천 -->
+    <div class="flex items-center gap-2 mb-2 mt-1">
+      <button id="dailySuggestBtn" onclick="suggestRelatedKeywords()"
+        class="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-full border border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors">
+        💡 연관 키워드 추천
+      </button>
+    </div>
+    <div id="dailySuggestArea" class="hidden mb-3">
+      <div class="text-xs text-slate-400 mb-1.5">클릭하면 바로 입력됩니다</div>
+      <div id="dailySuggestedKeywords" class="flex flex-wrap gap-1.5"></div>
+    </div>
+
 
 
 
@@ -4354,6 +4368,8 @@
 
 
             class="btn-sm bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100">🔄 다시 생성</button>
+
+          <button onclick="generateCardNewsHtml('daily')" class="btn-sm bg-indigo-600 text-white hover:bg-indigo-700">&#x1F0CF; 카드뉴스</button>
 
 
 
@@ -18716,6 +18732,161 @@ function renderWpSchedule() {
 }
 
 
+
+
+// ============ 카드뉴스 HTML 자동 생성 ============
+function generateCardNewsHtml(type) {
+  const rawEl = document.getElementById(type === 'blog' ? 'blogRawContent' : 'dailyRawContent');
+  const kwEl  = document.getElementById(type === 'blog' ? 'blogKeyword'   : 'dailyKeyword');
+  const text  = rawEl ? rawEl.value.trim() : '';
+  const kw    = kwEl  ? kwEl.value.trim()  : 'blog';
+  if (!text) { alert('먼저 블로그 글을 생성해주세요.'); return; }
+
+  // 제목 추출
+  const titleMatch = text.match(/^제목:\s*(.+)$/m);
+  const mainTitle  = titleMatch ? titleMatch[1].trim() : kw;
+
+  // 본문 정리
+  const body = text
+    .replace(/^---[\s\S]*?---\s*/m, '')
+    .replace(/\[IMAGE_KEYWORD\]:[^\n]*/g, '')
+    .replace(/대표태그:[^\n]*/g, '')
+    .trim();
+
+  // ✅ 섹션 추출
+  const sections = [];
+  const parts = body.split(/(?=✅)/);
+  parts.slice(1).forEach(sec => {
+    const sl = sec.split('\n').filter(l => l.trim());
+    if (!sl.length) return;
+    const secTitle = sl[0].replace(/^✅\s*\d*\.?\s*/, '').trim();
+    const secBody  = sl.slice(1).filter(l => l.trim()).slice(0, 4)
+      .map(l => l.replace(/^[▶✔•→]\s*/, '').trim()).filter(l => l.length > 2);
+    if (secTitle) sections.push({ title: secTitle, body: secBody });
+  });
+
+  const displaySections = sections.slice(0, 5);
+  const totalCards = 1 + displaySections.length + 1;
+  const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+  const theme = type === 'blog'
+    ? { cover: '#1B4F8A', footer: '#0D3561' }
+    : { cover: '#6d28d9', footer: '#4c1d95' };
+
+  // 도입부 훅 텍스트
+  const introLines = parts[0].split('\n').filter(l => l.trim() && !/^[①②③④⑤⑥]/.test(l.trim()) && !/^제목:/.test(l.trim()));
+  const hookText = introLines.slice(1, 3).join(' ').slice(0, 80) || '지금 바로 확인하세요!';
+
+  let cardsHtml = '';
+
+  // 표지 카드
+  cardsHtml += `<div class="card" style="background:${theme.cover}">
+  <div class="num" style="color:rgba(255,255,255,.55)">1 / ${totalCards}</div>
+  <div class="cover-body">
+    <div class="kw-badge">${kw}</div>
+    <h1 class="cover-title">${mainTitle}</h1>
+    <p class="hook">${hookText}</p>
+  </div>
+  <div class="footer" style="background:${theme.footer}"><span>코리아IT아카데미 대구지점</span><span>${new Date().getFullYear()}</span></div>
+</div>`;
+
+  // 섹션 카드
+  displaySections.forEach((sec, i) => {
+    const items = sec.body.slice(0, 4).map(b => `<li>${b}</li>`).join('') || '<li>내용을 확인하세요.</li>';
+    cardsHtml += `<div class="card" style="background:#F8F9FA">
+  <div class="num" style="color:#94a3b8">${i + 2} / ${totalCards}</div>
+  <div class="sec-body">
+    <h2 class="sec-title" style="color:${theme.cover}">${sec.title}</h2>
+    <ul class="sec-list">${items}</ul>
+  </div>
+  <div class="footer" style="background:${theme.footer}"><span>${kw}</span><span>${new Date().getFullYear()}</span></div>
+</div>`;
+  });
+
+  // 마무리 카드
+  const bullets = displaySections.map(s => `<li>✅ ${s.title}</li>`).join('');
+  cardsHtml += `<div class="card" style="background:${theme.cover}">
+  <div class="num" style="color:rgba(255,255,255,.55)">${totalCards} / ${totalCards}</div>
+  <div class="cover-body">
+    <h2 class="cover-title" style="font-size:30px">핵심 정리</h2>
+    <ul class="conc-list">${bullets}</ul>
+    <p class="hook" style="margin-top:18px">도움이 됐다면 공감과 댓글 부탁드립니다 😊</p>
+  </div>
+  <div class="footer" style="background:${theme.footer}"><span>코리아IT아카데미 대구지점</span><span>${today}</span></div>
+</div>`;
+
+  const html = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>${mainTitle} 카드뉴스</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#f1f5f9;padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px}
+.card{width:800px;height:800px;position:relative;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.15);border-radius:12px}
+.num{position:absolute;top:18px;right:22px;font-size:13px;font-weight:700}
+.footer{padding:14px 24px;display:flex;justify-content:space-between;font-size:13px;color:rgba(255,255,255,.85);font-weight:600}
+.cover-body{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:60px 50px;text-align:center;color:#fff}
+.kw-badge{font-size:12px;background:rgba(255,255,255,.18);border-radius:20px;padding:4px 14px;margin-bottom:20px;letter-spacing:1px}
+.cover-title{font-size:34px;font-weight:900;line-height:1.35;margin-bottom:20px;word-break:keep-all}
+.hook{font-size:15px;opacity:.85;line-height:1.7;word-break:keep-all}
+.sec-body{flex:1;padding:55px 50px 35px;display:flex;flex-direction:column;justify-content:center}
+.sec-title{font-size:26px;font-weight:900;margin-bottom:26px;line-height:1.35;word-break:keep-all}
+.sec-list{list-style:none}
+.sec-list li{font-size:16px;color:#334155;line-height:1.75;padding:10px 0;border-bottom:1px solid #e2e8f0;word-break:keep-all}
+.sec-list li::before{content:'▶ ';color:#6366f1}
+.sec-list li:last-child{border-bottom:none}
+.conc-list{list-style:none;text-align:left}
+.conc-list li{font-size:16px;opacity:.9;padding:7px 0;line-height:1.5;word-break:keep-all}
+@media print{body{background:white;padding:0}.card{page-break-after:always;box-shadow:none;border-radius:0}}
+</style>
+</head>
+<body>${cardsHtml}</body>
+</html>`;
+
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  const ds = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  a.download = `${kw.replace(/\s+/g,'_')}_카드뉴스_${ds}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ============ 연관 키워드 자동 추천 (일상 블로그) ============
+async function suggestRelatedKeywords() {
+  const kw = document.getElementById('dailyKeyword').value.trim();
+  if (!kw) { alert('키워드를 먼저 입력해주세요.'); return; }
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) { alert('Gemini API 키를 먼저 입력해주세요.'); return; }
+
+  const btn = document.getElementById('dailySuggestBtn');
+  btn.textContent = '⏳ 추천 중...';
+  btn.disabled = true;
+
+  try {
+    const result = await callGeminiAPI(
+      `네이버 블로그 검색에서 "${kw}" 키워드와 관련된 롱테일 키워드 5개를 추천해주세요. 검색량이 있으면서 경쟁이 낮은 키워드 위주로 추천하세요. 키워드만 쉼표로 구분해서 5개만 출력하세요. 다른 설명은 일절 출력하지 마세요.`,
+      '당신은 네이버 블로그 SEO 전문가입니다.',
+      300
+    );
+    const keywords = result.split(/[,\n]/).map(k => k.replace(/^\d+[\.\)]\s*/, '').trim()).filter(k => k && k.length > 1).slice(0, 5);
+    const container = document.getElementById('dailySuggestedKeywords');
+    container.innerHTML = keywords.map(k =>
+      `<button onclick="document.getElementById('dailyKeyword').value=${JSON.stringify(k)};document.getElementById('dailySuggestArea').querySelectorAll('button').forEach(b=>b.classList.remove('ring-2','ring-purple-400'));this.classList.add('ring-2','ring-purple-400')"
+        class="px-3 py-1.5 text-xs rounded-full border border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors cursor-pointer">${k}</button>`
+    ).join('');
+    document.getElementById('dailySuggestArea').classList.remove('hidden');
+  } catch (e) {
+    alert('키워드 추천 실패: ' + e.message);
+  } finally {
+    btn.textContent = '💡 연관 키워드 추천';
+    btn.disabled = false;
+  }
+}
 
 </script>
 
