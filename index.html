@@ -1340,15 +1340,11 @@
 
 
 
-          <input type="text" id="timetableUrl" value="http://localhost:5000" placeholder="서버 주소"
+          <div class="flex-1 text-xs border border-emerald-200 rounded px-2 py-1.5 bg-emerald-50 text-emerald-700 truncate" title="itdaegu-timetable 연동">📡 itdaegu-timetable 시간표</div>
 
 
 
-            class="flex-1 text-xs border border-emerald-200 rounded px-2 py-1.5 focus:outline-none focus:border-emerald-400 bg-white" />
-
-
-
-          <button onclick="testTimetableConnection()" class="btn-sm bg-emerald-600 text-white hover:bg-emerald-700 px-2 whitespace-nowrap">연결</button>
+          <button onclick="testTimetableConnection()" class="btn-sm bg-emerald-600 text-white hover:bg-emerald-700 px-2 whitespace-nowrap">불러오기</button>
 
 
 
@@ -1376,7 +1372,7 @@
 
 
 
-              <option>부산</option><option>인천</option><option>대전</option>
+              <option>부산</option><option>인천</option><option>대전</option><option>노원</option>
 
 
 
@@ -1400,15 +1396,11 @@
 
 
 
-              <option value="4">4월</option><option value="5">5월</option>
-
-
-
+              <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
+              <option value="4">4월</option><option value="5" selected>5월</option>
               <option value="6">6월</option><option value="7">7월</option>
-
-
-
-              <option value="8">8월</option>
+              <option value="8">8월</option><option value="9">9월</option>
+              <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
 
 
 
@@ -5833,50 +5825,14 @@ let selectedDeptIds = new Set(DEPT_MAP.map(d => d.id)); // 초기 전체 선택
 
 
 
-  // 시간표 서버 초기화
-
-
-
-  const savedUrl = localStorage.getItem('timetableUrl');
-
-
-
-  if (savedUrl) {
-
-
-
-    const urlEl = document.getElementById('timetableUrl');
-
-
-
-    if (urlEl) urlEl.value = savedUrl;
-
-
-
-  }
-
-
+  // 시간표 자동 연결 (itdaegu-timetable JSON)
+  testTimetableConnection().catch(() => {});
 
   // 현재 월을 기본값으로 설정
-
-
-
   const curMonth = new Date().getMonth() + 1;
-
-
-
   const monthSel = document.getElementById('timetableMonth');
-
-
-
   if (monthSel) {
-
-
-
     [...monthSel.options].forEach(o => { if (parseInt(o.value) === curMonth) o.selected = true; });
-
-
-
   }
 
 
@@ -14383,94 +14339,39 @@ function copyMessage() {
 
 
 
-// ============ 시간표 서버 연동 ============
+// ============ 시간표 서버 연동 (itdaegu-timetable 정적 JSON) ============
 
-
+const TIMETABLE_JSON_URL = 'https://chan63078-dot.github.io/itdaegu-timetable/data/schedule.json';
 
 let timetableConnected = false;
+let _timetableCache = null;
 
-
-
-
-
-
+async function loadTimetableData() {
+  if (_timetableCache) return _timetableCache;
+  const r = await fetch(TIMETABLE_JSON_URL, { signal: AbortSignal.timeout(8000) });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  _timetableCache = await r.json();
+  return _timetableCache;
+}
 
 async function testTimetableConnection() {
+  const dot = document.getElementById('serverStatusDot');
+  const txt = document.getElementById('timetableStatusText');
 
-
-
-  const url = (document.getElementById('timetableUrl').value || '').trim();
-
-
-
-  const dot  = document.getElementById('serverStatusDot');
-
-
-
-  const txt  = document.getElementById('timetableStatusText');
-
-
-
-  dot.className  = 'w-2 h-2 rounded-full bg-yellow-400 inline-block';
-
-
-
-  txt.textContent = '연결 중...';
-
-
+  dot.className = 'w-2 h-2 rounded-full bg-yellow-400 inline-block';
+  txt.textContent = '불러오는 중...';
 
   try {
-
-
-
-    const r = await fetch(`${url}/api/campuses`, { signal: AbortSignal.timeout(4000) });
-
-
-
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-
-
-
-    const campuses = await r.json();
-
-
-
+    const data = await loadTimetableData();
     timetableConnected = true;
-
-
-
-    dot.className  = 'w-2 h-2 rounded-full bg-green-500 inline-block';
-
-
-
-    txt.textContent = `연결됨 · 캠퍼스: ${campuses.join(', ')}`;
-
-
-
-    localStorage.setItem('timetableUrl', url);
-
-
-
+    dot.className = 'w-2 h-2 rounded-full bg-green-500 inline-block';
+    txt.textContent = `연결됨 · 총 ${data.courses.length}개 강의 (${data.branches.join(', ')})`;
   } catch(e) {
-
-
-
     timetableConnected = false;
-
-
-
-    dot.className  = 'w-2 h-2 rounded-full bg-red-500 inline-block';
-
-
-
-    txt.textContent = '연결 실패 — Flask 서버가 실행 중인지 확인하세요 (python app.py)';
-
-
-
+    _timetableCache = null;
+    dot.className = 'w-2 h-2 rounded-full bg-red-500 inline-block';
+    txt.textContent = '불러오기 실패 — 네트워크 연결을 확인하세요';
   }
-
-
-
 }
 
 
@@ -15077,151 +14978,78 @@ function toSearchKeyword(name) {
 
 async function showScheduleFromAPI(selected) {
 
-
-
-  const baseUrl  = (document.getElementById('timetableUrl').value || '').trim();
-
-
-
   const campus   = document.getElementById('timetableCampus').value;
-
-
-
   const month    = parseInt(document.getElementById('timetableMonth').value);
-
-
-
   const year     = new Date().getFullYear();
-
-
-
   const grid     = document.getElementById('scheduleGrid');
-
-
-
   const todayStr = new Date().toISOString().slice(0, 10);
 
-
-
-
-
-
-
   // Inline CSS dot color variables
-
-
-
   const dotStyleVars = SCHED_COLORS.map((c,i) => `--dot-${SCHED_NAMES[i]}:${c}`).join(';');
-
-
-
   document.documentElement.style.cssText += ';' + dotStyleVars;
 
-
-
-
-
-
-
   const dateColorMap = {}; // { 'YYYY-MM-DD': [colorName, ...] }
-
-
-
   const allResults   = [];
 
+  // itdaegu-timetable JSON 로드
+  let timetableData;
+  try {
+    timetableData = await loadTimetableData();
+  } catch(e) {
+    grid.innerHTML = `<div class="text-center py-8 text-red-400 text-sm">시간표 데이터 로드 실패 — 상단 "불러오기" 버튼을 눌러 다시 시도하세요</div>`;
+    return;
+  }
 
+  // 선택 월의 첫날/마지막날 계산
+  function monthOverlaps(startDate, endDate, yr, mo) {
+    const monthStart = `${yr}-${String(mo).padStart(2,'0')}-01`;
+    const lastDay = new Date(yr, mo, 0).getDate();
+    const monthEnd = `${yr}-${String(mo).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
+    return startDate <= monthEnd && endDate >= monthStart;
+  }
 
-
-
-
+  // JSON 과정 → API 호환 형식 변환
+  function mapCourse(c, yr, todayStr) {
+    const status = c.endDate < todayStr ? '종료' :
+                   c.startDate <= todayStr ? '진행중' :
+                   c.startDate === todayStr ? '오늘개강' : '예정';
+    return {
+      '과정명': c.name,
+      '개강일': c.startDate,
+      '종강일': c.endDate,
+      '요일': c.days,
+      '시작시간': c.time,
+      '종료시간': '',
+      '진행상태': status,
+      '강의실': c.room,
+      '강사': c.instructor,
+    };
+  }
 
   for (let i = 0; i < selected.length; i++) {
-
-
-
     const subj  = selected[i];
-
-
-
     const color = SCHED_NAMES[i % SCHED_NAMES.length];
-
-
-
     const hex   = SCHED_COLORS[i % SCHED_COLORS.length];
 
+    const keyword = toSearchKeyword(subj.name).toLowerCase();
 
-
-
-
-
-
-    const keyword = toSearchKeyword(subj.name);
-
-
-
-
-
-
-
-    // 선택 월부터 8월까지 평일·주말 전부 조회
-
-
-
-    const months = Array.from({length: 9 - month}, (_, k) => month + k);
-
-
-
-    const fetches = months.flatMap(m => ['weekday','weekend'].map(t =>
-
-
-
-      fetch(`${baseUrl}/api/courses?month=${m}&type=${t}&campus=${encodeURIComponent(campus)}&q=${encodeURIComponent(keyword)}`)
-
-
-
-        .then(r=>r.json()).catch(()=>({courses:[]}))
-
-
-
-    ));
-
-
-
-    const allResponses = await Promise.all(fetches);
-
-
-
-
-
-
-
-    // 중복 제거 (과정명+개강일 기준)
-
-
-
+    // 캠퍼스 + 월 범위 + 키워드로 필터링 (선택 월부터 연말까지)
     const seen = new Set();
-
-
-
-    const matched = allResponses.flatMap(r => r.courses||[]).filter(c => {
-
-
-
-      const key = (c['과정명']||'') + (c['개강일']||'');
-
-
-
-      if (seen.has(key)) return false;
-
-
-
-      seen.add(key); return true;
-
-
-
-    });
-
-
+    const matched = timetableData.courses
+      .filter(c => c.branch === campus)
+      .filter(c => {
+        for (let m = month; m <= 12; m++) {
+          if (monthOverlaps(c.startDate, c.endDate, year, m)) return true;
+        }
+        return false;
+      })
+      .filter(c => c.name.toLowerCase().includes(keyword))
+      .filter(c => {
+        const key = c.name + c.startDate;
+        if (seen.has(key)) return false;
+        seen.add(key); return true;
+      })
+      .map(c => mapCourse(c, year, todayStr));
 
 
 
