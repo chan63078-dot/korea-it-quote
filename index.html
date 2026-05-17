@@ -3432,7 +3432,11 @@
 
 
 
-        <button onclick="resetSystemPrompt()" class="mt-2 px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm hover:bg-slate-50 transition-colors">기본값으로 초기화</button>
+        <div class="mt-2 flex items-center gap-2">
+          <button onclick="saveSystemPromptDefault()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors font-semibold">기본값으로 저장</button>
+          <button onclick="resetSystemPrompt()" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm hover:bg-slate-50 transition-colors">기본값으로 초기화</button>
+          <span id="sysPromptSaveMsg" class="text-xs text-green-600 hidden">저장됐습니다 ✓</span>
+        </div>
 
 
 
@@ -7585,7 +7589,7 @@ function initBlogPage() {
 
 
 
-    sysEl.value = localStorage.getItem('blogSystemPrompt') || DEFAULT_SYSTEM_PROMPT;
+    sysEl.value = localStorage.getItem('blogSystemPrompt') || localStorage.getItem('blogSystemPromptDefault') || DEFAULT_SYSTEM_PROMPT;
 
 
 
@@ -8022,22 +8026,22 @@ function setBlogView(mode) {
 
 
 
+function saveSystemPromptDefault() {
+  const val = document.getElementById('systemPromptText').value.trim();
+  if (!val) return;
+  localStorage.setItem('blogSystemPromptDefault', val);
+  localStorage.setItem('blogSystemPrompt', val);
+  const msg = document.getElementById('sysPromptSaveMsg');
+  msg.classList.remove('hidden');
+  setTimeout(() => msg.classList.add('hidden'), 2000);
+}
+
 function resetSystemPrompt() {
-
-
-
-  if (!confirm('시스템 프롬프트를 기본값으로 초기화할까요?')) return;
-
-
-
-  document.getElementById('systemPromptText').value = DEFAULT_SYSTEM_PROMPT;
-
-
-
-  localStorage.removeItem('blogSystemPrompt');
-
-
-
+  const saved = localStorage.getItem('blogSystemPromptDefault');
+  const label = saved ? '저장된 기본값' : '초기 기본값';
+  if (!confirm(`시스템 프롬프트를 ${label}으로 초기화할까요?`)) return;
+  document.getElementById('systemPromptText').value = saved || DEFAULT_SYSTEM_PROMPT;
+  localStorage.setItem('blogSystemPrompt', saved || DEFAULT_SYSTEM_PROMPT);
 }
 
 
@@ -18581,95 +18585,148 @@ function generateCardNewsHtml(type) {
     .replace(/대표태그:[^\n]*/g, '')
     .trim();
 
-  // ✅ 섹션 추출
-  const sections = [];
+  // 도입부 훅 텍스트
   const parts = body.split(/(?=✅)/);
+  const introLines = (parts[0] || '').split('\n').filter(l => l.trim() && !/^[①②③④⑤⑥]/.test(l.trim()) && !/^제목:/.test(l.trim()) && !/^목차/.test(l.trim()));
+  const hookText = introLines.slice(1, 4).join(' ').replace(/\s+/g, ' ').slice(0, 130) || '지금 바로 확인하세요!';
+
+  // ✅ 섹션 추출 → 섹션 한 장 = 카드 한 장
+  const sections = [];
   parts.slice(1).forEach(sec => {
     const sl = sec.split('\n').filter(l => l.trim());
     if (!sl.length) return;
     const secTitle = sl[0].replace(/^✅\s*\d*\.?\s*/, '').trim();
-    const secBody  = sl.slice(1).filter(l => l.trim()).slice(0, 4)
-      .map(l => l.replace(/^[▶✔•→]\s*/, '').trim()).filter(l => l.length > 2);
-    if (secTitle) sections.push({ title: secTitle, body: secBody });
+    const bullets  = sl.slice(1).filter(l => l.trim())
+      .map(l => l.replace(/^[▶✔•→💡👍👎]\s*/, '').replace(/^[→]\s*/, '').trim())
+      .filter(l => l.length > 3 && !/^[①②③④⑤⑥]/.test(l));
+    if (secTitle) sections.push({ title: secTitle, bullets: bullets.slice(0, 6) });
   });
 
-  const displaySections = sections.slice(0, 5);
-  const totalCards = 1 + displaySections.length + 1;
+  const totalCards = 1 + sections.length + 1;
   const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
-  const theme = type === 'blog'
-    ? { cover: '#1B4F8A', footer: '#0D3561' }
-    : { cover: '#6d28d9', footer: '#4c1d95' };
 
-  // 도입부 훅 텍스트
-  const introLines = parts[0].split('\n').filter(l => l.trim() && !/^[①②③④⑤⑥]/.test(l.trim()) && !/^제목:/.test(l.trim()));
-  const hookText = introLines.slice(1, 3).join(' ').slice(0, 80) || '지금 바로 확인하세요!';
+  // 테마 색상
+  const theme = type === 'blog'
+    ? { primary: '#1565C0', dark: '#0D1B3E', light: '#1E88E5', accent: '#FFD54F', ctaDark: '#1A237E', ctaMid: '#283593' }
+    : { primary: '#6d28d9', dark: '#2d1b69', light: '#8b5cf6', accent: '#fbbf24', ctaDark: '#4c1d95', ctaMid: '#5b21b6' };
 
   let cardsHtml = '';
 
-  // 표지 카드
-  cardsHtml += `<div class="card" style="background:${theme.cover}">
-  <div class="num" style="color:rgba(255,255,255,.55)">1 / ${totalCards}</div>
-  <div class="cover-body">
-    <div class="kw-badge">${kw}</div>
-    <h1 class="cover-title">${mainTitle}</h1>
-    <p class="hook">${hookText}</p>
+  // === 표지 카드 ===
+  cardsHtml += `
+<div class="card card-cover">
+  <div class="deco-circle deco-circle-1"></div>
+  <div class="deco-circle deco-circle-2"></div>
+  <div class="cover-content">
+    <div class="brand-tag">코리아IT아카데미 대구지점</div>
+    <div class="main-title">${mainTitle}</div>
+    <div class="sub-copy">${hookText}</div>
+    ${sections.length > 0 ? `<div class="highlight-box">총 ${sections.length}가지 핵심 정보 &nbsp;|&nbsp; ${today}</div>` : ''}
   </div>
-  <div class="footer" style="background:${theme.footer}"><span>코리아IT아카데미 대구지점</span><span>${new Date().getFullYear()}</span></div>
+  <div class="badge">1 / ${totalCards}</div>
+  <div class="footer-bar"><span>코리아IT아카데미 대구지점</span><span>${kw}</span></div>
 </div>`;
 
-  // 섹션 카드
-  displaySections.forEach((sec, i) => {
-    const items = sec.body.slice(0, 4).map(b => `<li>${b}</li>`).join('') || '<li>내용을 확인하세요.</li>';
-    cardsHtml += `<div class="card" style="background:#F8F9FA">
-  <div class="num" style="color:#94a3b8">${i + 2} / ${totalCards}</div>
-  <div class="sec-body">
-    <h2 class="sec-title" style="color:${theme.cover}">${sec.title}</h2>
-    <ul class="sec-list">${items}</ul>
+  // === 본문 카드 (섹션 한 장씩) ===
+  sections.forEach((sec, i) => {
+    const itemsHtml = sec.bullets.map((b, j) => `
+      <div class="step-item">
+        <div class="step-num">${j + 1}</div>
+        <div class="step-main">${b}</div>
+      </div>`).join('');
+    cardsHtml += `
+<div class="card card-content">
+  <div class="top-bar"></div>
+  <div class="inner">
+    <div class="section-label">POINT ${i + 1}</div>
+    <div class="section-title">${sec.title}</div>
+    <div class="step-list">${itemsHtml || '<div class="step-item"><div class="step-num">✓</div><div class="step-main">내용을 참고해 주세요.</div></div>'}</div>
   </div>
-  <div class="footer" style="background:${theme.footer}"><span>${kw}</span><span>${new Date().getFullYear()}</span></div>
+  <div class="badge">${i + 2} / ${totalCards}</div>
+  <div class="footer-bar"><span>코리아IT아카데미 대구지점</span><span>${kw}</span></div>
 </div>`;
   });
 
-  // 마무리 카드
-  const bullets = displaySections.map(s => `<li>✅ ${s.title}</li>`).join('');
-  cardsHtml += `<div class="card" style="background:${theme.cover}">
-  <div class="num" style="color:rgba(255,255,255,.55)">${totalCards} / ${totalCards}</div>
-  <div class="cover-body">
-    <h2 class="cover-title" style="font-size:30px">핵심 정리</h2>
-    <ul class="conc-list">${bullets}</ul>
-    <p class="hook" style="margin-top:18px">도움이 됐다면 공감과 댓글 부탁드립니다 😊</p>
+  // === CTA 마무리 카드 ===
+  const summaryItems = sections.slice(0, 4).map(s =>
+    `<div class="summary-item"><div class="s-label">✅ ${s.title.slice(0, 18)}</div><div class="s-value">${(s.bullets[0] || '').slice(0, 28)}</div></div>`
+  ).join('');
+  cardsHtml += `
+<div class="card card-cta">
+  <div class="cta-deco cta-deco-1"></div>
+  <div class="cta-deco cta-deco-2"></div>
+  <div class="cta-content">
+    <div class="cta-label">핵심 요약</div>
+    <div class="cta-title">${mainTitle.slice(0, 28)}</div>
+    ${summaryItems ? `<div class="summary-box">${summaryItems}</div>` : ''}
+    <div class="url-chip">도움이 됐다면 공감과 댓글 부탁드립니다 😊</div>
   </div>
-  <div class="footer" style="background:${theme.footer}"><span>코리아IT아카데미 대구지점</span><span>${today}</span></div>
+  <div class="badge">${totalCards} / ${totalCards}</div>
+  <div class="footer-bar footer-dark"><span>코리아IT아카데미 대구지점</span><span>${today}</span></div>
 </div>`;
 
   const html = `<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${mainTitle} 카드뉴스</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans KR','Malgun Gothic',sans-serif;background:#f1f5f9;padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px}
-.card{width:800px;height:800px;position:relative;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.15);border-radius:12px}
-.num{position:absolute;top:18px;right:22px;font-size:13px;font-weight:700}
-.footer{padding:14px 24px;display:flex;justify-content:space-between;font-size:13px;color:rgba(255,255,255,.85);font-weight:600}
-.cover-body{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:60px 50px;text-align:center;color:#fff}
-.kw-badge{font-size:12px;background:rgba(255,255,255,.18);border-radius:20px;padding:4px 14px;margin-bottom:20px;letter-spacing:1px}
-.cover-title{font-size:34px;font-weight:900;line-height:1.35;margin-bottom:20px;word-break:keep-all}
-.hook{font-size:15px;opacity:.85;line-height:1.7;word-break:keep-all}
-.sec-body{flex:1;padding:55px 50px 35px;display:flex;flex-direction:column;justify-content:center}
-.sec-title{font-size:26px;font-weight:900;margin-bottom:26px;line-height:1.35;word-break:keep-all}
-.sec-list{list-style:none}
-.sec-list li{font-size:16px;color:#334155;line-height:1.75;padding:10px 0;border-bottom:1px solid #e2e8f0;word-break:keep-all}
-.sec-list li::before{content:'▶ ';color:#6366f1}
-.sec-list li:last-child{border-bottom:none}
-.conc-list{list-style:none;text-align:left}
-.conc-list li{font-size:16px;opacity:.9;padding:7px 0;line-height:1.5;word-break:keep-all}
-@media print{body{background:white;padding:0}.card{page-break-after:always;box-shadow:none;border-radius:0}}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0A0A14; font-family: 'Noto Sans KR', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; gap: 40px; }
+.capture-guide { background: #1A1A2E; border: 1px solid #3A3A5C; border-radius: 12px; padding: 20px 30px; max-width: 860px; width: 100%; color: #8888AA; font-size: 13px; line-height: 1.8; }
+.capture-guide strong { color: #AAAACC; display: block; margin-bottom: 6px; font-size: 14px; }
+.card { width: 800px; height: 800px; position: relative; overflow: hidden; flex-shrink: 0; }
+.badge { position: absolute; top: 28px; right: 28px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff; font-size: 13px; font-weight: 500; padding: 5px 14px; border-radius: 20px; letter-spacing: 0.5px; z-index: 10; }
+.footer-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; font-size: 12px; z-index: 10; }
+/* 표지 카드 */
+.card-cover { background: linear-gradient(145deg, ${theme.dark} 0%, ${theme.primary} 55%, ${theme.light} 100%); }
+.deco-circle { position: absolute; border-radius: 50%; opacity: 0.08; }
+.deco-circle-1 { width: 500px; height: 500px; background: #fff; top: -120px; right: -140px; }
+.deco-circle-2 { width: 300px; height: 300px; background: #fff; bottom: -80px; left: -80px; }
+.cover-content { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 60px 60px 100px; }
+.brand-tag { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); color: #fff; font-size: 12px; font-weight: 500; padding: 6px 16px; border-radius: 20px; letter-spacing: 1px; margin-bottom: 30px; }
+.main-title { font-size: 46px; font-weight: 900; color: #fff; line-height: 1.2; margin-bottom: 22px; letter-spacing: -1px; word-break: keep-all; }
+.sub-copy { font-size: 15px; color: rgba(255,255,255,0.75); line-height: 1.7; word-break: keep-all; }
+.highlight-box { margin-top: 28px; background: rgba(255,255,255,0.1); border-left: 4px solid ${theme.accent}; padding: 14px 20px; border-radius: 0 8px 8px 0; color: #fff; font-size: 14px; font-weight: 700; }
+.card-cover .footer-bar { background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.6); }
+/* 본문 카드 */
+.card-content { background: #F0F4FF; }
+.top-bar { position: absolute; top: 0; left: 0; right: 0; height: 8px; background: linear-gradient(90deg, ${theme.primary}, ${theme.light}); }
+.inner { position: absolute; top: 8px; left: 0; right: 0; bottom: 52px; padding: 40px 50px 28px; display: flex; flex-direction: column; }
+.section-label { font-size: 12px; font-weight: 700; color: ${theme.primary}; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+.section-title { font-size: 26px; font-weight: 900; color: ${theme.dark}; line-height: 1.25; margin-bottom: 24px; padding-bottom: 18px; border-bottom: 2px solid #D0D8F0; word-break: keep-all; }
+.card-content .footer-bar { background: ${theme.primary}; color: rgba(255,255,255,0.85); }
+.step-list { display: flex; flex-direction: column; gap: 10px; flex: 1; overflow: hidden; }
+.step-item { display: flex; align-items: flex-start; gap: 14px; background: #fff; border-radius: 12px; padding: 14px 18px; }
+.step-num { width: 28px; height: 28px; min-width: 28px; background: ${theme.primary}; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; }
+.step-main { font-size: 14px; font-weight: 600; color: ${theme.dark}; line-height: 1.5; word-break: keep-all; padding-top: 4px; }
+/* CTA 카드 */
+.card-cta { background: linear-gradient(145deg, ${theme.dark} 0%, ${theme.ctaDark} 50%, ${theme.ctaMid} 100%); }
+.cta-deco { position: absolute; border-radius: 50%; opacity: 0.06; }
+.cta-deco-1 { width: 500px; height: 500px; background: #fff; top: -150px; left: -100px; }
+.cta-deco-2 { width: 350px; height: 350px; background: ${theme.accent}; bottom: -100px; right: -80px; }
+.cta-content { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 60px 60px 100px; text-align: center; }
+.cta-label { font-size: 13px; font-weight: 700; color: ${theme.accent}; letter-spacing: 2px; margin-bottom: 18px; }
+.cta-title { font-size: 34px; font-weight: 900; color: #fff; line-height: 1.25; margin-bottom: 28px; word-break: keep-all; }
+.summary-box { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 22px 28px; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+.summary-item { text-align: left; }
+.s-label { font-size: 11px; color: rgba(255,255,255,0.5); letter-spacing: 1px; margin-bottom: 5px; }
+.s-value { font-size: 13px; font-weight: 700; color: #fff; word-break: keep-all; line-height: 1.4; }
+.url-chip { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); font-size: 14px; padding: 10px 28px; border-radius: 30px; }
+.footer-dark { background: rgba(0,0,0,0.4); color: rgba(255,255,255,0.55); }
+@media print { body { background: white; padding: 0; } .card { page-break-after: always; } .capture-guide { display: none; } }
 </style>
 </head>
-<body>${cardsHtml}</body>
+<body>
+<div class="capture-guide">
+  <strong>카드뉴스 캡처 안내</strong>
+  각 카드를 캡처하려면: Win + Shift + S 를 눌러 영역 선택 캡처 후 저장하세요.<br>
+  카드 크기: 800 x 800px / 총 ${totalCards}장 / 브라우저 확대 100% 상태에서 캡처하세요.
+</div>
+${cardsHtml}
+</body>
 </html>`;
 
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
