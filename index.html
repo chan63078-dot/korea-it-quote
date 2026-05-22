@@ -3380,6 +3380,21 @@
     <p class="text-xs text-amber-600 mt-1.5">키 저장 시 글 생성 후 어울리는 이미지가 자동으로 표시됩니다</p>
   </div>
 
+  <!-- Claude Worker URL 설정 -->
+  <div class="mb-4 p-4 bg-purple-50 border border-purple-200 rounded-2xl">
+    <div class="flex items-center gap-2 mb-2">
+      <span class="text-sm font-bold text-purple-800">🤖 Claude Worker URL</span>
+      <span class="text-xs text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">Cloudflare Workers</span>
+    </div>
+    <div class="flex gap-2">
+      <input type="text" id="claudeWorkerUrl" placeholder="https://your-worker.workers.dev"
+        class="flex-1 px-3 py-2 text-xs border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300 bg-white" />
+      <button onclick="saveClaudeWorkerUrl()"
+        class="px-3 py-1.5 text-xs bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold">저장</button>
+    </div>
+    <p class="text-xs text-purple-600 mt-1.5">저장 후 <strong>Claude로 생성</strong> 버튼이 활성화됩니다 · <a href="https://workers.cloudflare.com" target="_blank" class="underline">Workers 설정 →</a></p>
+  </div>
+
   <!-- 시스템 프롬프트 설정 (고급) -->
 
 
@@ -3623,6 +3638,12 @@
     </button>
 
 
+
+    <button onclick="generateBlogPostClaude()" id="blogClaudeBtn"
+      class="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+      <span id="blogClaudeIcon">🤖</span>
+      <span id="blogClaudeText">Claude로 생성</span>
+    </button>
 
     <div id="blogErrorBox" class="hidden mt-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 whitespace-pre-line"></div>
 
@@ -5894,6 +5915,8 @@ let selectedDeptIds = new Set(DEPT_MAP.map(d => d.id)); // 초기 전체 선택
 
 
   updateApiKeyBanners();
+
+  loadClaudeWorkerUrl();
 
 
 
@@ -8390,7 +8413,100 @@ async function generateBlogPost() {
 
 }
 
+// ============ Claude Worker URL 저장/불러오기 ============
 
+function saveClaudeWorkerUrl() {
+  const url = document.getElementById('claudeWorkerUrl').value.trim();
+  if (!url) { alert('Worker URL을 입력해주세요.'); return; }
+  localStorage.setItem('claudeWorkerUrl', url);
+  alert('저장됐습니다. Claude로 생성 버튼을 사용할 수 있습니다.');
+}
+
+function loadClaudeWorkerUrl() {
+  const url = localStorage.getItem('claudeWorkerUrl') || '';
+  const el = document.getElementById('claudeWorkerUrl');
+  if (el) el.value = url;
+  return url;
+}
+
+// ============ Claude로 블로그 생성 ============
+
+async function generateBlogPostClaude() {
+  const keyword = document.getElementById('blogKeyword').value.trim();
+  if (!keyword) { alert('메인 키워드를 입력해주세요.'); return; }
+
+  const workerUrl = localStorage.getItem('claudeWorkerUrl') || '';
+  if (!workerUrl) {
+    alert('설정에서 Claude Worker URL을 먼저 저장해주세요.');
+    document.getElementById('claudeWorkerUrl').focus();
+    return;
+  }
+
+  const sysPrompt = document.getElementById('systemPromptText').value || DEFAULT_SYSTEM_PROMPT;
+  localStorage.setItem('blogSystemPrompt', sysPrompt);
+
+  const btn = document.getElementById('blogClaudeBtn');
+  const btnText = document.getElementById('blogClaudeText');
+  const btnIcon = document.getElementById('blogClaudeIcon');
+  btn.disabled = true;
+  btnText.textContent = 'Claude 생성 중...';
+  btnIcon.textContent = '⏳';
+
+  try {
+    const maxTokens = getBlogMaxTokens();
+    const userMsg = `오늘 날짜: ${new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'})}\n\n다음 키워드로 블로그 원고를 작성해주세요: "${keyword}"`;
+
+    const res = await fetch(workerUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: sysPrompt,
+        messages: [{ role: 'user', content: userMsg }],
+        max_tokens: maxTokens,
+      }),
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error?.message || `Worker 오류: ${res.status}`);
+    }
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+
+    const result = data.content?.[0]?.text || '';
+    if (!result) throw new Error('Claude 응답이 비어 있습니다.');
+
+    document.getElementById('blogErrorBox').classList.add('hidden');
+    document.getElementById('blogRawContent').value = result;
+    document.getElementById('blogPreviewContent').innerHTML = markdownToHtml(result);
+
+    const charCount = result.length;
+    const charEl = document.getElementById('blogCharCount');
+    if (charEl) {
+      const charRange = charCount >= 2000 && charCount <= 4000 ? '✅ 최적' : charCount < 2000 ? '⚠️ 짧음' : '⚠️ 길음';
+      charEl.textContent = `${charCount.toLocaleString()}자 ${charRange} (2,000~4,000 권장) · Claude`;
+      charEl.className = charCount >= 2000 && charCount <= 4000 ? 'text-xs text-purple-600 font-semibold' : 'text-xs text-amber-500 font-semibold';
+    }
+
+    renderBlogMeta(result);
+    setBlogView('raw');
+    document.getElementById('blogResultArea').classList.remove('hidden');
+    saveRecentKeyword(keyword);
+    renderRecentKeywords();
+    saveBlogHistory(keyword, result);
+    document.getElementById('blogResultArea').scrollIntoView({ behavior: 'smooth' });
+
+  } catch (err) {
+    const errBox = document.getElementById('blogErrorBox');
+    if (errBox) { errBox.textContent = err.message; errBox.classList.remove('hidden'); }
+    else { alert(err.message); }
+  } finally {
+    btn.disabled = false;
+    btnText.textContent = 'Claude로 생성';
+    btnIcon.textContent = '🤖';
+  }
+}
 
 
 
