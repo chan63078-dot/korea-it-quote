@@ -8423,9 +8423,13 @@ function saveClaudeWorkerUrl() {
 }
 
 function loadClaudeWorkerUrl() {
-  const url = localStorage.getItem('claudeWorkerUrl') || '';
+  const DEFAULT_WORKER_URL = 'https://claude-blog-proxy.chan63078.workers.dev';
+  const url = localStorage.getItem('claudeWorkerUrl') || DEFAULT_WORKER_URL;
   const el = document.getElementById('claudeWorkerUrl');
   if (el) el.value = url;
+  if (!localStorage.getItem('claudeWorkerUrl')) {
+    localStorage.setItem('claudeWorkerUrl', DEFAULT_WORKER_URL);
+  }
   return url;
 }
 
