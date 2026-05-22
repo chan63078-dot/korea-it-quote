@@ -3860,6 +3860,86 @@
 
 
 
+
+
+  <!-- Claude 자동 발행 글 목록 -->
+  <div class="mt-4 border border-indigo-200 rounded-2xl overflow-hidden">
+    <button onclick="toggleClaudePosts()" class="w-full flex items-center justify-between px-4 py-3 bg-indigo-50 hover:bg-indigo-100 transition-colors">
+      <span class="flex items-center gap-2 text-sm font-semibold text-indigo-700">
+        <span>🤖</span>
+        <span>Claude 자동 발행 글</span>
+        <span id="claudePostCount" class="text-xs text-indigo-400"></span>
+      </span>
+      <span id="claudePostArrow" class="text-indigo-400">▾</span>
+    </button>
+    <div id="claudePostBody" class="hidden divide-y divide-slate-100">
+      <div id="claudePostList" class="p-3 space-y-2 text-sm text-slate-500 text-center">
+        불러오는 중...
+      </div>
+    </div>
+  </div>
+
+<script>
+(function() {
+  var claudePostsLoaded = false;
+  window.toggleClaudePosts = function() {
+    var body = document.getElementById('claudePostBody');
+    var arrow = document.getElementById('claudePostArrow');
+    var isHidden = body.classList.contains('hidden');
+    body.classList.toggle('hidden');
+    arrow.textContent = isHidden ? '▴' : '▾';
+    if (isHidden && !claudePostsLoaded) {
+      claudePostsLoaded = true;
+      loadClaudePosts();
+    }
+  };
+  async function loadClaudePosts() {
+    var list = document.getElementById('claudePostList');
+    try {
+      var res = await fetch('./blog-posts/index.json?t=' + Date.now());
+      if (!res.ok) throw new Error('불러오기 실패');
+      var data = await res.json();
+      var posts = data.posts || [];
+      var countEl = document.getElementById('claudePostCount');
+      if (countEl) countEl.textContent = posts.length ? '(' + posts.length + '개)' : '';
+      if (posts.length === 0) {
+        list.innerHTML = '<p class="py-4 text-slate-400 text-center">아직 발행된 글이 없습니다.<br><span class="text-xs">Claude Code에서 /blog-pipeline 실행 후 발행하면 여기에 표시됩니다.</span></p>';
+        return;
+      }
+      list.innerHTML = posts.map(function(p) {
+        return '<div class="flex items-start gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-lg cursor-pointer" onclick="openClaudePost('' + p.file + '')">' +
+          '<div class="flex-1 min-w-0">' +
+            '<p class="font-medium text-slate-800 truncate">' + (p.title || p.keyword) + '</p>' +
+            '<p class="text-xs text-slate-400 mt-0.5">' + p.date + ' · ' + (p.chars || 0).toLocaleString() + '자</p>' +
+            (p.preview ? '<p class="text-xs text-slate-500 mt-1 line-clamp-2">' + p.preview + '</p>' : '') +
+          '</div>' +
+          '<span class="text-xs text-indigo-400 flex-shrink-0 mt-0.5">읽기 ›</span>' +
+        '</div>';
+      }).join('');
+    } catch(e) {
+      list.innerHTML = '<p class="py-4 text-red-400 text-center">글 목록을 불러오지 못했습니다.<br><span class="text-xs">' + e.message + '</span></p>';
+    }
+  }
+  window.openClaudePost = async function(file) {
+    try {
+      var res = await fetch('./blog-posts/' + file + '?t=' + Date.now());
+      var text = await res.text();
+      var body = text.replace(/^---[\s\S]*?---
+/, '');
+      var rawArea = document.getElementById('blogRawContent');
+      var resultArea = document.getElementById('blogResultArea');
+      if (rawArea && resultArea) {
+        rawArea.value = body;
+        if (typeof renderBlogPreview === 'function') renderBlogPreview();
+        if (typeof setBlogView === 'function') setBlogView('preview');
+        resultArea.classList.remove('hidden');
+        resultArea.scrollIntoView({ behavior: 'smooth' });
+      }
+    } catch(e) { alert('글을 불러오지 못했습니다: ' + e.message); }
+  };
+})();
+</script>
+
 </div><!-- /blogPage -->
 
 
