@@ -1,6 +1,5 @@
-// Cloudflare Worker — Anthropic API 프록시
-// 배포 방법: https://workers.cloudflare.com 에서 새 Worker 생성 후 이 코드 붙여넣기
-// 환경변수: ANTHROPIC_API_KEY = sk-ant-... 값으로 Secret 추가
+// Cloudflare Worker — Groq API 프록시 (무료)
+// 환경변수: GROQ_API_KEY = gsk_... 값으로 Secret 추가
 
 export default {
   async fetch(request, env) {
@@ -20,8 +19,8 @@ export default {
       return new Response('Method Not Allowed', { status: 405, headers: corsHeaders });
     }
 
-    if (!env.ANTHROPIC_API_KEY) {
-      return new Response(JSON.stringify({ error: 'ANTHROPIC_API_KEY not set in Worker environment' }), {
+    if (!env.GROQ_API_KEY) {
+      return new Response(JSON.stringify({ error: 'GROQ_API_KEY not set in Worker environment' }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -29,25 +28,38 @@ export default {
     try {
       const body = await request.json();
 
-      const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
+      const messages = [];
+      if (body.system) messages.push({ role: 'system', content: body.system });
+      messages.push(...(body.messages || []));
+
+      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
+          'Authorization': `Bearer ${env.GROQ_API_KEY}`,
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
+          model: 'llama-3.3-70b-versatile',
+          messages,
           max_tokens: body.max_tokens || 8192,
-          system: body.system || '',
-          messages: body.messages,
+          temperature: 0.7,
         }),
       });
 
-      const data = await anthropicRes.json();
+      const data = await groqRes.json();
+
+      // Anthropic 응답 형식으로 변환 (사이트 코드 호환)
+      if (data.choices?.[0]?.message?.content) {
+        const converted = {
+          content: [{ type: 'text', text: data.choices[0].message.content }],
+        };
+        return new Response(JSON.stringify(converted), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
 
       return new Response(JSON.stringify(data), {
-        status: anthropicRes.status,
+        status: groqRes.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } catch (err) {
