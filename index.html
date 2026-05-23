@@ -19084,8 +19084,14 @@ async function suggestRelatedKeywords() {
     <!-- 서버 설정 -->
     <div style="margin-bottom:14px;">
       <label style="display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px;">🖥️ NaverBee 서버</label>
-      <input id="nb-server" type="text" placeholder="https://naver-blog-server-ecxq.onrender.com"
-        style="width:100%;padding:9px 12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:13px;outline:none;box-sizing:border-box;" />
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input id="nb-server" type="text" placeholder="https://naver-blog-server-ecxq.onrender.com"
+          style="flex:1;padding:9px 12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:13px;outline:none;box-sizing:border-box;" />
+        <button onclick="document.getElementById('nb-server').value='http://127.0.0.1:3355';document.getElementById('nb-password').value='local2026';"
+          title="내 PC의 로컬 자동화 서버에 연결"
+          style="padding:9px 10px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;font-size:12px;font-weight:600;color:#15803d;cursor:pointer;white-space:nowrap;">💻 내 PC</button>
+      </div>
+      <p style="font-size:11px;color:#aaa;margin-top:4px;">내 PC에서 start.bat 실행 후 💻 내 PC 버튼 클릭</p>
     </div>
 
     <!-- 비밀번호 -->
