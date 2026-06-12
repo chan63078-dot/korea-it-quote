@@ -19071,10 +19071,30 @@ body { background: #0A0A14; font-family: 'Noto Sans KR', sans-serif; display: fl
 <body>
 <div class="capture-guide">
   <strong>카드뉴스 캡처 안내</strong>
-  각 카드를 캡처하려면: Win + Shift + S 를 눌러 영역 선택 캡처 후 저장하세요.<br>
-  카드 크기: 800 x 800px / 총 ${totalCards}장 / 브라우저 확대 100% 상태에서 캡처하세요.
+  아래 버튼을 누르면 모든 카드가 1080x1080 PNG로 자동 저장됩니다. (총 ${totalCards}장)<br>
+  <button id="saveAllBtn" style="margin-top:10px;padding:10px 26px;border:none;border-radius:8px;background:#4f46e5;color:#fff;font-size:14px;font-weight:700;cursor:pointer">📥 전체 PNG 저장</button>
+  <span id="saveProg" style="margin-left:10px;font-size:13px"></span>
 </div>
 ${cardsHtml}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
+<script>
+document.getElementById('saveAllBtn').onclick=async function(){
+  var btn=this,prog=document.getElementById('saveProg');
+  btn.disabled=true;
+  var cards=document.querySelectorAll('.card');
+  for(var i=0;i<cards.length;i++){
+    prog.textContent=(i+1)+' / '+cards.length+' 저장 중...';
+    var canvas=await html2canvas(cards[i],{scale:1.35,useCORS:true});
+    var a=document.createElement('a');
+    a.download='${kw.replace(/\s+/g,'_')}_카드_'+String(i+1).padStart(2,'0')+'.png';
+    a.href=canvas.toDataURL('image/png');
+    a.click();
+    await new Promise(function(r){setTimeout(r,400);});
+  }
+  prog.textContent='✅ 완료! 다운로드 폴더를 확인하세요.';
+  btn.disabled=false;
+};
+<\/script>
 </body>
 </html>`;
 
