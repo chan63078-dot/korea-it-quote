@@ -3295,6 +3295,8 @@
 
 
       <span id="apiKeyStatusBadge" class="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-500">키 없음</span>
+      <button onclick="exportSettings()" class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 hover:bg-emerald-200">⬇ 백업</button>
+      <button onclick="importSettings()" class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200">⬆ 복원</button>
 
 
 
@@ -6647,6 +6649,40 @@ function runAiCurriculumSearch() {
 // ============ Gemini API 키 멀티 관리 ============
 
 
+
+/* 설정·키·이력 전체 백업/복원 */
+function exportSettings(){
+  const data={};
+  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);data[k]=localStorage.getItem(k);}
+  const blob=new Blob([JSON.stringify({app:'korea-it-quote',exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='korea-it-quote_백업_'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+  alert('✅ 백업 파일이 다운로드되었습니다.\nAPI 키, 생성 이력, 프롬프트 등 모든 설정이 포함됩니다.');
+}
+function importSettings(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';
+  inp.onchange=function(e){
+    const f=e.target.files[0];if(!f)return;
+    if(!confirm('백업 파일의 설정으로 덮어씁니다. 계속할까요?'))return;
+    const r=new FileReader();
+    r.onload=function(){
+      try{
+        const j=JSON.parse(r.result);
+        const data=j.data||j;
+        if(!data||typeof data!=='object')throw new Error('bad');
+        let n=0;
+        Object.keys(data).forEach(function(k){if(typeof data[k]==='string'){localStorage.setItem(k,data[k]);n++;}});
+        alert('✅ '+n+'개 항목 복원 완료. 페이지를 새로고침합니다.');
+        location.reload();
+      }catch(err){alert('⚠ 잘못된 백업 파일입니다.');}
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+}
 
 function loadApiKeys() {
 
