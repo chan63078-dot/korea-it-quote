@@ -1872,7 +1872,7 @@ Q&A 5개는 실제로 궁금해할 법한 내용으로 구성한다.
 
 CTA 규칙
 CTA 문구는 아래 형식을 그대로 써라.
-코리아IT아카데미학원 대구점에서 상담받아보세요.
+코리아AI아카데미학원 대구점에서 상담받아보세요.
 http://koreaitac.com/
 "지금 바로" "문의하세요" "도전하세요" 표현 금지.
 
@@ -1881,13 +1881,13 @@ http://koreaitac.com/
 모바일 기준 한 줄 15~18자로 자연스럽게 줄바꿈.
 
 Context
-홍보 대상: 코리아IT아카데미학원 대구점
+홍보 대상: 코리아AI아카데미학원 대구점
 
 Image Keyword
 원고 끝나면 한 줄 띄고 아래 형식으로 출력.
 [IMAGE_KEYWORD]: (영어 단어 또는 짧은 구문 1개)`;
 
-const DEFAULT_SYSTEM_PROMPT = `당신은 코리아IT아카데미 대구지점의 전문 네이버 블로그 작가입니다.
+const DEFAULT_SYSTEM_PROMPT = `당신은 코리아AI아카데미 대구지점의 전문 네이버 블로그 작가입니다.
 
 
 
@@ -2011,7 +2011,7 @@ const DEFAULT_SYSTEM_PROMPT = `당신은 코리아IT아카데미 대구지점의
 
 
 
-⑥ 마무리 + CTA (코리아IT아카데미 대구지점 문의 유도)
+⑥ 마무리 + CTA (코리아AI아카데미 대구지점 문의 유도)
 
 
 
@@ -5879,7 +5879,7 @@ async function askMentor() {
   };
   const courseInfoStr = Object.entries(topCourses).map(([k,v])=>`[${k}] ${v}`).join('\n');
 
-  const mentorSystem = `당신은 코리아IT아카데미 대구지점의 10년차 수석 커리어 멘토입니다.
+  const mentorSystem = `당신은 코리아AI아카데미 대구지점의 10년차 수석 커리어 멘토입니다.
 학원의 실제 과목 데이터를 기반으로 구체적인 커리큘럼과 수강료를 포함하여 답변합니다.
 
 === 현재 개설 과정 및 수강료 ===
@@ -8363,7 +8363,7 @@ function printQuote() {
 
 
 
-      <div class="print-title">코리아 IT아카데미 교육과정 등록금 안내</div>
+      <div class="print-title">코리아 AI아카데미 교육과정 등록금 안내</div>
 
 
 
@@ -8819,7 +8819,7 @@ function copyMessage() {
 
 
 
-    `안녕하세요${customerName ? ', ' + customerName + '님' : ''}! 코리아IT아카데미입니다 😊`,
+    `안녕하세요${customerName ? ', ' + customerName + '님' : ''}! 코리아AI아카데미입니다 😊`,
 
 
 
@@ -11307,7 +11307,7 @@ function downloadExcel() {
 
 
 
-  XLSX.writeFile(wb, `코리아IT아카데미_수강료견적_${todayStr()}.xlsx`, { bookType: 'xlsx', cellStyles: true });
+  XLSX.writeFile(wb, `코리아AI아카데미_수강료견적_${todayStr()}.xlsx`, { bookType: 'xlsx', cellStyles: true });
 
 
 
@@ -11735,7 +11735,7 @@ function openMsgModal() {
 
 
 
-      body: `안녕하세요${name?` ${name}님`:''}! 코리아IT아카데미입니다 😊\n\n`+
+      body: `안녕하세요${name?` ${name}님`:''}! 코리아AI아카데미입니다 😊\n\n`+
 
 
 
@@ -11775,7 +11775,7 @@ function openMsgModal() {
 
 
 
-      body: `[코리아IT아카데미]\n`+
+      body: `[코리아AI아카데미]\n`+
 
 
 
@@ -11815,7 +11815,7 @@ function openMsgModal() {
 
 
 
-      body: `안녕하세요${name?`, ${name}님`:''}.\n코리아IT아카데미 ${cons}입니다.\n\n`+
+      body: `안녕하세요${name?`, ${name}님`:''}.\n코리아AI아카데미 ${cons}입니다.\n\n`+
 
 
 
@@ -12485,7 +12485,7 @@ function openMailtoTemplate() {
 
 
 
-  const subject = encodeURIComponent(`[코리아IT아카데미] ${name ? name + '님 ' : ''}수강료 견적 안내`);
+  const subject = encodeURIComponent(`[코리아AI아카데미] ${name ? name + '님 ' : ''}수강료 견적 안내`);
 
 
 
@@ -12881,7 +12881,7 @@ function autoFillWpKeywords() {
 
 
 
-  const prefix = '코리아IT아카데미 대구';
+  const prefix = '코리아AI아카데미 대구';
 
 
 
@@ -12973,7 +12973,7 @@ function igUC(){const cap=igCap||'';const cnt=document.getElementById('ig-charcn
 
 
 
-async function igGen(){const uk=localStorage.getItem('ig_k_unsplash')||document.getElementById('ig-uk')?.value.trim();const btn=document.getElementById('ig-gbtn');const prev=document.getElementById('ig-prev');if(btn)btn.disabled=true;if(prev)prev.style.display='none';igSS('⏳ AI가 글 작성 중...','ld');const topics=['AI·머신러닝','웹개발','사이버보안','클라우드','앱개발','IT취업'];const topic=document.getElementById('ig-topic')?.value.trim()||topics[Math.floor(Math.random()*topics.length)];const kw=document.getElementById('ig-imgkw')?.value.trim()||'technology';const toneEl=document.getElementById('ig-tone');const tone=toneEl?toneEl.value:'info';const toneMap={info:'IT 정보/팀을 알기 쉽게 전달하는 정보형',promo:'코리아IT아카데미 대구지점 수강을 자연스럽게 홍보하는',story:'IT를 배우는 수강생 관점의 공감 스토리텔링형'};const toneDesc=toneMap[tone]||toneMap.info;const prompt='인스타그램 IT 정보글 한국어로 작성.\n주제: '+topic+'\n스타일: '+toneDesc+'\n형식:\n이모지+제목\n(빈줄)\n핵심 내용 3~5줄 (각 줄 이모지 시작)\n(빈줄)\n해시태그 7~10개\n전체 300자 이내. 해시태그는 #코리아IT아카데미 반드시 포함.';try{igCap=await callGeminiAPI(prompt,'인스타그램 마케팅 전문가',600);igUC();igSS('⏳ 이미지 검색 중...','ld');let iu='https://images.unsplash.com/photo-1518770660439-4636190af475?w=800';if(uk){try{const ur=await fetch('https://api.unsplash.com/photos/random?query='+encodeURIComponent(kw)+'&orientation=portrait&client_id='+uk);if(ur.ok){const ud=await ur.json();iu=ud.urls?.regular||iu;}}catch(e){}}igIU=iu;const img=document.getElementById('ig-img');const cap=document.getElementById('ig-caption');if(img)img.src=iu;if(cap)cap.textContent=igCap;if(prev)prev.style.display='block';const st=document.getElementById('ig-status');if(st)st.style.display='none';}catch(e){igSS('❌ '+e.message,'er');}finally{if(btn)btn.disabled=false;}}
+async function igGen(){const uk=localStorage.getItem('ig_k_unsplash')||document.getElementById('ig-uk')?.value.trim();const btn=document.getElementById('ig-gbtn');const prev=document.getElementById('ig-prev');if(btn)btn.disabled=true;if(prev)prev.style.display='none';igSS('⏳ AI가 글 작성 중...','ld');const topics=['AI·머신러닝','웹개발','사이버보안','클라우드','앱개발','IT취업'];const topic=document.getElementById('ig-topic')?.value.trim()||topics[Math.floor(Math.random()*topics.length)];const kw=document.getElementById('ig-imgkw')?.value.trim()||'technology';const toneEl=document.getElementById('ig-tone');const tone=toneEl?toneEl.value:'info';const toneMap={info:'IT 정보/팀을 알기 쉽게 전달하는 정보형',promo:'코리아AI아카데미 대구지점 수강을 자연스럽게 홍보하는',story:'IT를 배우는 수강생 관점의 공감 스토리텔링형'};const toneDesc=toneMap[tone]||toneMap.info;const prompt='인스타그램 IT 정보글 한국어로 작성.\n주제: '+topic+'\n스타일: '+toneDesc+'\n형식:\n이모지+제목\n(빈줄)\n핵심 내용 3~5줄 (각 줄 이모지 시작)\n(빈줄)\n해시태그 7~10개\n전체 300자 이내. 해시태그는 #코리아AI아카데미 반드시 포함.';try{igCap=await callGeminiAPI(prompt,'인스타그램 마케팅 전문가',600);igUC();igSS('⏳ 이미지 검색 중...','ld');let iu='https://images.unsplash.com/photo-1518770660439-4636190af475?w=800';if(uk){try{const ur=await fetch('https://api.unsplash.com/photos/random?query='+encodeURIComponent(kw)+'&orientation=portrait&client_id='+uk);if(ur.ok){const ud=await ur.json();iu=ud.urls?.regular||iu;}}catch(e){}}igIU=iu;const img=document.getElementById('ig-img');const cap=document.getElementById('ig-caption');if(img)img.src=iu;if(cap)cap.textContent=igCap;if(prev)prev.style.display='block';const st=document.getElementById('ig-status');if(st)st.style.display='none';}catch(e){igSS('❌ '+e.message,'er');}finally{if(btn)btn.disabled=false;}}
 
 
 
@@ -13230,13 +13230,13 @@ ${body.slice(0, 9000)}`;
   <div class="deco-circle deco-circle-1"></div>
   <div class="deco-circle deco-circle-2"></div>
   <div class="cover-content">
-    <div class="brand-tag">코리아IT아카데미 대구지점</div>
+    <div class="brand-tag">코리아AI아카데미 대구지점</div>
     <div class="main-title">${coverTitle}</div>
     <div class="sub-copy">${hookText}</div>
     ${sections.length > 0 ? `<div class="highlight-box">총 ${sections.length}가지 핵심 정보 &nbsp;|&nbsp; ${today}</div>` : ''}
   </div>
   <div class="badge">1 / ${totalCards}</div>
-  <div class="footer-bar"><span>코리아IT아카데미 대구지점</span><span>${kw}</span></div>
+  <div class="footer-bar"><span>코리아AI아카데미 대구지점</span><span>${kw}</span></div>
 </div>`;
 
   // === 본문 카드 (섹션 한 장씩) ===
@@ -13255,7 +13255,7 @@ ${body.slice(0, 9000)}`;
     <div class="step-list">${itemsHtml || '<div class="step-item"><div class="step-num">✓</div><div class="step-main">내용을 참고해 주세요.</div></div>'}</div>
   </div>
   <div class="badge">${i + 2} / ${totalCards}</div>
-  <div class="footer-bar"><span>코리아IT아카데미 대구지점</span><span>${kw}</span></div>
+  <div class="footer-bar"><span>코리아AI아카데미 대구지점</span><span>${kw}</span></div>
 </div>`;
   });
 
@@ -13274,7 +13274,7 @@ ${body.slice(0, 9000)}`;
     <div class="url-chip">도움이 됐다면 공감과 댓글 부탁드립니다 😊</div>
   </div>
   <div class="badge">${totalCards} / ${totalCards}</div>
-  <div class="footer-bar footer-dark"><span>코리아IT아카데미 대구지점</span><span>${today}</span></div>
+  <div class="footer-bar footer-dark"><span>코리아AI아카데미 대구지점</span><span>${today}</span></div>
 </div>`;
 
   const html = `<!DOCTYPE html>
