@@ -1576,7 +1576,7 @@ async function _fetchGemini(apiKey, userPrompt, systemInstruction, modelName, ma
 
 
     const isNotFound = raw.toLowerCase().includes('not found') || raw.toLowerCase().includes('not supported');
-
+const isOverloaded = res.status === 503 || status === 'UNAVAILABLE' || raw.toLowerCase().includes('overloaded') || raw.toLowerCase().includes('high demand');
 
 
     if (isQuota) throw Object.assign(new Error('QUOTA'), { isQuota: true, raw });
@@ -1584,7 +1584,7 @@ async function _fetchGemini(apiKey, userPrompt, systemInstruction, modelName, ma
 
 
     if (isNotFound) throw Object.assign(new Error('NOT_FOUND'), { isNotFound: true, model, raw });
-
+if (isOverloaded) throw Object.assign(new Error('OVERLOADED'), { isOverloaded: true, model, raw });
 
 
     throw new Error(`[${res.status}] ${raw || '알 수 없는 오류'}`);
@@ -1720,7 +1720,7 @@ async function callGeminiAPI(userPrompt, systemInstruction, maxTokens) {
 
 
         if (err.isQuota || err.isNotFound) continue; // 다음 모델 시도
-
+if (err.isOverloaded) { await new Promise(r => setTimeout(r, 1200)); continue; }
 
 
         throw err; // 인증 오류 등 다른 에러는 즉시 중단
