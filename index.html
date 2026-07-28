@@ -3930,7 +3930,8 @@
         return;
       }
       list.innerHTML = posts.map(function(p) {
-        return '<div class="flex items-start gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-lg cursor-pointer" onclick="openClaudePost('' + p.file + '')">' +
+        var safeFile = String(p.file || '').replace(/"/g, '&quot;');
+        return '<div class="flex items-start gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-lg cursor-pointer" data-file="' + safeFile + '">' +
           '<div class="flex-1 min-w-0">' +
             '<p class="font-medium text-slate-800 truncate">' + (p.title || p.keyword) + '</p>' +
             '<p class="text-xs text-slate-400 mt-0.5">' + p.date + ' · ' + (p.chars || 0).toLocaleString() + '자</p>' +
@@ -3939,6 +3940,11 @@
           '<span class="text-xs text-indigo-400 flex-shrink-0 mt-0.5">읽기 ›</span>' +
         '</div>';
       }).join('');
+      list.querySelectorAll('[data-file]').forEach(function(el) {
+        el.addEventListener('click', function() {
+          openClaudePost(el.getAttribute('data-file'));
+        });
+      });
     } catch(e) {
       list.innerHTML = '<p class="py-4 text-red-400 text-center">글 목록을 불러오지 못했습니다.<br><span class="text-xs">' + e.message + '</span></p>';
     }
@@ -3947,8 +3953,7 @@
     try {
       var res = await fetch('./blog-posts/' + file + '?t=' + Date.now());
       var text = await res.text();
-      var body = text.replace(/^---[\s\S]*?---
-/, '');
+      var body = text.replace(/^---[\s\S]*?---\n/, '');
       var rawArea = document.getElementById('blogRawContent');
       var resultArea = document.getElementById('blogResultArea');
       if (rawArea && resultArea) {
