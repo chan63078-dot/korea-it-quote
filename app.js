@@ -189,7 +189,7 @@ function setSidebarTab(tab) {
 
 
 
-  const tabs = { quote: 'tabQuote', blog: 'tabBlog', daily: 'tabDaily', wp: 'tabWp', instagram: 'tabInstagram' };
+  const tabs = { quote: 'tabQuote', blog: 'tabBlog', daily: 'tabDaily', wp: 'tabWp', instagram: 'tabInstagram', today: 'tabToday' };
 
 
 
@@ -225,7 +225,7 @@ function setSidebarTab(tab) {
 
 
 
-  ['quotePage','blogPage','dailyPage','wpPage','instagramPage'].forEach(id => {
+  ['quotePage','blogPage','dailyPage','wpPage','instagramPage','todayPage'].forEach(id => {
 
 
 
@@ -241,7 +241,7 @@ function setSidebarTab(tab) {
 
 
 
-  const pageMap = { quote: 'quotePage', blog: 'blogPage', daily: 'dailyPage', wp: 'wpPage', instagram: 'instagramPage' };
+  const pageMap = { quote: 'quotePage', blog: 'blogPage', daily: 'dailyPage', wp: 'wpPage', instagram: 'instagramPage', today: 'todayPage' };
 
 
 
@@ -266,6 +266,8 @@ function setSidebarTab(tab) {
 
 
   if (tab === 'wp') initWpPage();
+
+  if (tab === 'today') initTodayPage();
 
 
 
@@ -4486,6 +4488,72 @@ function initWpPage() {
 
 
 
+}
+
+async function initTodayPage() {
+  const body = document.getElementById('todayBody');
+  if (!body) return;
+  body.innerHTML = '<p class="py-6 text-slate-400 text-center text-sm">불러오는 중...</p>';
+  try {
+    const res = await fetch('./today-content/latest.json?t=' + Date.now());
+    if (!res.ok) throw new Error('불러오기 실패');
+    const data = await res.json();
+
+    if (!data.date || !data.instagram || !data.instagram.candidates || data.instagram.candidates.length === 0) {
+      body.innerHTML = '<p class="py-8 text-slate-400 text-center text-sm">아직 준비된 콘텐츠가 없습니다.<br><span class="text-xs">Claude에게 "오늘 거 써줘"라고 요청하면 여기에 표시됩니다.</span></p>';
+      return;
+    }
+
+    let html = '';
+    html += '<div class="mb-4 flex items-center justify-between">';
+    html += '<span class="text-xs font-semibold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-3 py-1">⏳ 승인 대기 중</span>';
+    html += '<span class="text-xs text-slate-400">' + data.date + '</span>';
+    html += '</div>';
+
+    html += '<h3 class="text-sm font-bold text-slate-700 mb-2">📸 인스타그램 기획 TOP ' + data.instagram.candidates.length + '</h3>';
+    html += '<div class="space-y-2 mb-6">';
+    data.instagram.candidates.forEach(function(c) {
+      html += '<div class="border border-slate-200 rounded-xl p-3">';
+      html += '<div class="flex items-start justify-between gap-2">';
+      html += '<p class="font-semibold text-slate-800 text-sm">' + c.rank + '. ' + c.title + '</p>';
+      html += '<span class="text-xs font-bold text-indigo-600 flex-shrink-0">' + c.score + '점</span>';
+      html += '</div>';
+      html += '<p class="text-xs text-slate-400 mt-1">' + (c.format || '') + ' · ' + (c.purpose || '') + '</p>';
+      if (c.evidence_url) {
+        html += '<a href="' + c.evidence_url + '" target="_blank" class="text-xs text-indigo-500 hover:underline">🔗 ' + (c.evidence_label || '근거 링크') + '</a>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+
+    if (data.blog) {
+      html += '<h3 class="text-sm font-bold text-slate-700 mb-2">📝 블로그 초안</h3>';
+      html += '<div class="border border-slate-200 rounded-xl p-3 cursor-pointer hover:bg-slate-50" onclick="toggleTodayBlog()">';
+      html += '<p class="font-semibold text-slate-800 text-sm">' + data.blog.title + '</p>';
+      html += '<p class="text-xs text-slate-400 mt-0.5">' + (data.blog.chars || 0).toLocaleString() + '자 · 클릭하면 전체 보기</p>';
+      html += '<p class="text-xs text-slate-500 mt-1 line-clamp-2">' + (data.blog.preview || '') + '</p>';
+      html += '</div>';
+      html += '<div id="todayBlogFull" class="hidden mt-2 border border-slate-200 rounded-xl p-4 text-sm text-slate-700 whitespace-pre-wrap"></div>';
+    }
+
+    body.innerHTML = html;
+    if (data.blog) {
+      window._todayBlogContent = data.blog.content || '';
+    }
+  } catch (e) {
+    body.innerHTML = '<p class="py-8 text-red-400 text-center text-sm">불러오지 못했습니다.<br><span class="text-xs">' + e.message + '</span></p>';
+  }
+}
+
+function toggleTodayBlog() {
+  const el = document.getElementById('todayBlogFull');
+  if (!el) return;
+  if (el.classList.contains('hidden')) {
+    el.textContent = window._todayBlogContent || '';
+    el.classList.remove('hidden');
+  } else {
+    el.classList.add('hidden');
+  }
 }
 
 
