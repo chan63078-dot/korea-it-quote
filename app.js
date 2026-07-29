@@ -4520,7 +4520,10 @@ async function initTodayPage() {
       html += '</div>';
       html += '<p class="text-xs text-slate-400 mt-1">' + (c.format || '') + ' · ' + (c.purpose || '') + '</p>';
       if (c.evidence_url) {
-        html += '<a href="' + c.evidence_url + '" target="_blank" class="text-xs text-indigo-500 hover:underline">🔗 ' + (c.evidence_label || '근거 링크') + '</a>';
+        html += '<a href="' + c.evidence_url + '" target="_blank" class="text-xs text-indigo-500 hover:underline block">🔗 ' + (c.evidence_label || '근거 링크') + '</a>';
+      }
+      if (c.canva_url) {
+        html += '<a href="' + c.canva_url + '" target="_blank" class="text-xs text-pink-500 hover:underline block mt-0.5">🎨 카드뉴스 디자인 보기 (Canva)</a>';
       }
       html += '</div>';
     });
