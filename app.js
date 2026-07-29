@@ -4512,7 +4512,9 @@ async function initTodayPage() {
 
     html += '<h3 class="text-sm font-bold text-slate-700 mb-2">📸 인스타그램 기획 TOP ' + data.instagram.candidates.length + '</h3>';
     html += '<div class="space-y-2 mb-6">';
-    data.instagram.candidates.forEach(function(c) {
+    window._todayIgScripts = [];
+    data.instagram.candidates.forEach(function(c, idx) {
+      window._todayIgScripts[idx] = c.script || '';
       html += '<div class="border border-slate-200 rounded-xl p-3">';
       html += '<div class="flex items-start justify-between gap-2">';
       html += '<p class="font-semibold text-slate-800 text-sm">' + c.rank + '. ' + c.title + '</p>';
@@ -4524,6 +4526,10 @@ async function initTodayPage() {
       }
       if (c.canva_url) {
         html += '<a href="' + c.canva_url + '" target="_blank" class="text-xs text-pink-500 hover:underline block mt-0.5">🎨 카드뉴스 디자인 보기 (Canva)</a>';
+      }
+      if (c.script) {
+        html += '<div class="today-ig-toggle text-xs text-slate-500 hover:underline mt-1 cursor-pointer" data-idx="' + idx + '">📝 릴스 대본·카드뉴스 원고 보기 ▾</div>';
+        html += '<div id="todayIgScript' + idx + '" class="hidden mt-2 border-t border-slate-100 pt-2 text-xs text-slate-700 whitespace-pre-wrap"></div>';
       }
       html += '</div>';
     });
@@ -4543,6 +4549,21 @@ async function initTodayPage() {
     if (data.blog) {
       window._todayBlogContent = data.blog.content || '';
     }
+    body.querySelectorAll('.today-ig-toggle').forEach(function(el) {
+      el.addEventListener('click', function() {
+        var idx = el.getAttribute('data-idx');
+        var target = document.getElementById('todayIgScript' + idx);
+        if (!target) return;
+        if (target.classList.contains('hidden')) {
+          target.textContent = window._todayIgScripts[idx] || '';
+          target.classList.remove('hidden');
+          el.textContent = '📝 릴스 대본·카드뉴스 원고 접기 ▴';
+        } else {
+          target.classList.add('hidden');
+          el.textContent = '📝 릴스 대본·카드뉴스 원고 보기 ▾';
+        }
+      });
+    });
   } catch (e) {
     body.innerHTML = '<p class="py-8 text-red-400 text-center text-sm">불러오지 못했습니다.<br><span class="text-xs">' + e.message + '</span></p>';
   }
